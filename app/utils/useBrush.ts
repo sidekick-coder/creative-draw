@@ -1,50 +1,65 @@
-import pen from '~/brushes/pen'
-import type { Brush } from './defineBrush'
+import type { Brush, BrushSettings } from './defineBrush'
 
-export function useBrush() {
-    const brushes = ref<Brush[]>([])
-    const brush = ref<Brush>()
-    const settings = ref({
-        color: '#eee',
-        size: 1,
+interface Options {
+    brushes: Brush[] | Ref<Brush[]>
+    selected: string | Ref<string>
+    settings: BrushSettings | Ref<BrushSettings>
+}
+
+interface DrawOptions {
+    ctx: CanvasRenderingContext2D
+    event: PointerEvent
+}
+
+export function useBrush({ brushes: _brushes, selected: _selected, settings: _settings }: Options) {
+    const brushes = isRef(_brushes) ? _brushes : ref(_brushes)
+    const selected = isRef(_selected) ? _selected : ref(_selected)
+    const settings = isRef(_settings) ? _settings : ref(_settings)
+    const isDrawing = ref(false)
+
+    const brush = computed(() => {
+        return brushes.value.find((b) => b.name === selected.value)
     })
 
-    function load(ctx: CanvasRenderingContext2D) {
-        brushes.value = [pen(ctx)]
-        brush.value = brushes.value[0]
-    }
+    function start({ ctx, event }: DrawOptions) {
+        isDrawing.value = true
 
-    function setBrush(index: number) {
-        brush.value = brushes.value[index]
-    }
-
-    function start(event: MouseEvent) {
         const { offsetX, offsetY } = event
 
         brush.value?.start({
             position: { x: offsetX, y: offsetY },
             settings: settings.value,
             event,
+            ctx,
+            pressure: event.pressure,
         })
     }
 
-    function draw(event: MouseEvent) {
+    function draw({ event, ctx }: DrawOptions) {
         const { offsetX, offsetY } = event
 
         brush.value?.draw({
             position: { x: offsetX, y: offsetY },
             settings: settings.value,
             event,
+            ctx,
+            pressure: event.pressure,
         })
     }
 
-    function stop(event: MouseEvent) {
+    function stop({ event, ctx }: DrawOptions) {
+        if (!isDrawing.value) return
+
         brush.value?.stop({
             position: { x: event.offsetX, y: event.offsetY },
             settings: settings.value,
             event,
+            ctx,
+            pressure: event.pressure,
         })
+
+        isDrawing.value = false
     }
 
-    return { brushes, brush, load, setBrush, start, draw, stop }
+    return { start, draw, stop, brush }
 }

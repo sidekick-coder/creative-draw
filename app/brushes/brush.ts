@@ -1,5 +1,3 @@
-import type { BrushOptions } from '~/utils/defineBrush'
-
 export default defineBrush(() => {
     const state = {
         isDrawing: false,
@@ -8,8 +6,8 @@ export default defineBrush(() => {
     }
 
     return {
-        name: 'pen',
-        start({ position, ctx }: BrushOptions) {
+        name: 'brush',
+        start({ position, ctx }) {
             const { x, y } = position
 
             ctx.beginPath()
@@ -20,18 +18,28 @@ export default defineBrush(() => {
 
             state.isDrawing = true
         },
-        draw({ position, settings, ctx }: BrushOptions) {
+        draw({ position, settings, ctx, pressure = 1 }) {
             if (!state.isDrawing) return
 
             const { x, y } = position
             const { color, size } = settings
 
-            console.log(color, size, position)
+            const opacity = (settings.opacity || 1) * pressure
+            const hardness = (settings.hardness || 1) * pressure
 
-            ctx.strokeStyle = color
+            ctx.globalAlpha = opacity
+            ctx.strokeStyle = settings.color
             ctx.lineWidth = size
             ctx.lineCap = 'round'
             ctx.lineJoin = 'round'
+
+            if (hardness < 1) {
+                const gradient = ctx.createRadialGradient(x, y, size * (1 - hardness), x, y, size)
+
+                gradient.addColorStop(0, color)
+                gradient.addColorStop(1, `rgba(0, 0, 0, ${opacity})`)
+                ctx.strokeStyle = gradient
+            }
 
             ctx.lineTo(state.lastX, state.lastY)
             ctx.stroke()
@@ -39,7 +47,7 @@ export default defineBrush(() => {
             state.lastX = x
             state.lastY = y
         },
-        stop({ ctx }: BrushOptions) {
+        stop({ ctx }) {
             ctx.closePath()
 
             state.isDrawing = false

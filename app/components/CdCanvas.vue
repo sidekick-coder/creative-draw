@@ -1,76 +1,87 @@
 <script setup lang="ts">
+const brushes = defineModel('brushes', {
+    type: Array as PropType<Brush[]>,
+    default: null,
+})
+
+const brushSelected = defineModel('brushSelected', {
+    type: String,
+    default: null,
+})
+
+const brushSettings = defineModel('brushSettings', {
+    type: Object as PropType<BrushSettings>,
+    required: true,
+})
+
 const canvas = ref<HTMLCanvasElement>()
+
 let context: CanvasRenderingContext2D
 
-// const state = reactive({
-//     offsetX: 0,
-//     offsetY: 0,
-//     lastX: 0,
-//     lastY: 0,
-// })
-//
-// const isDrawing = ref(false)
-//
-// function onMouseMove(e: MouseEvent) {
-//     if (!isDrawing.value) return
-//
-//     context.lineWidth = 10
-//     context.lineCap = 'round'
-//     context.lineJoin = 'round'
-//
-//     context.beginPath()
-//
-//     context.moveTo(state.lastX, state.lastY)
-//     context.lineTo(e.clientX - state.offsetX, e.clientY)
-//
-//     context.stroke()
-//
-//     state.lastX = e.clientX - state.offsetX
-//     state.lastY = e.clientY
-// }
+const { start, stop, draw } = useBrush({
+    brushes,
+    selected: brushSelected,
+    settings: brushSettings,
+})
 
-const { start, stop, draw, load: loadBrushes } = useBrush()
-
-function load() {
+function onResize() {
     if (!canvas.value) return
 
     const parent = canvas.value.parentElement!
 
-    const offsetX = canvas.value.offsetLeft
-    const offsetY = canvas.value.offsetTop
+    canvas.value.width = parent.clientWidth
+    canvas.value.height = parent.clientHeight
+}
 
-    // state.offsetX = canvas.value.offsetLeft
-    // state.offsetY = canvas.value.offsetTop
+function load() {
+    if (!canvas.value) return
 
-    canvas.value.width = parent.clientWidth - offsetX
-    canvas.value.height = parent.clientHeight - offsetY
+    onResize()
+
+    new ResizeObserver(onResize).observe(canvas.value.parentElement!)
 
     context = canvas.value.getContext('2d')!
 
-    loadBrushes(context)
+    canvas.value.addEventListener('touchstart', (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+    })
 
-    canvas.value.addEventListener('mousedown', start)
-    canvas.value.addEventListener('mousemove', draw)
-    canvas.value.addEventListener('mouseup', stop)
+    canvas.value.addEventListener('touchmove', (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+    })
 
-    // context.strokeStyle = '#000000'
+    canvas.value.addEventListener('touchend', (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+    })
 
-    // canvas.value.addEventListener('mousedown', (e) => {
-    //     isDrawing.value = true
-    //     state.lastX = e.offsetX
-    //     state.lastY = e.offsetY
-    // })
-    //
-    // canvas.value.addEventListener('mouseup', () => {
-    //     isDrawing.value = false
-    // })
-    //
-    // canvas.value.addEventListener('mousemove', onMouseMove)
+    canvas.value.addEventListener('pointerdown', (event) => {
+        start({
+            event,
+            ctx: context,
+        })
+    })
+
+    canvas.value.addEventListener('pointermove', (event) => {
+        draw({
+            event,
+            ctx: context,
+        })
+    })
+
+    canvas.value.addEventListener('pointerup', (event) => {
+        stop({
+            event,
+            ctx: context,
+        })
+    })
 }
 
 onMounted(load)
 </script>
 
 <template>
-    <canvas ref="canvas" class="bg-white" />
+    <canvas ref="canvas" class="size-full bg-white" />
 </template>

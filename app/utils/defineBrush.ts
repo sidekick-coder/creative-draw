@@ -12,19 +12,18 @@ export interface BrushSettings {
 export interface BrushOptions {
     position: BrushPosition
     settings: BrushSettings
-    event: MouseEvent
+    event: PointerEvent
+    ctx: CanvasRenderingContext2D
+    pressure?: number
 }
 
 export interface Brush {
+    name: string
     start: (options: BrushOptions) => void
     stop: (options: BrushOptions) => void
     draw: (options: BrushOptions) => void
 }
 
-export interface BrushDefinition {
-    (ctx: CanvasRenderingContext2D): Brush
-}
-
-export function defineBrush(cb: BrushDefinition): BrushDefinition {
-    return cb
+export function defineBrush(cb: Brush | (() => Brush)): Brush {
+    return cb instanceof Function ? cb() : cb
 }
