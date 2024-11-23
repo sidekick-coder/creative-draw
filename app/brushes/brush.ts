@@ -21,35 +21,24 @@ export default defineBrush(() => {
         draw({ position, settings, ctx, pressure = 1 }) {
             if (!state.isDrawing) return
 
-            const { x, y } = position
-            const { color, size } = settings
+            const size = settings.size * pressure
 
-            const opacity = (settings.opacity || 1) * pressure
-            const hardness = (settings.hardness || 1) * pressure
-
-            ctx.globalAlpha = opacity
-            ctx.strokeStyle = settings.color
+            ctx.globalAlpha = settings.opacity || 1
+            ctx.strokeStyle = settings.color || 'black'
             ctx.lineWidth = size
             ctx.lineCap = 'round'
             ctx.lineJoin = 'round'
 
-            if (hardness < 1) {
-                const gradient = ctx.createRadialGradient(x, y, size * (1 - hardness), x, y, size)
-
-                gradient.addColorStop(0, color)
-                gradient.addColorStop(1, `rgba(0, 0, 0, ${opacity})`)
-                ctx.strokeStyle = gradient
-            }
-
-            ctx.lineTo(state.lastX, state.lastY)
+            ctx.beginPath()
+            ctx.moveTo(state.lastX, state.lastY)
+            ctx.lineTo(position.x, position.y)
             ctx.stroke()
-
-            state.lastX = x
-            state.lastY = y
-        },
-        stop({ ctx }) {
             ctx.closePath()
 
+            state.lastX = position.x
+            state.lastY = position.y
+        },
+        stop() {
             state.isDrawing = false
         },
     }

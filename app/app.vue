@@ -7,7 +7,7 @@ const brushSelected = ref('brush')
 
 const brushSettings = ref({
     color: '#000000',
-    size: 5,
+    size: 25,
 })
 </script>
 <template>

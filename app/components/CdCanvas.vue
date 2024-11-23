@@ -58,24 +58,15 @@ function load() {
     })
 
     canvas.value.addEventListener('pointerdown', (event) => {
-        start({
-            event,
-            ctx: context,
-        })
+        start({ event, ctx: context })
     })
 
     canvas.value.addEventListener('pointermove', (event) => {
-        draw({
-            event,
-            ctx: context,
-        })
+        draw({ event, ctx: context })
     })
 
     canvas.value.addEventListener('pointerup', (event) => {
-        stop({
-            event,
-            ctx: context,
-        })
+        stop({ event, ctx: context })
     })
 }
 
