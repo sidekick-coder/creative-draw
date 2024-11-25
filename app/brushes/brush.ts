@@ -48,7 +48,7 @@ export default defineBrush(() => {
                 const p1 = points[i]
                 const p2 = points[i + 1]
 
-                const size = Math.min(settings.size * 0.2, (settings.size || 1) * p1.pressure)
+                const size = settings.size
                 const opacity = (settings.opacity || 1) * p1.pressure
 
                 ctx.globalAlpha = opacity

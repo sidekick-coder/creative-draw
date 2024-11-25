@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --color-primary-50: 244 234 253;
+        --color-primary-75: 210 169 245;
+        --color-primary-100: 192 133 241;
+        --color-primary-200: 165 81 234;
+        --color-primary-300: 146 45 230;
+        --color-primary-400: 102 31 161;
+        --color-primary-500: 89 27 140;
+
+        --color-secondary-50: 233 242 253;
+        --color-secondary-75: 166 203 246;
+        --color-secondary-100: 129 181 242;
+        --color-secondary-200: 75 149 236;
+        --color-secondary-300: 38 127 232;
+        --color-secondary-400: 27 89 162;
+        --color-secondary-500: 23 77 142;
+
+        --color-success-50: 234 253 240;
+        --color-success-75: 167 247 195;
+        --color-success-100: 130 244 170;
+        --color-success-200: 77 239 133;
+        --color-success-300: 40 236 108;
+        --color-success-400: 28 165 76;
+        --color-success-500: 24 144 66;
+
+        --color-danger-50: 253 235 235;
+        --color-danger-75: 248 171 172;
+        --color-danger-100: 245 136 137;
+        --color-danger-200: 241 85 87;
+        --color-danger-300: 238 50 52;
+        --color-danger-400: 167 35 36;
+        --color-danger-500: 145 31 32;
+
+        --color-info-50: 233 247 253;
+        --color-info-75: 165 224 246;
+        --color-info-100: 127 211 242;
+        --color-info-200: 72 192 237;
+        --color-info-300: 35 179 233;
+        --color-info-400: 25 125 163;
+        --color-info-500: 21 109 142;
+        
+        --color-warning-50: 253 249 236;
+        --color-warning-75: 248 232 178;
+        --color-warning-100: 245 222 147;
+        --color-warning-200: 240 208 100;
+        --color-warning-300: 237 198 68;
+        --color-warning-400: 166 139 48;
+        --color-warning-500: 145 121 41;
+
+
+        --color-body-0: 255 255 255;
+        --color-body-10: 250 250 250;
+        --color-body-20: 245 245 245;
+        --color-body-30: 235 235 236;
+        --color-body-40: 223 222 224;
+        --color-body-50: 194 192 195;
+        --color-body-60: 179 177 181;
+        --color-body-70: 167 165 169;
+        --color-body-80: 153 150 154;
+        --color-body-90: 138 135 140;
+        --color-body-100: 123 119 125;
+        --color-body-200: 109 104 111;
+        --color-body-300: 94 89 97;
+        --color-body-400: 82 77 85;
+        --color-body-500: 67 62 70;
+        --color-body-600: 55 49 58;
+        --color-body-700: 38 32 41;
+        --color-body-800: 23 17 27;
+        --color-body-900: 11 4 15;
+    }
+ }
