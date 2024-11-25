@@ -71,6 +71,27 @@ function load() {
 }
 
 onMounted(load)
+
+// save
+
+function save() {
+    const image = canvas.value!.toDataURL('image/png')
+
+    return image
+}
+
+function toBlob() {
+    return new Promise<Blob>((resolve) => {
+        canvas.value!.toBlob((blob) => {
+            resolve(blob!)
+        })
+    })
+}
+
+defineExpose({
+    save,
+    toBlob,
+})
 </script>
 
 <template>
