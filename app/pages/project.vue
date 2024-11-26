@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type CdCanvas from '~/components/CdCanvas.vue'
 
-const filename = ref('')
 const directory = ref<FileSystemDirectoryHandle>()
 
 interface Layer {
@@ -15,12 +14,16 @@ interface Project {
     name: string
     description: string
     layers: Layer[]
+    width: number
+    height: number
 }
 
 const project = ref<Project>({
     name: '2024-01-01',
     description: '',
     layers: [],
+    width: 500,
+    height: 500,
 })
 
 // brushes
@@ -35,7 +38,7 @@ const brushSelected = ref('brush')
 
 const brushSettings = ref({
     color: '#000000',
-    size: 50,
+    size: 5,
 })
 
 const canvasRef = ref<InstanceType<typeof CdCanvas>>()
@@ -97,8 +100,15 @@ async function save() {
             </cd-btn>
         </div>
 
-        <div class="flex h-[calc(100%-2.5rem)] w-full">
-            <cd-canvas ref="canvasRef" :brushes :brush-selected :brush-settings />
+        <div class="flex h-[calc(100%-2.5rem)] w-full items-center justify-center bg-body-700">
+            <cd-canvas
+                ref="canvasRef"
+                :brushes
+                :brush-selected
+                :brush-settings
+                :width="project.width"
+                :height="project.height"
+            />
         </div>
     </div>
 </template>

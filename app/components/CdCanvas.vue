@@ -14,6 +14,16 @@ const brushSettings = defineModel('brushSettings', {
     required: true,
 })
 
+const width = defineProp<number>('width', {
+    type: Number,
+    required: true,
+})
+
+const height = defineProp<number>('height', {
+    type: Number,
+    required: true,
+})
+
 const canvas = ref<HTMLCanvasElement>()
 
 let context: CanvasRenderingContext2D
@@ -24,21 +34,8 @@ const { start, stop, draw } = useBrush({
     settings: brushSettings,
 })
 
-function onResize() {
-    if (!canvas.value) return
-
-    const parent = canvas.value.parentElement!
-
-    canvas.value.width = parent.clientWidth
-    canvas.value.height = parent.clientHeight
-}
-
 function load() {
     if (!canvas.value) return
-
-    onResize()
-
-    new ResizeObserver(onResize).observe(canvas.value.parentElement!)
 
     context = canvas.value.getContext('2d')!
 
@@ -95,5 +92,5 @@ defineExpose({
 </script>
 
 <template>
-    <canvas ref="canvas" class="size-full bg-white" />
+    <canvas ref="canvas" class="bg-white" :width :height />
 </template>
