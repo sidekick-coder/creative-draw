@@ -1,5 +1,3 @@
-import { es2015 } from 'globals'
-
 export default defineBrush(() => {
     const state = {
         isDrawing: false,
