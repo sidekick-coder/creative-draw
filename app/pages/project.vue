@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { pbkdf2 } from 'node:crypto'
 import type { argv0 } from 'node:process'
 import type CdCanvas from '~/components/CdCanvas.vue'
 
@@ -88,18 +89,31 @@ async function save() {
     await writable.close()
 }
 
+// zoom and pan
+const containerRef = ref<HTMLDivElement>()
 const scale = ref(1)
 const offsetX = ref(0)
 const offsetY = ref(0)
+
+const { space } = useMagicKeys()
 
 const isPannig = ref(false)
 let lastMouseX = 0
 let lastMouseY = 0
 
+function setInitialOffset() {
+    if (!containerRef.value) return
+
+    const [rects] = containerRef.value.getClientRects()
+
+    offsetX.value = ((rects?.width || 0) - project.value.width) / 2
+    offsetY.value = ((rects?.height || 0) - project.value.height) / 2
+}
+
 function resetScale() {
     scale.value = 1
-    offsetX.value = 0
-    offsetY.value = 0
+
+    setInitialOffset()
 }
 
 function onZoom(value: number) {
@@ -112,18 +126,14 @@ function onWheel(event: WheelEvent) {
     const zoomDelta = event.deltaY < 0 ? 1 : -1
     const newScale = Math.max(0.1, scale.value + zoomDelta * factor)
 
-    // Adjust offset for zoom centering
-    const rect = event.target.getBoundingClientRect()
-    const mouseX = event.clientX - rect.left
-    const mouseY = event.clientY - rect.top
-
-    offsetX.value += mouseX * (1 / scale.value - 1 / newScale)
-    offsetY.value += mouseY * (1 / scale.value - 1 / newScale)
-
     scale.value = newScale
 }
 
 function onMouseDown(event: MouseEvent) {
+    if (!space) return
+
+    event.preventDefault()
+
     isPannig.value = true
     lastMouseX = event.clientX
     lastMouseY = event.clientY
@@ -141,6 +151,8 @@ function onMouseMove(event: MouseEvent) {
 function onMouseUp() {
     isPannig.value = false
 }
+
+onLoad(containerRef, setInitialOffset)
 </script>
 
 <template>
@@ -177,7 +189,9 @@ function onMouseUp() {
 
         <ClientOnly>
             <div
+                ref="containerRef"
                 class="relative flex w-full flex-1 items-center justify-center overflow-hidden bg-body-700"
+                :class="[isPannig ? 'cursor-grabbing' : '', space ? 'cursor-grab' : '']"
                 @wheel="onWheel"
                 @mousedown="onMouseDown"
                 @mousemove="onMouseMove"
@@ -193,6 +207,11 @@ function onMouseUp() {
                     :scale
                     :offset-x
                     :offset-y
+                    class="absolute"
+                    :style="{
+                        left: `${offsetX}px`,
+                        top: `${offsetY}px`,
+                    }"
                 />
             </div>
         </ClientOnly>

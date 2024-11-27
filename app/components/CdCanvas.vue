@@ -83,7 +83,7 @@ function load() {
 
 onMounted(load)
 
-// rescale
+// scale
 const scale = defineProp<number>('scale', {
     type: Number,
     default: 1,
@@ -116,14 +116,13 @@ function rescale() {
     context.restore()
 }
 
-watch([scale], rescale, { immediate: true })
+onMounted(rescale)
+watch([scale, offsetX, offsetY], rescale)
 
 // save
 
-function save() {
-    const image = canvas.value!.toDataURL('image/png')
-
-    return image
+function toDataURL(type: string = 'image/png', quality: number = 1) {
+    return canvas.value!.toDataURL(type, quality)
 }
 
 function toBlob() {
@@ -135,7 +134,7 @@ function toBlob() {
 }
 
 defineExpose({
-    save,
+    toDataURL,
     toBlob,
 })
 </script>
