@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { pbkdf2 } from 'node:crypto'
+import { pbkdf2, pbkdf2Sync } from 'node:crypto'
 import type { argv0 } from 'node:process'
 import type CdCanvas from '~/components/CdCanvas.vue'
 
@@ -24,8 +24,8 @@ const project = ref<Project>({
     name: '2024-01-01',
     description: '',
     layers: [],
-    width: 500,
-    height: 500,
+    width: 1200,
+    height: 1200,
 })
 
 // brushes
@@ -106,8 +106,11 @@ function setInitialOffset() {
 
     const [rects] = containerRef.value.getClientRects()
 
-    offsetX.value = ((rects?.width || 0) - project.value.width) / 2
-    offsetY.value = ((rects?.height || 0) - project.value.height) / 2
+    if (!rects) return
+
+    // centralize the project in the container
+    offsetX.value = (rects.width - project.value.width) / 2
+    offsetY.value = (rects.height - project.value.height) / 2
 }
 
 function resetScale() {
@@ -122,6 +125,7 @@ function onZoom(value: number) {
 
 function onWheel(event: WheelEvent) {
     event.preventDefault()
+
     const factor = 0.1
     const zoomDelta = event.deltaY < 0 ? 1 : -1
     const newScale = Math.max(0.1, scale.value + zoomDelta * factor)
@@ -130,7 +134,7 @@ function onWheel(event: WheelEvent) {
 }
 
 function onMouseDown(event: MouseEvent) {
-    if (!space) return
+    if (!space?.value) return
 
     event.preventDefault()
 
@@ -193,9 +197,10 @@ onLoad(containerRef, setInitialOffset)
                 class="relative flex w-full flex-1 items-center justify-center overflow-hidden bg-body-700"
                 :class="[isPannig ? 'cursor-grabbing' : '', space ? 'cursor-grab' : '']"
                 @wheel="onWheel"
-                @mousedown="onMouseDown"
-                @mousemove="onMouseMove"
-                @mouseup="onMouseUp"
+                @pointerdown="onMouseDown"
+                @pointermove="onMouseMove"
+                @pointerup="onMouseUp"
+                @touchmove.prevent
             >
                 <cd-canvas
                     ref="canvasRef"
@@ -209,8 +214,9 @@ onLoad(containerRef, setInitialOffset)
                     :offset-y
                     class="absolute"
                     :style="{
-                        left: `${offsetX}px`,
-                        top: `${offsetY}px`,
+                        'left': `${offsetX}px`,
+                        'top': `${offsetY}px`,
+                        'pointer-events': space ? 'none' : 'auto',
                     }"
                 />
             </div>

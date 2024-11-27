@@ -1,4 +1,95 @@
 <script setup lang="ts">
+// canvas
+const width = defineProp<number>('width', {
+    type: Number,
+    required: true,
+})
+
+const height = defineProp<number>('height', {
+    type: Number,
+    required: true,
+})
+
+const scale = defineProp<number>('scale', {
+    type: Number,
+    default: 1,
+})
+
+const canvas = ref<HTMLCanvasElement>()
+const offscreenCanvas = document.createElement('canvas')
+
+offscreenCanvas.width = width.value
+offscreenCanvas.height = height.value
+
+// offscreenCanvas.classList.add('bg-white', 'fixed', 'bottom-4', 'right-4')
+// document.body.appendChild(offscreenCanvas)
+
+const offscreenContext = offscreenCanvas.getContext('2d')!
+
+function render(c: HTMLCanvasElement) {
+    const ctx = c.getContext('2d')!
+
+    c.width = width.value * scale.value
+    c.height = height.value * scale.value
+
+    ctx.clearRect(0, 0, c.width, c.height)
+    ctx.imageSmoothingEnabled = false
+    ctx.imageSmoothingQuality = 'high'
+
+    ctx.drawImage(
+        offscreenCanvas,
+        0,
+        0,
+        offscreenCanvas.width,
+        offscreenCanvas.height,
+        0,
+        0,
+        offscreenCanvas.width * scale.value,
+        offscreenCanvas.height * scale.value
+    )
+
+    requestAnimationFrame(() => render(c))
+}
+
+onLoad(canvas, render)
+
+// scale
+
+const offsetX = defineProp<number>('offsetX', {
+    type: Number,
+    default: 0,
+})
+
+const offsetY = defineProp<number>('offsetY', {
+    type: Number,
+    default: 0,
+})
+
+function rescale() {
+    if (!canvas.value) return
+
+    const ctx = canvas.value.getContext('2d')!
+
+    ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
+
+    canvas.value.width = width.value * scale.value
+    canvas.value.height = height.value * scale.value
+
+    ctx.save()
+
+    // ctx.scale(scale.value, scale.value)
+
+    // ctx.imageSmoothingEnabled = false
+    // ctx.imageSmoothingQuality = 'high'
+
+    // ctx.drawImage(offscreenCanvas, 0, 0, offscreenCanvas.width, offscreenCanvas.height)
+    ctx.restore()
+}
+
+onMounted(rescale)
+watch([scale, offsetX, offsetY], rescale)
+
+// brush
 const brushes = defineModel('brushes', {
     type: Array as PropType<Brush[]>,
     default: null,
@@ -14,110 +105,65 @@ const brushSettings = defineModel('brushSettings', {
     required: true,
 })
 
-const width = defineProp<number>('width', {
-    type: Number,
-    required: true,
-})
-
-const height = defineProp<number>('height', {
-    type: Number,
-    required: true,
-})
-
-const canvas = ref<HTMLCanvasElement>()
-const offscreenCanvas = new OffscreenCanvas(width.value, height.value)
-const offscreenContext = offscreenCanvas.getContext('2d')!
-
-let context: CanvasRenderingContext2D
-
-const { start, stop, draw } = useBrush({
+const { draw, start, stop } = useBrush({
     brushes,
     selected: brushSelected,
     settings: brushSettings,
 })
 
-function load() {
+function onPointerDown(event: PointerEvent) {
     if (!canvas.value) return
 
-    context = canvas.value.getContext('2d')!
+    event.preventDefault()
 
-    // draw square
-    context.fillStyle = 'black'
-    context.fillRect(width.value / 2 - 50, height.value / 2 - 50, 100, 100)
+    const ctx = offscreenContext
 
-    offscreenContext.fillStyle = 'black'
-    offscreenContext.fillRect(width.value / 2 - 50, height.value / 2 - 50, 100, 100)
+    const x = event.offsetX / scale.value
+    const y = event.offsetY / scale.value
 
-    canvas.value.addEventListener('touchstart', (event) => {
-        event.preventDefault()
-        event.stopPropagation()
-    })
-
-    canvas.value.addEventListener('touchmove', (event) => {
-        event.preventDefault()
-        event.stopPropagation()
-    })
-
-    canvas.value.addEventListener('touchend', (event) => {
-        event.preventDefault()
-        event.stopPropagation()
-    })
-
-    canvas.value.addEventListener('pointerdown', (event) => {
-        event.preventDefault()
-        start({ event, ctx: context })
-        start({ event, ctx: offscreenContext })
-    })
-
-    canvas.value.addEventListener('pointermove', (event) => {
-        event.preventDefault()
-        draw({ event, ctx: context })
-        draw({ event, ctx: offscreenContext })
-    })
-
-    canvas.value.addEventListener('pointerup', (event) => {
-        stop({ event, ctx: context })
-        stop({ event, ctx: offscreenContext })
+    start({
+        event,
+        ctx,
+        x,
+        y,
     })
 }
 
-onMounted(load)
-
-// scale
-const scale = defineProp<number>('scale', {
-    type: Number,
-    default: 1,
-})
-
-const offsetX = defineProp<number>('offsetX', {
-    type: Number,
-    default: 0,
-})
-
-const offsetY = defineProp<number>('offsetY', {
-    type: Number,
-    default: 0,
-})
-
-function rescale() {
+function onPointerMove(event: PointerEvent) {
     if (!canvas.value) return
 
-    context.clearRect(0, 0, canvas.value.width, canvas.value.height)
+    event.preventDefault()
 
-    canvas.value.width = width.value * scale.value
-    canvas.value.height = height.value * scale.value
+    const ctx = offscreenContext
 
-    context.scale(scale.value, scale.value)
+    const x = event.offsetX / scale.value
+    const y = event.offsetY / scale.value
 
-    context.imageSmoothingEnabled = false
-    context.imageSmoothingQuality = 'high'
-
-    context.drawImage(offscreenCanvas, 0, 0, offscreenCanvas.width, offscreenCanvas.height)
-    context.restore()
+    draw({ event, ctx, x, y })
 }
 
-onMounted(rescale)
-watch([scale, offsetX, offsetY], rescale)
+function onPointerUp(event: PointerEvent) {
+    if (!canvas.value) return
+
+    event.preventDefault()
+
+    const ctx = offscreenContext
+
+    const x = event.offsetX / scale.value
+    const y = event.offsetY / scale.value
+
+    stop({ event, ctx, x, y })
+}
+
+onLoad(canvas, (c) => {
+    c.addEventListener('touchmove', (event) => {
+        event.preventDefault()
+    })
+
+    c.addEventListener('pointerdown', onPointerDown)
+    c.addEventListener('pointermove', onPointerMove)
+    c.addEventListener('pointerup', onPointerUp)
+})
 
 // save
 

@@ -9,6 +9,8 @@ interface Options {
 interface DrawOptions {
     ctx: CanvasRenderingContext2D
     event: PointerEvent
+    x: number
+    y: number
 }
 
 export function useBrush({ brushes: _brushes, selected: _selected, settings: _settings }: Options) {
@@ -21,13 +23,11 @@ export function useBrush({ brushes: _brushes, selected: _selected, settings: _se
         return brushes.value.find((b) => b.name === selected.value)
     })
 
-    function start({ ctx, event }: DrawOptions) {
+    function start({ ctx, event, y, x }: DrawOptions) {
         isDrawing.value = true
 
-        const { offsetX, offsetY } = event
-
         brush.value?.start({
-            position: { x: offsetX, y: offsetY },
+            position: { x, y },
             settings: settings.value,
             event,
             ctx,
@@ -35,11 +35,9 @@ export function useBrush({ brushes: _brushes, selected: _selected, settings: _se
         })
     }
 
-    function draw({ event, ctx }: DrawOptions) {
-        const { offsetX, offsetY } = event
-
+    function draw({ event, ctx, x, y }: DrawOptions) {
         brush.value?.draw({
-            position: { x: offsetX, y: offsetY },
+            position: { x, y },
             settings: settings.value,
             event,
             ctx,
@@ -47,11 +45,11 @@ export function useBrush({ brushes: _brushes, selected: _selected, settings: _se
         })
     }
 
-    function stop({ event, ctx }: DrawOptions) {
+    function stop({ event, ctx, x, y }: DrawOptions) {
         if (!isDrawing.value) return
 
         brush.value?.stop({
-            position: { x: event.offsetX, y: event.offsetY },
+            position: { x, y },
             settings: settings.value,
             event,
             ctx,
