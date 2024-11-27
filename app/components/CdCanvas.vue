@@ -186,5 +186,5 @@ defineExpose({
 </script>
 
 <template>
-    <canvas ref="canvas" class="bg-white" :width :height />
+    <canvas ref="canvas" class="cursor-crosshair bg-white" :width :height />
 </template>
