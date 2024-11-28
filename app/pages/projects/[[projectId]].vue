@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { pbkdf2, pbkdf2Sync } from 'node:crypto'
-import type { argv0 } from 'node:process'
 import type CdCanvas from '~/components/CdCanvas.vue'
 
 const directory = ref<FileSystemDirectoryHandle>()
@@ -27,6 +25,24 @@ const project = ref<Project>({
     width: 1200,
     height: 1200,
 })
+
+// general
+const route = useRoute()
+
+// project
+const projectId = computed(() => route.params.projectId as string | undefined)
+
+async function setProject() {
+    if (!projectId.value) return
+
+    const response = await showProject(projectId.value)
+
+    console.log(response)
+}
+
+if (process.client) {
+    watch(projectId, setProject, { immediate: true })
+}
 
 // brushes
 const files = import.meta.glob('~/brushes/*.ts', {
@@ -68,25 +84,26 @@ async function save() {
 
     if (!directory.value) return
 
-    const projectFolder = await directory.value.getDirectoryHandle(project.value.name, {
-        create: true,
+    const payload: any = {
+        name: project.value.name,
+        description: project.value.description,
+        width: project.value.width,
+        height: project.value.height,
+        layers: [],
+    }
+
+    const data = await canvasRef.value.toBlob()
+
+    payload.layers.push({
+        name: 'layer',
+        description: 'layer',
+        type: 'image/png',
+        data,
     })
 
-    const layerFolder = await projectFolder.getDirectoryHandle('layers', {
-        create: true,
-    })
+    const created = await createProject(directory.value, payload)
 
-    await writeLayers(layerFolder)
-
-    const projectFile = await projectFolder.getFileHandle('index.json', {
-        create: true,
-    })
-
-    const writable = await projectFile.createWritable()
-
-    await writable.write(JSON.stringify(project.value, null, 2))
-
-    await writable.close()
+    navigateTo(`/projects/${created.id}`)
 }
 
 // zoom and pan
