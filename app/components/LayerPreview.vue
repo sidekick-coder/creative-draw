@@ -20,7 +20,9 @@ async function load() {
 
 const debouncedLoad = debounce(load, 15 * 1000)
 
-watch(() => layer.value.data, debouncedLoad, { immediate: true })
+onMounted(load)
+
+watch(() => layer.value.data, debouncedLoad)
 // class
 const className = defineProp('class', {
     type: String,

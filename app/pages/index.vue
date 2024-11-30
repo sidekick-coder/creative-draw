@@ -26,7 +26,6 @@ async function open() {
 
     if (exists) {
         await $db.handles.delete(exists.id)
-        return
     }
 
     const id = await $db.handles.add({
@@ -77,7 +76,6 @@ const sizes = [
             <div class="flex w-full max-w-sm flex-col justify-center text-center">
                 <h1 class="mb-4 text-2xl font-bold">Creative draw</h1>
                 <div class="mb-8 flex flex-col gap-y-2">
-                    <cd-btn to="/projects">{{ $t('newEntity', [$t('project')]) }}</cd-btn>
                     <cd-btn @click="open">{{ $t('openEntity', [$t('project')]) }}</cd-btn>
 
                     <div class="-mx-2 mt-4 flex flex-wrap gap-y-4">
