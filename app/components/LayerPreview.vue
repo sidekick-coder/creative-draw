@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import debounce from 'lodash-es/debounce'
+
 const layer = defineModel({
     type: Object as PropType<Layer>,
     required: true,
@@ -16,7 +18,9 @@ async function load() {
     src.value = URL.createObjectURL(new Blob([response], { type: 'image/png' }))
 }
 
-watch(() => layer.value.data, load, { immediate: true })
+const debouncedLoad = debounce(load, 15 * 1000)
+
+watch(() => layer.value.data, debouncedLoad, { immediate: true })
 // class
 const className = defineProp('class', {
     type: String,

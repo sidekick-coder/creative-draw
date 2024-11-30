@@ -21,9 +21,6 @@ const offscreenCanvas = document.createElement('canvas')
 offscreenCanvas.width = width.value
 offscreenCanvas.height = height.value
 
-// offscreenCanvas.classList.add('bg-white', 'fixed', 'bottom-4', 'right-4')
-// document.body.appendChild(offscreenCanvas)
-
 const offscreenContext = offscreenCanvas.getContext('2d')!
 
 function render(c: HTMLCanvasElement) {
@@ -33,7 +30,8 @@ function render(c: HTMLCanvasElement) {
     c.height = height.value * scale.value
 
     ctx.clearRect(0, 0, c.width, c.height)
-    ctx.imageSmoothingEnabled = false
+
+    ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
 
     ctx.drawImage(
@@ -74,16 +72,6 @@ function rescale() {
 
     canvas.value.width = width.value * scale.value
     canvas.value.height = height.value * scale.value
-
-    ctx.save()
-
-    // ctx.scale(scale.value, scale.value)
-
-    // ctx.imageSmoothingEnabled = false
-    // ctx.imageSmoothingQuality = 'high'
-
-    // ctx.drawImage(offscreenCanvas, 0, 0, offscreenCanvas.width, offscreenCanvas.height)
-    ctx.restore()
 }
 
 onMounted(rescale)

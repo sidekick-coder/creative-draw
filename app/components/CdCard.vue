@@ -28,7 +28,7 @@ const color = defineProp<'none' | 'default' | 'body-600' | 'body-800'>('color', 
 function setColor() {
     const options: Record<typeof color.value, string> = {
         'none': '',
-        'default': 'bg-body-900',
+        'default': 'bg-body-900 [&.clickable]:hover:bg-body-900/50',
         'body-600': 'bg-body-600 [&.clickable]:hover:bg-body-500',
         'body-800': 'bg-body-800',
     }
@@ -49,7 +49,7 @@ const to = defineProp<NuxtLinkProps['to']>('to', {
 function setClickable() {
     let isClickable = !!to.value
 
-    set('clickable', isClickable ? 'clickable cursor-pointer' : '')
+    set('clickable', isClickable ? 'clickable cursor-pointer block' : '')
 }
 
 watch(to, setClickable, { immediate: true })

@@ -15,8 +15,8 @@ const saving = ref(false)
 
 async function setProject() {
     if (!projectId.value) {
-        const width = 800
-        const height = 600
+        const width = Number(route.query.width) || 800
+        const height = Number(route.query.height) || 600
 
         project.value = {
             name: format(new Date(), 'yyyy-MM-dd'),
@@ -24,21 +24,31 @@ async function setProject() {
             height: height,
             layers: [
                 {
+                    id: window.crypto.randomUUID(),
                     name: 'background',
                     filename: 'background',
                     order: 1,
                     type: 'paint',
+                    width: width,
+                    height: height,
+                    visible: true,
                     data: new Uint8Array(width * height * 4).fill(255),
                 },
                 {
+                    id: window.crypto.randomUUID(),
                     name: 'paint',
                     filename: 'paint',
                     order: 2,
                     type: 'paint',
+                    width: width,
+                    height: height,
+                    visible: true,
                     data: new Uint8Array(width * height * 4),
                 },
             ],
         }
+
+        project.value.selected_layer = project.value.layers[1]!.id
 
         return
     }
@@ -113,7 +123,7 @@ const brushSelected = ref('brush')
 
 const brushSettings = ref({
     color: '#000000',
-    size: 5,
+    size: 40,
 })
 
 // zoom and pan

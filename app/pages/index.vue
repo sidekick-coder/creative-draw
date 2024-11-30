@@ -36,6 +36,39 @@ async function open() {
 
     navigateTo(`/projects/${id}`)
 }
+
+const sizes = [
+    {
+        label: 'A4 300dpi',
+        width: 2480,
+        height: 3508,
+    },
+    {
+        label: 'A4 600dpi',
+        width: 4960,
+        height: 7016,
+    },
+    {
+        label: 'A5 300dpi',
+        width: 1748,
+        height: 2480,
+    },
+    {
+        label: 'A5 600dpi',
+        width: 3508,
+        height: 4960,
+    },
+    {
+        label: 'A6 300dpi',
+        width: 1240,
+        height: 1748,
+    },
+    {
+        label: 'A6 600dpi',
+        width: 2480,
+        height: 3508,
+    },
+]
 </script>
 
 <template>
@@ -46,6 +79,16 @@ async function open() {
                 <div class="mb-8 flex flex-col gap-y-2">
                     <cd-btn to="/projects">{{ $t('newEntity', [$t('project')]) }}</cd-btn>
                     <cd-btn @click="open">{{ $t('openEntity', [$t('project')]) }}</cd-btn>
+
+                    <div class="-mx-2 mt-4 flex flex-wrap gap-y-4">
+                        <div v-for="size in sizes" :key="size.label" class="w-4/12 px-2">
+                            <cd-card :to="`/projects?width=${size.width}&height=${size.height}`">
+                                <cd-card-content>
+                                    <div class="text-center">{{ size.label }}</div>
+                                </cd-card-content>
+                            </cd-card>
+                        </div>
+                    </div>
                 </div>
 
                 <div v-if="items.length" class="flex flex-col gap-y-2 py-4">
