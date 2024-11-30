@@ -2,7 +2,7 @@ import { findEntry, destroyEntry, makeDirectoryEntry, writeEntry } from 'drive-f
 
 import type { Layer, ProjectParsed } from '#imports'
 
-async function convertBufferToPng(buffer: Uint8Array, width: number, height: number) {
+export async function convertBufferToPng(buffer: Uint8Array, width: number, height: number) {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')!
 
@@ -23,9 +23,10 @@ async function convertBufferToPng(buffer: Uint8Array, width: number, height: num
 export async function saveProject(handle: FileSystemDirectoryHandle, project: ProjectParsed) {
     const data = {
         description: project.description,
+        selected_layer: project.selected_layer,
         height: project.height,
         width: project.width,
-        layers: [] as Omit<Layer, 'data'>[],
+        layers: [] as Partial<Layer>[],
     }
 
     if (await findEntry(handle, '/layers')) {
@@ -47,10 +48,14 @@ export async function saveProject(handle: FileSystemDirectoryHandle, project: Pr
         )
 
         data.layers.push({
+            ...layer,
+            data: undefined,
             filename,
             order: order,
             name: layer.name,
             type: layer.type,
+            width: layer.width || project.width,
+            height: layer.height || project.height,
         })
     }
     const json = new TextEncoder().encode(JSON.stringify(data, null, 4))

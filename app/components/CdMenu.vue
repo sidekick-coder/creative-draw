@@ -50,6 +50,11 @@ const closeOnContentClick = defineProp<boolean>('closeOnContentClick', {
     default: true,
 })
 
+const closeOnOutsideClick = defineProp<boolean>('closeOnOutsideClick', {
+    type: Boolean,
+    default: true,
+})
+
 const contentRef = ref<HTMLElement>()
 
 const model = defineModel({
@@ -59,7 +64,7 @@ const model = defineModel({
 
 function onClick() {
     if (openOnClick.value) {
-        model.value = true
+        model.value = !model.value
     }
 }
 
@@ -69,13 +74,15 @@ function onClickContent() {
     }
 }
 
-onClickOutside(
-    contentRef,
-    () => {
-        model.value = false
-    },
-    { ignore: [activatorRef as any] }
-)
+if (closeOnOutsideClick.value) {
+    onClickOutside(
+        contentRef,
+        () => {
+            model.value = false
+        },
+        { ignore: [activatorRef as any] }
+    )
+}
 
 // floating ui definition
 const placement = defineProp<Placement>('placement', {

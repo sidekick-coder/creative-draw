@@ -206,24 +206,12 @@ onLoad(containerRef, fitToScreen)
 
 <template>
     <div v-if="project" class="w-dvh flex h-dvh flex-col">
-        <div class="absolute left-0 top-0 z-20 flex w-full items-center bg-body-900/50 px-4 py-2">
+        <div class="absolute left-0 top-0 z-20 flex w-full items-center bg-body-900/50 px-4">
             <cd-btn padding="none" size="sm" variant="text" @click="navigateTo('/')">
                 <cd-icon name="heroicons:home-20-solid" />
             </cd-btn>
 
             <brush-selector v-model="brushSelected" :brushes="brushes" />
-
-            <cd-menu>
-                <template #activator="{ attrs }">
-                    <cd-btn v-bind="attrs" variant="text"> Layers </cd-btn>
-                </template>
-
-                <cd-card>
-                    <cd-list-item v-for="layer in project.layers" :key="layer.name">
-                        {{ layer.name }}
-                    </cd-list-item>
-                </cd-card>
-            </cd-menu>
 
             <cd-btn class="ml-4" :loading="saving" variant="text" @click="save">
                 {{ $t('save') }}
@@ -232,6 +220,21 @@ onLoad(containerRef, fitToScreen)
             <div class="flex-1"></div>
 
             <div class="flex items-center gap-x-2">
+                <cd-menu :close-on-content-click="false" :close-on-outside-click="false">
+                    <template #activator="{ attrs }">
+                        <cd-btn v-bind="attrs" variant="text" padding="none" class="size-[56px]">
+                            <cd-icon name="heroicons:square-2-stack-solid" />
+                        </cd-btn>
+                    </template>
+
+                    <div class="pt-4">
+                        <layer-dock
+                            v-model="project.selected_layer"
+                            v-model:layers="project.layers"
+                        />
+                    </div>
+                </cd-menu>
+
                 <cd-btn padding="none" size="sm" @click="fitToScreen">
                     <cd-icon name="heroicons:arrows-pointing-out-20-solid" />
                 </cd-btn>
@@ -277,8 +280,12 @@ onLoad(containerRef, fitToScreen)
                     :style="{
                         'left': `${offsetX}px`,
                         'top': `${offsetY}px`,
-                        'pointer-events': space ? 'none' : 'auto',
+                        'pointer-events':
+                            space || project.selected_layer !== layer.id || !layer.visible
+                                ? 'none'
+                                : 'auto',
                         'z-index': layer.order,
+                        'opacity': layer.visible ? 1 : 0,
                     }"
                 />
             </div>

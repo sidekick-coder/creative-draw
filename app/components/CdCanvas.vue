@@ -114,6 +114,9 @@ const { draw, start, stop } = useBrush({
 function onPointerDown(event: PointerEvent) {
     if (!canvas.value) return
 
+    // focus the canvas
+    canvas.value.focus()
+
     event.preventDefault()
 
     const ctx = offscreenContext
@@ -208,5 +211,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <canvas ref="canvas" class="cursor-crosshair" :width :height />
+    <canvas
+        ref="canvas"
+        class="cursor-crosshair border-2 border-transparent focus:border-primary-300 focus:outline-none"
+        :width
+        :height
+        tabindex="0"
+    />
 </template>
