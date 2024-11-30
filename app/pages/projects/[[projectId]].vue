@@ -2,23 +2,16 @@
 import type CdCanvas from '~/components/CdCanvas.vue'
 import type { ProjectParsed } from '#imports'
 import { format } from 'date-fns'
-import orderBy from 'lodash/orderBy'
 
 const directory = ref<FileSystemDirectoryHandle>()
 
-const project = ref<ProjectParsed>({
-    name: '',
-    description: '',
-    layers: [],
-    width: 1200,
-    height: 1200,
-})
+const project = ref<ProjectParsed>()
 
 // general
 const route = useRoute()
 
 // project
-const projectId = computed(() => route.params.projectId as string | undefined)
+const projectId = computed(() => Number(route.params.projectId) || undefined)
 
 async function setProject() {
     if (!projectId.value) {
@@ -44,11 +37,16 @@ async function setProject() {
         return
     }
 
-    const response = await showProject(projectId.value)
+    const response = await $db.handles.get(projectId.value)
 
-    if (response) {
-        project.value = response
+    if (!response) {
+        navigateTo('/')
+        return
     }
+
+    const parsed = await parseProject(response.handle)
+
+    project.value = parsed
 }
 
 if (process.client) {
@@ -153,7 +151,7 @@ onLoad(containerRef, setInitialOffset)
 </script>
 
 <template>
-    <div class="w-dvh flex h-dvh flex-col">
+    <div v-if="project" class="w-dvh flex h-dvh flex-col">
         <div class="flex h-10 px-4">
             <input v-model="project.name" label="Name" class="bg-transparent focus:bg-body-600" />
 

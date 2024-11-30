@@ -1,34 +1,50 @@
-import { Dexie } from 'dexie'
+import { Dexie, type EntityTable } from 'dexie'
 
-import { listEntries, makeDirectoryEntry, readEntry, resolvePath, writeEntry } from 'drive-fsa'
+import { destroyEntry, makeDirectoryEntry, readEntry, resolvePath, writeEntry } from 'drive-fsa'
 
-interface Project {
+export interface Project {
     id: string
     handle: FileSystemDirectoryHandle
 }
 
-interface Layer {
+export interface Layer {
     name: string
-    description?: string
     data: Uint8Array
 }
 
-interface ProjectParsed {
-    id: string
+export interface Handle {
+    id?: number
+    handle: FileSystemDirectoryHandle
     name: string
-    description?: string
-    height: number
-    width: number
-    layers: Layer[]
 }
 
 const db = new Dexie('creative-draw') as Dexie & {
     projects: Dexie.Table<Project, string>
+    handles: EntityTable<Handle, 'id'>
 }
 
 db.version(1).stores({
     projects: 'id,handle',
+    handles: '++id,handle,&name',
 })
+
+async function convertBufferToPng(buffer: Uint8Array, width: number, height: number) {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')!
+
+    canvas.width = width
+    canvas.height = height
+
+    const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height)
+
+    ctx.putImageData(imageData, 0, 0)
+
+    const dataUrl = canvas.toDataURL('image/png')
+
+    const blob = await fetch(dataUrl).then((res) => res.blob())
+
+    return new Uint8Array(await blob.arrayBuffer()) as Uint8Array
+}
 
 export function listProjects() {
     return db.projects.toArray()
@@ -50,6 +66,7 @@ export async function showProject(id: string) {
     })
 
     const response: ProjectParsed = {
+        _handle: project.handle,
         id: project.id,
         name: project.handle.name,
         description: config.description,
@@ -65,7 +82,6 @@ export async function showProject(id: string) {
 
         response.layers.push({
             name: l.name,
-            description: l.description,
             data,
         })
     }
@@ -91,10 +107,14 @@ export async function createProject(
     await makeDirectoryEntry(handle, '/layers')
 
     for (const l of payload.layers) {
-        const path = resolvePath('/layers', `${l.name}.png`)
+        const path = resolvePath('/layers', `${l.name}.raw`)
 
         await writeEntry(handle, path, l.data)
-
+        await writeEntry(
+            handle,
+            resolvePath('/layers', `${l.name}.png`),
+            await convertBufferToPng(l.data, payload.width, payload.height)
+        )
         config.layers.push({
             name: l.name,
             description: l.description,
@@ -111,8 +131,42 @@ export async function createProject(
     return showProject(id)
 }
 
-export function updateProject(id: string, name: string) {
-    return db.projects.update(id, { name })
+export async function updateProject(id: string, payload: Omit<ProjectParsed, 'id'>) {
+    const project = await showProject(id)
+
+    if (!project) {
+        throw new Error('Project not found')
+    }
+
+    const handle = project._handle
+
+    const config: any = {
+        description: payload.description,
+        height: payload.height,
+        width: payload.width,
+        layers: [],
+    }
+
+    await destroyEntry(handle, '/layers')
+
+    await makeDirectoryEntry(handle, '/layers')
+
+    for (const l of payload.layers) {
+        const path = resolvePath('/layers', `${l.name}.raw`)
+
+        await writeEntry(handle, path, l.data)
+
+        config.layers.push({
+            name: l.name,
+            path: path,
+        })
+    }
+
+    const json = new TextEncoder().encode(JSON.stringify(config, null, 4))
+
+    await writeEntry(handle, '/index.json', json)
+
+    return showProject(id)
 }
 
 export function deleteProject(id: string) {
