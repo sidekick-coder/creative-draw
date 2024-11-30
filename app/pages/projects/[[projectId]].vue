@@ -1,25 +1,13 @@
 <script setup lang="ts">
 import type CdCanvas from '~/components/CdCanvas.vue'
+import type { ProjectParsed } from '#imports'
+import { format } from 'date-fns'
+import orderBy from 'lodash/orderBy'
 
 const directory = ref<FileSystemDirectoryHandle>()
 
-interface Layer {
-    name: string
-    description: string
-    type: string
-    data: string
-}
-
-interface Project {
-    name: string
-    description: string
-    layers: Layer[]
-    width: number
-    height: number
-}
-
-const project = ref<Project>({
-    name: '2024-01-01',
+const project = ref<ProjectParsed>({
+    name: '',
     description: '',
     layers: [],
     width: 1200,
@@ -33,11 +21,34 @@ const route = useRoute()
 const projectId = computed(() => route.params.projectId as string | undefined)
 
 async function setProject() {
-    if (!projectId.value) return
+    if (!projectId.value) {
+        project.value.name = format(new Date(), 'yyyy-MM-dd')
+
+        const backgroundLayer = {
+            name: 'background',
+            description: 'background',
+            order: 0,
+            type: 'paint',
+            data: new Uint8Array(project.value.width * project.value.height * 4).fill(255),
+        }
+        // paint layer
+        const paintLayer = {
+            name: 'paint',
+            description: 'paint',
+            order: 1,
+            type: 'paint',
+            data: new Uint8Array(project.value.width * project.value.height * 4),
+        }
+
+        project.value.layers = [backgroundLayer, paintLayer]
+        return
+    }
 
     const response = await showProject(projectId.value)
 
-    console.log(response)
+    if (response) {
+        project.value = response
+    }
 }
 
 if (process.client) {
@@ -59,49 +70,14 @@ const brushSettings = ref({
     size: 5,
 })
 
-const canvasRef = ref<InstanceType<typeof CdCanvas>>()
-
-async function writeLayers(handle: FileSystemDirectoryHandle) {
-    const image = await canvasRef.value?.toBlob()
-
-    const fileHandle = await handle.getFileHandle(`${project.value.name}.png`, {
-        create: true,
-    })
-
-    const writable = await fileHandle.createWritable()
-
-    await writable.write(image)
-
-    await writable.close()
-}
-
 async function save() {
-    if (!canvasRef.value || !project.value.name) return
-
     if (!directory.value) {
         directory.value = await window.showDirectoryPicker()
     }
 
     if (!directory.value) return
 
-    const payload: any = {
-        name: project.value.name,
-        description: project.value.description,
-        width: project.value.width,
-        height: project.value.height,
-        layers: [],
-    }
-
-    const data = await canvasRef.value.toBlob()
-
-    payload.layers.push({
-        name: 'layer',
-        description: 'layer',
-        type: 'image/png',
-        data,
-    })
-
-    const created = await createProject(directory.value, payload)
+    const created = await createProject(directory.value, project.value)
 
     navigateTo(`/projects/${created.id}`)
 }
@@ -183,6 +159,18 @@ onLoad(containerRef, setInitialOffset)
 
             <brush-selector v-model="brushSelected" :brushes="brushes" />
 
+            <cd-menu>
+                <template #activator="{ attrs }">
+                    <cd-btn v-bind="attrs" variant="text"> Layers </cd-btn>
+                </template>
+
+                <cd-card>
+                    <cd-list-item v-for="layer in project.layers" :key="layer.name">
+                        {{ layer.name }}
+                    </cd-list-item>
+                </cd-card>
+            </cd-menu>
+
             <cd-btn class="ml-4" @click="save">
                 {{ $t('save') }}
             </cd-btn>
@@ -220,7 +208,9 @@ onLoad(containerRef, setInitialOffset)
                 @touchmove.prevent
             >
                 <cd-canvas
-                    ref="canvasRef"
+                    v-for="layer in project.layers"
+                    :key="layer.name"
+                    v-model="layer.data"
                     :brushes
                     :brush-selected
                     :brush-settings
@@ -234,6 +224,7 @@ onLoad(containerRef, setInitialOffset)
                         'left': `${offsetX}px`,
                         'top': `${offsetY}px`,
                         'pointer-events': space ? 'none' : 'auto',
+                        'z-index': layer.order,
                     }"
                 />
             </div>

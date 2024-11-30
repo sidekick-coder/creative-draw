@@ -167,24 +167,46 @@ onLoad(canvas, (c) => {
 
 // save
 
-function toDataURL(type: string = 'image/png', quality: number = 1) {
-    return canvas.value!.toDataURL(type, quality)
+let interval: NodeJS.Timeout
+
+const model = defineModel({
+    type: Object as PropType<Uint8Array>,
+    required: true,
+})
+
+function loadModel() {
+    if (!model.value) return
+
+    const ctx = offscreenContext
+
+    const imageData = new ImageData(new Uint8ClampedArray(model.value), width.value, height.value)
+
+    ctx.putImageData(imageData, 0, 0)
 }
 
-function toBlob() {
-    return new Promise<Blob>((resolve) => {
-        canvas.value!.toBlob((blob) => {
-            resolve(blob!)
-        })
-    })
+function saveModel() {
+    if (!offscreenCanvas) return
+
+    const ctx = offscreenCanvas.getContext('2d')!
+
+    const imageData = ctx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height)
+
+    const clampedArray = imageData.data
+
+    model.value = new Uint8Array(clampedArray)
 }
 
-defineExpose({
-    toDataURL,
-    toBlob,
+onMounted(() => {
+    loadModel()
+
+    interval = setInterval(saveModel, 5000)
+})
+
+onUnmounted(() => {
+    if (interval) clearInterval(interval)
 })
 </script>
 
 <template>
-    <canvas ref="canvas" class="cursor-crosshair bg-white" :width :height />
+    <canvas ref="canvas" class="cursor-crosshair" :width :height />
 </template>

@@ -9,7 +9,7 @@ definePageMeta({
         <div class="flex h-full w-10/12 items-center justify-center">
             <div class="flex w-full max-w-sm flex-col justify-center text-center">
                 <h1 class="mb-4 text-2xl font-bold">Creative draw</h1>
-                <cd-btn to="/project">{{ $t('newEntity', [$t('project')]) }}</cd-btn>
+                <cd-btn to="/projects">{{ $t('newEntity', [$t('project')]) }}</cd-btn>
             </div>
         </div>
         <div class="flex w-2/12 flex-col gap-y-8 bg-body-700 p-4">
