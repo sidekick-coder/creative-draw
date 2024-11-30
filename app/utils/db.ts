@@ -11,7 +11,6 @@ const db = new Dexie('creative-draw') as Dexie & {
 }
 
 db.version(1).stores({
-    projects: 'id,handle',
     handles: '++id,handle,&name',
 })
 

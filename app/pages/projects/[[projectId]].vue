@@ -128,22 +128,40 @@ const isPannig = ref(false)
 let lastMouseX = 0
 let lastMouseY = 0
 
-function setInitialOffset() {
-    if (!containerRef.value) return
+function centralize() {
+    if (!containerRef.value || !project.value) return
 
     const [rects] = containerRef.value.getClientRects()
 
     if (!rects) return
 
+    const currentWidth = project.value.width * scale.value
+    const currentHeight = project.value.height * scale.value
+
     // centralize the project in the container
-    offsetX.value = (rects.width - project.value.width) / 2
-    offsetY.value = (rects.height - project.value.height) / 2
+    offsetX.value = (rects.width - currentWidth) / 2
+    offsetY.value = (rects.height - currentHeight) / 2
 }
 
-function resetScale() {
-    scale.value = 1
+function fitToScreen() {
+    if (!containerRef.value || !project.value) return
 
-    setInitialOffset()
+    const [rects] = containerRef.value.getClientRects()
+
+    if (!rects) return
+
+    const paddingX = 80
+    const paddingY = 80 + 56 // 56 is the height of the top bar
+
+    const availableWidth = rects.width - paddingX * 2
+    const availableHeight = rects.height - paddingY * 2
+
+    const scaleWidth = availableWidth / project.value.width
+    const scaleHeight = availableHeight / project.value.height
+
+    scale.value = Math.min(scaleWidth, scaleHeight)
+
+    nextTick(centralize)
 }
 
 function onZoom(value: number) {
@@ -183,12 +201,12 @@ function onMouseUp() {
     isPannig.value = false
 }
 
-onLoad(containerRef, setInitialOffset)
+onLoad(containerRef, fitToScreen)
 </script>
 
 <template>
     <div v-if="project" class="w-dvh flex h-dvh flex-col">
-        <div class="flex h-10 items-center px-4">
+        <div class="absolute left-0 top-0 z-20 flex w-full items-center bg-body-900/50 px-4 py-2">
             <cd-btn padding="none" size="sm" variant="text" @click="navigateTo('/')">
                 <cd-icon name="heroicons:home-20-solid" />
             </cd-btn>
@@ -214,7 +232,7 @@ onLoad(containerRef, setInitialOffset)
             <div class="flex-1"></div>
 
             <div class="flex items-center gap-x-2">
-                <cd-btn padding="none" size="sm" @click="resetScale">
+                <cd-btn padding="none" size="sm" @click="fitToScreen">
                     <cd-icon name="heroicons:arrows-pointing-out-20-solid" />
                 </cd-btn>
 
@@ -235,7 +253,7 @@ onLoad(containerRef, setInitialOffset)
         <ClientOnly>
             <div
                 ref="containerRef"
-                class="relative flex w-full flex-1 items-center justify-center overflow-hidden bg-body-700"
+                class="relative z-10 flex w-full flex-1 items-center justify-center overflow-hidden bg-body-700"
                 :class="[isPannig ? 'cursor-grabbing' : '', space ? 'cursor-grab' : '']"
                 @wheel="onWheel"
                 @pointerdown="onMouseDown"
