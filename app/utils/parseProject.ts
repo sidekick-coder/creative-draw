@@ -9,6 +9,14 @@ export interface ProjectParsed {
     [key: string]: any
 }
 
+export interface Layer {
+    name: string
+    filename: string
+    type: 'paint' | 'image'
+    order: number
+    data: Uint8Array
+}
+
 export async function parseProject(handle: FileSystemDirectoryHandle) {
     const config = await readEntry(handle, 'index.json', {
         responseType: 'json',
@@ -24,12 +32,15 @@ export async function parseProject(handle: FileSystemDirectoryHandle) {
     }
 
     for await (const l of config.layers) {
-        const data = await readEntry(handle, l.path, {
+        const data = await readEntry(handle, `/layers/${l.filename}.raw`, {
             responseType: 'arraybuffer',
         })
 
         response.layers.push({
             name: l.name,
+            filename: l.filename,
+            type: l.type,
+            order: l.order,
             data,
         })
     }

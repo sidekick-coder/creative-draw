@@ -3,37 +3,43 @@ import type CdCanvas from '~/components/CdCanvas.vue'
 import type { ProjectParsed } from '#imports'
 import { format } from 'date-fns'
 
-const directory = ref<FileSystemDirectoryHandle>()
-
-const project = ref<ProjectParsed>()
-
 // general
 const route = useRoute()
 
 // project
 const projectId = computed(() => Number(route.params.projectId) || undefined)
 
+const project = ref<ProjectParsed>()
+const handle = ref<FileSystemDirectoryHandle>()
+const saving = ref(false)
+
 async function setProject() {
     if (!projectId.value) {
-        project.value.name = format(new Date(), 'yyyy-MM-dd')
+        const width = 800
+        const height = 600
 
-        const backgroundLayer = {
-            name: 'background',
-            description: 'background',
-            order: 0,
-            type: 'paint',
-            data: new Uint8Array(project.value.width * project.value.height * 4).fill(255),
-        }
-        // paint layer
-        const paintLayer = {
-            name: 'paint',
-            description: 'paint',
-            order: 1,
-            type: 'paint',
-            data: new Uint8Array(project.value.width * project.value.height * 4),
+        project.value = {
+            name: format(new Date(), 'yyyy-MM-dd'),
+            width: width,
+            height: height,
+            layers: [
+                {
+                    name: 'background',
+                    filename: 'background',
+                    order: 1,
+                    type: 'paint',
+                    data: new Uint8Array(width * height * 4).fill(255),
+                },
+                {
+                    name: 'paint',
+                    filename: 'paint',
+                    order: 2,
+                    type: 'paint',
+                    data: new Uint8Array(width * height * 4),
+                },
+            ],
         }
 
-        project.value.layers = [backgroundLayer, paintLayer]
         return
     }
 
@@ -47,11 +53,53 @@ async function setProject() {
     const parsed = await parseProject(response.handle)
 
     project.value = parsed
+    handle.value = response.handle
 }
 
-if (process.client) {
-    watch(projectId, setProject, { immediate: true })
+async function create() {
+    const handle = await window.showDirectoryPicker({
+        mode: 'readwrite',
+    })
+
+    await saveProject(handle, project.value!)
+
+    const exists = await $db.handles.where('name').equals(handle.name).first()
+
+    if (exists) {
+        await $db.handles.delete(exists.id)
+    }
+
+    const id = await $db.handles.add({
+        handle,
+        name: handle.name,
+    })
+
+    navigateTo(`/projects/${id}`)
 }
+
+async function update() {
+    if (!handle.value || !project.value) return
+
+    await saveProject(handle.value, project.value)
+}
+
+async function save() {
+    saving.value = true
+
+    const promise = handle.value ? update : create
+
+    await promise().catch((error) => {
+        console.error(error)
+    })
+
+    setTimeout(() => {
+        saving.value = false
+    }, 800)
+}
+
+onMounted(setProject)
+
+watch(projectId, setProject)
 
 // brushes
 const files = import.meta.glob('~/brushes/*.ts', {
@@ -67,18 +115,6 @@ const brushSettings = ref({
     color: '#000000',
     size: 5,
 })
-
-async function save() {
-    if (!directory.value) {
-        directory.value = await window.showDirectoryPicker()
-    }
-
-    if (!directory.value) return
-
-    const created = await createProject(directory.value, project.value)
-
-    navigateTo(`/projects/${created.id}`)
-}
 
 // zoom and pan
 const containerRef = ref<HTMLDivElement>()
@@ -152,8 +188,10 @@ onLoad(containerRef, setInitialOffset)
 
 <template>
     <div v-if="project" class="w-dvh flex h-dvh flex-col">
-        <div class="flex h-10 px-4">
-            <input v-model="project.name" label="Name" class="bg-transparent focus:bg-body-600" />
+        <div class="flex h-10 items-center px-4">
+            <cd-btn padding="none" size="sm" variant="text" @click="navigateTo('/')">
+                <cd-icon name="heroicons:home-20-solid" />
+            </cd-btn>
 
             <brush-selector v-model="brushSelected" :brushes="brushes" />
 
@@ -169,7 +207,7 @@ onLoad(containerRef, setInitialOffset)
                 </cd-card>
             </cd-menu>
 
-            <cd-btn class="ml-4" @click="save">
+            <cd-btn class="ml-4" :loading="saving" variant="text" @click="save">
                 {{ $t('save') }}
             </cd-btn>
 

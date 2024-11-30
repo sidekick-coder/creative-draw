@@ -9,6 +9,12 @@ async function setItems() {
     items.value = await $db.handles.toArray()
 }
 
+async function deleteItem(item: Handle) {
+    await $db.handles.delete(item.id)
+
+    setItems()
+}
+
 onMounted(setItems)
 
 async function open() {
@@ -37,9 +43,43 @@ async function open() {
         <div class="flex h-full w-10/12 items-center justify-center">
             <div class="flex w-full max-w-sm flex-col justify-center text-center">
                 <h1 class="mb-4 text-2xl font-bold">Creative draw</h1>
-                <div class="flex flex-col gap-y-2">
+                <div class="mb-8 flex flex-col gap-y-2">
                     <cd-btn to="/projects">{{ $t('newEntity', [$t('project')]) }}</cd-btn>
                     <cd-btn @click="open">{{ $t('openEntity', [$t('project')]) }}</cd-btn>
+                </div>
+
+                <div v-if="items.length" class="flex flex-col gap-y-2 py-4">
+                    <h2 class="text-left text-lg font-bold text-body-100">
+                        {{ $t('recentOpened') }}
+                    </h2>
+
+                    <cd-card v-for="item in items" :key="item.id" :to="`/projects/${item.id}`">
+                        <cd-card-content class="flex items-center">
+                            <cd-icon name="heroicons:document-20-solid" class="text-xl" />
+
+                            <div class="flex-1 pl-4 text-left">{{ item.name }}</div>
+
+                            <div class="flex gap-x-2">
+                                <cd-btn
+                                    color="body-700"
+                                    padding="none"
+                                    size="sm"
+                                    @click="navigateTo(`/projects/${item.id}`)"
+                                >
+                                    <cd-icon name="heroicons:chevron-right-20-solid" />
+                                </cd-btn>
+
+                                <cd-btn
+                                    color="body-700"
+                                    padding="none"
+                                    size="sm"
+                                    @click.stop="deleteItem(item)"
+                                >
+                                    <cd-icon name="heroicons:trash-20-solid" />
+                                </cd-btn>
+                            </div>
+                        </cd-card-content>
+                    </cd-card>
                 </div>
             </div>
         </div>

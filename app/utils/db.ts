@@ -9,6 +9,8 @@ export interface Project {
 
 export interface Layer {
     name: string
+    type: 'paint' | 'image'
+    order: number
     data: Uint8Array
 }
 
