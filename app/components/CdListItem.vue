@@ -11,15 +11,25 @@ const className = defineProp<string>('class', {
 })
 
 const attrs = useAttrs()
-const classMap = ref(new Map<string, string>())
+const { classes, set } = useClassBuilder({ class: className })
 
-const classes = computed(() => {
-    const all = Array.from(classMap.value.values()).join(' ')
+set('base', 'flex items-center gap-x-5 px-4 py-3 transition-colors')
 
-    return twMerge(all, className.value)
+const color = defineProp<string>('color', {
+    type: String,
+    default: 'primary',
 })
 
-classMap.value.set('base', 'flex items-center gap-x-5 px-4 py-3')
+function setColor() {
+    const options: Record<typeof color.value, string> = {
+        none: '',
+        primary: 'hover:bg-primary-300/25 hover:text-primary-100',
+    }
+
+    set('color', options[color.value] || '')
+}
+
+watch(color, setColor, { immediate: true })
 
 // links and path to
 const to = defineProp<any>('to', {
@@ -28,20 +38,11 @@ const to = defineProp<any>('to', {
 })
 
 function setLinkClasses() {
-    classMap.value.set('link', '')
+    set('link', '')
 
     if (!to.value && !attrs.onClick) return
 
-    classMap.value.set(
-        'link',
-        `
-            cursor-pointer
-            transition-colors
-            
-            hover:bg-primary-300/25
-            hover:text-primary-100
-        `
-    )
+    set('link', 'cursor-pointer')
 }
 
 watch(to, setLinkClasses, { immediate: true })
@@ -62,11 +63,11 @@ const isRouteActive = computed(() => {
 
 function setActive() {
     if (isRouteActive.value || active.value) {
-        classMap.value.set('active', 'bg-primary-300/25 !text-primary-100')
+        set('active', 'bg-primary-300/25 !text-primary-100')
         return
     }
 
-    classMap.value.set('active', '')
+    set('active', '')
 }
 
 watch([active, isRouteActive], setActive, { immediate: true })

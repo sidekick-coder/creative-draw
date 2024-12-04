@@ -8,21 +8,50 @@ const layer = defineModel({
 
 const src = ref<string>()
 
+function toBase64(blob: Blob) {
+    return new Promise<string>((resolve) => {
+        const reader = new FileReader()
+
+        reader.onload = () => {
+            resolve(reader.result as string)
+        }
+
+        reader.readAsDataURL(blob)
+    })
+}
+
 async function load() {
+    if (!layer.value.data) {
+        return
+    }
+
     const response = await convertUint8ToBlob(
         layer.value.data,
         layer.value.width!,
         layer.value.height!
     )
 
-    src.value = URL.createObjectURL(new Blob([response], { type: 'image/png' }))
+    const base64 = await toBase64(response)
+
+    if (src.value === base64) {
+        return
+    }
+
+    src.value = base64
 }
 
-const debouncedLoad = debounce(load, 15 * 1000)
+let interval: NodeJS.Timeout
 
-onMounted(load)
+onMounted(() => {
+    load()
 
-watch(() => layer.value.data, debouncedLoad)
+    interval = setInterval(() => load(), 30 * 1000)
+})
+
+onUnmounted(() => {
+    clearInterval(interval)
+})
+
 // class
 const className = defineProp('class', {
     type: String,

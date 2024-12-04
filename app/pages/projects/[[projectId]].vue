@@ -241,6 +241,7 @@ onLoad(containerRef, fitToScreen)
                         <layer-dock
                             v-model="project.selected_layer"
                             v-model:layers="project.layers"
+                            :project="project"
                         />
                     </div>
                 </cd-menu>

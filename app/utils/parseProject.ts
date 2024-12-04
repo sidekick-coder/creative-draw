@@ -1,5 +1,32 @@
 import { readEntry } from 'drive-fsa'
 
+export interface LayerBase {
+    id: string
+    name: string
+    type: 'paint' | 'image'
+    order: number
+    visible?: boolean
+}
+
+export interface LayerPaint extends LayerBase {
+    type: 'paint'
+    width: number
+    height: number
+    data: Uint8Array
+    filename?: string
+}
+
+export interface LayerImage extends LayerBase {
+    type: 'image'
+    width: number
+    height: number
+    data: Uint8Array
+    x: number
+    y: number
+}
+
+export type Layer = LayerPaint | LayerImage
+
 export interface ProjectParsed {
     name: string
     description?: string
@@ -8,18 +35,6 @@ export interface ProjectParsed {
     selected_layer?: string
     layers: Layer[]
     [key: string]: any
-}
-
-export interface Layer {
-    id: string
-    name: string
-    filename: string
-    type: 'paint' | 'image'
-    order: number
-    data: Uint8Array
-    visible?: boolean
-    width?: number
-    height?: number
 }
 
 export async function parseProject(handle: FileSystemDirectoryHandle) {
@@ -54,6 +69,8 @@ export async function parseProject(handle: FileSystemDirectoryHandle) {
             response.selected_layer = id
         }
     }
+
+    response.layers.sort((a, b) => b.order - a.order)
 
     return response
 }
