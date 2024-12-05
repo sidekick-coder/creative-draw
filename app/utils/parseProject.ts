@@ -34,6 +34,11 @@ export interface ProjectParsed {
     width: number
     selected_layer?: string
     layers: Layer[]
+
+    current_scale: number
+    current_offset_x: number
+    current_offset_y: number
+
     [key: string]: any
 }
 
@@ -49,6 +54,11 @@ export async function parseProject(handle: FileSystemDirectoryHandle) {
         description: config.description,
         height: config.height,
         width: config.width,
+
+        current_scale: config.current_scale || 1,
+        current_offset_x: config.current_offset_x || 0,
+        current_offset_y: config.current_offset_y || 0,
+
         layers: [],
     }
 
