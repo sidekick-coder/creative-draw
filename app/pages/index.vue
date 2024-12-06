@@ -78,49 +78,73 @@ const sizes = [
                 <div class="mb-8 flex flex-col gap-y-2">
                     <cd-btn @click="open">{{ $t('openEntity', [$t('project')]) }}</cd-btn>
 
-                    <div class="-mx-2 mt-4 flex flex-wrap gap-y-4">
-                        <div v-for="size in sizes" :key="size.label" class="w-4/12 px-2">
-                            <cd-card :to="`/projects?width=${size.width}&height=${size.height}`">
-                                <cd-card-content>
-                                    <div class="text-center">{{ size.label }}</div>
+                    <div v-if="items.length" class="flex flex-col gap-y-2 py-4">
+                        <h2 class="text-left text-lg font-bold text-body-100">
+                            {{ $t('recentOpened') }}
+                        </h2>
+
+                        <cd-card v-for="item in items" :key="item.id" :to="`/projects/${item.id}`">
+                            <cd-card-content class="flex items-center">
+                                <cd-icon name="heroicons:document-20-solid" class="text-xl" />
+
+                                <div class="flex-1 pl-4 text-left">{{ item.name }}</div>
+
+                                <div class="flex gap-x-2">
+                                    <cd-btn
+                                        color="body-700"
+                                        padding="none"
+                                        size="sm"
+                                        @click="navigateTo(`/projects/${item.id}`)"
+                                    >
+                                        <cd-icon name="heroicons:chevron-right-20-solid" />
+                                    </cd-btn>
+
+                                    <cd-btn
+                                        color="body-700"
+                                        padding="none"
+                                        size="sm"
+                                        @click.stop="deleteItem(item)"
+                                    >
+                                        <cd-icon name="heroicons:trash-20-solid" />
+                                    </cd-btn>
+                                </div>
+                            </cd-card-content>
+                        </cd-card>
+                    </div>
+                    <h2 class="text-left text-lg font-bold text-body-100">
+                        {{ $t('predefinedSizes') }}
+                    </h2>
+
+                    <div class="mt-4 flex flex-col gap-y-4">
+                        <div v-for="size in sizes" :key="size.label">
+                            <cd-card>
+                                <cd-card-content class="flex items-center">
+                                    <div class="flex-1 text-left">{{ size.label }}</div>
+                                    <div class="flex gap-x-2">
+                                        <cd-btn
+                                            color="body-700"
+                                            padding="none"
+                                            size="sm"
+                                            :to="`/projects?width=${size.width}&height=${size.height}`"
+                                        >
+                                            <cd-icon name="streamline:orientation-portrait-solid" />
+                                        </cd-btn>
+
+                                        <cd-btn
+                                            color="body-700"
+                                            padding="none"
+                                            size="sm"
+                                            :to="`/projects?width=${size.height}&height=${size.width}`"
+                                        >
+                                            <cd-icon
+                                                name="streamline:orientation-landscape-solid"
+                                            />
+                                        </cd-btn>
+                                    </div>
                                 </cd-card-content>
                             </cd-card>
                         </div>
                     </div>
-                </div>
-
-                <div v-if="items.length" class="flex flex-col gap-y-2 py-4">
-                    <h2 class="text-left text-lg font-bold text-body-100">
-                        {{ $t('recentOpened') }}
-                    </h2>
-
-                    <cd-card v-for="item in items" :key="item.id" :to="`/projects/${item.id}`">
-                        <cd-card-content class="flex items-center">
-                            <cd-icon name="heroicons:document-20-solid" class="text-xl" />
-
-                            <div class="flex-1 pl-4 text-left">{{ item.name }}</div>
-
-                            <div class="flex gap-x-2">
-                                <cd-btn
-                                    color="body-700"
-                                    padding="none"
-                                    size="sm"
-                                    @click="navigateTo(`/projects/${item.id}`)"
-                                >
-                                    <cd-icon name="heroicons:chevron-right-20-solid" />
-                                </cd-btn>
-
-                                <cd-btn
-                                    color="body-700"
-                                    padding="none"
-                                    size="sm"
-                                    @click.stop="deleteItem(item)"
-                                >
-                                    <cd-icon name="heroicons:trash-20-solid" />
-                                </cd-btn>
-                            </div>
-                        </cd-card-content>
-                    </cd-card>
                 </div>
             </div>
         </div>
