@@ -184,7 +184,7 @@ onLoad(containerRef, () => {
 </script>
 
 <template>
-    <div v-if="project" class="w-dvh flex h-dvh flex-col">
+    <div v-if="project" class="w-dvh relative flex h-dvh flex-col">
         <div class="absolute left-0 top-0 z-20 flex w-full items-center bg-body-900/50 px-4">
             <cd-btn padding="none" size="sm" variant="text" @click="navigateTo('/')">
                 <cd-icon name="heroicons:home-20-solid" />
@@ -229,6 +229,10 @@ onLoad(containerRef, () => {
             </div>
         </div>
 
+        <div class="absolute left-0 top-0 z-20 flex h-full items-center px-2">
+            <brush-controls v-model="brushSettings" :brush="brushSelected" />
+        </div>
+
         <ClientOnly>
             <div
                 ref="containerRef"
@@ -240,10 +244,6 @@ onLoad(containerRef, () => {
                 @pointerup="onMouseUp"
                 @touchmove.prevent
             >
-                <div class="absolute left-0 top-0 flex size-full items-center bg-body-900/50 px-2">
-                    <brush-controls v-model="brushSettings" :brush="brushSelected" />
-                </div>
-
                 <cd-canvas
                     v-for="layer in project.layers"
                     :key="layer.name"
