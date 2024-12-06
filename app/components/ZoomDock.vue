@@ -50,7 +50,6 @@ function centralize() {
 }
 
 function fitToScreen() {
-    console.log('fitToScreen', containerRef.value, project.value)
     if (!containerRef.value || !project.value) return
 
     const [rects] = containerRef.value.getClientRects()

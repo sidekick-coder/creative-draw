@@ -6,6 +6,7 @@ export interface BrushPosition {
 export interface BrushSettings {
     color: string
     size: number
+    opacity: number
     [key: string]: any
 }
 

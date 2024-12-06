@@ -31,7 +31,7 @@ export default defineBrush(() => {
 
             const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
             const steps = Math.floor(distance / gap)
-            const points = [] as any
+            const map = new Map<string, { x: number; y: number; pressure: number }>()
 
             for (let i = 0; i < steps; i++) {
                 const t = i / steps
@@ -39,12 +39,18 @@ export default defineBrush(() => {
                 const y = startY + t * (endY - startY)
                 const pressure = startPressure + t * (endPressure - startPressure)
 
-                points.push({ x, y, pressure })
+                const key = `${Math.round(x)}-${Math.round(y)}`
+
+                map.set(key, { x, y, pressure })
             }
+
+            const points = Array.from(map.values())
 
             for (let i = 0; i < points.length - 1; i++) {
                 const p1 = points[i]
                 const p2 = points[i + 1]
+
+                if (!p1 || !p2) continue
 
                 const size = settings.size
                 const opacity = (settings.opacity || 1) * p1.pressure

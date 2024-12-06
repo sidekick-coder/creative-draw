@@ -17,6 +17,7 @@ const scale = defineProp<number>('scale', {
 
 const canvas = ref<HTMLCanvasElement>()
 const offscreenCanvas = document.createElement('canvas')
+const animationFrame = ref<number>()
 
 offscreenCanvas.width = width.value
 offscreenCanvas.height = height.value
@@ -46,10 +47,14 @@ function render(c: HTMLCanvasElement) {
         offscreenCanvas.height * scale.value
     )
 
-    requestAnimationFrame(() => render(c))
+    animationFrame.value = requestAnimationFrame(() => render(c))
 }
 
 onLoad(canvas, render)
+
+onUnmounted(() => {
+    if (animationFrame.value) cancelAnimationFrame(animationFrame.value)
+})
 
 // scale
 
@@ -154,6 +159,7 @@ onLoad(canvas, (c) => {
     c.addEventListener('pointerdown', onPointerDown)
     c.addEventListener('pointermove', onPointerMove)
     c.addEventListener('pointerup', onPointerUp)
+    c.addEventListener('pointerleave', onPointerUp)
 })
 
 // save

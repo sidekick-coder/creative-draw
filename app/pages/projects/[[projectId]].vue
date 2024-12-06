@@ -123,11 +123,12 @@ const files = import.meta.glob('~/brushes/*.ts', {
 const all = Object.values(files).map((file: any) => file.default)
 
 const brushes = ref<Brush[]>(all)
-const brushSelected = ref('brush')
+const brushSelected = ref('pen')
 
 const brushSettings = ref({
-    color: '#000000',
+    color: '0,0,0',
     size: 40,
+    opacity: 0.5,
 })
 
 // zoom and pan
@@ -239,6 +240,10 @@ onLoad(containerRef, () => {
                 @pointerup="onMouseUp"
                 @touchmove.prevent
             >
+                <div class="absolute left-0 top-0 flex size-full items-center bg-body-900/50 px-2">
+                    <brush-controls v-model="brushSettings" :brush="brushSelected" />
+                </div>
+
                 <cd-canvas
                     v-for="layer in project.layers"
                     :key="layer.name"
