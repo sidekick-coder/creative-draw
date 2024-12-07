@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Layer } from '@/composables/useInstance'
+
 const instance = useInstance()
 
 const model = defineModel({
@@ -10,7 +12,7 @@ const model = defineModel({
         type: 'paint',
         width: 1920,
         height: 1080,
-        data: new Uint8Array(1920 * 1080 * 4),
+        data: new OffscreenCanvas(1920, 1080),
     }),
 })
 
@@ -18,10 +20,9 @@ const scale = computed(() => instance.scale)
 
 // render
 const canvas = ref<HTMLCanvasElement>()
-const offscreen = ref<OffscreenCanvas>()
 const interval = ref<NodeJS.Timeout>()
 
-function render(c: HTMLCanvasElement, offCanvas: OffscreenCanvas) {
+function render(c: HTMLCanvasElement) {
     const ctx = c.getContext('2d')!
 
     c.width = model.value.width * scale.value
@@ -33,27 +34,25 @@ function render(c: HTMLCanvasElement, offCanvas: OffscreenCanvas) {
     ctx.imageSmoothingQuality = 'high'
 
     ctx.drawImage(
-        offCanvas,
+        model.value.data,
         0,
         0,
-        offCanvas.width,
-        offCanvas.height,
+        model.value.data.width,
+        model.value.data.height,
         0,
         0,
-        offCanvas.width * scale.value,
-        offCanvas.height * scale.value
+        model.value.data.width * scale.value,
+        model.value.data.height * scale.value
     )
 }
 
 function load() {
     if (!canvas.value) return
 
-    offscreen.value = new OffscreenCanvas(model.value.width, model.value.height)
-
     canvas.value.width = model.value.width
     canvas.value.height = model.value.height
 
-    interval.value = setInterval(() => render(canvas.value!, offscreen.value!), 16)
+    interval.value = setInterval(() => render(canvas.value!), 16)
 }
 
 onMounted(load)
@@ -62,31 +61,9 @@ onUnmounted(() => {
     if (interval.value) clearInterval(interval.value)
 })
 
-// load
-function loadData() {
-    if (!model.value || !offscreen.value) return
-
-    const ctx = offscreen.value.getContext('2d')!
-
-    const { width, height, data } = model.value
-
-    const imageData = new ImageData(new Uint8ClampedArray(data), width, height)
-
-    ctx.putImageData(imageData, 0, 0)
-
-    // test
-    ctx.beginPath()
-    ctx.fillStyle = 'red'
-    ctx.rect(width / 2 - 50, height / 2 - 50, 100, 100)
-    ctx.fill()
-    ctx.closePath()
-}
-
-onMounted(loadData)
-
 // events
 function onPointerDown(e: PointerEvent) {
-    const ctx = offscreen.value!.getContext('2d')!
+    const ctx = model.value.data.getContext('2d')!
 
     instance.emit('layer:pointerdown', {
         event: e,
@@ -98,7 +75,7 @@ function onPointerDown(e: PointerEvent) {
 }
 
 function onPointerMove(e: PointerEvent) {
-    const ctx = offscreen.value!.getContext('2d')!
+    const ctx = model.value.data.getContext('2d')!
 
     instance.emit('layer:pointermove', {
         event: e,
@@ -110,7 +87,7 @@ function onPointerMove(e: PointerEvent) {
 }
 
 function onPointerUp(e: PointerEvent) {
-    const ctx = offscreen.value!.getContext('2d')!
+    const ctx = model.value.data.getContext('2d')!
 
     instance.emit('layer:pointerup', {
         event: e,

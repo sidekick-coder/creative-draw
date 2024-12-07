@@ -1,21 +1,6 @@
 <script setup lang="ts">
 const instance = useInstance()
 
-const model = defineModel({
-    type: Object,
-    default: () => ({
-        size: 10,
-        opacity: 1,
-        enable_opacity_pressure: true,
-        enable_size_pressure: true,
-        color: {
-            r: 0,
-            g: 0,
-            b: 0,
-        },
-    }),
-})
-
 const isDrawing = ref(false)
 const lastX = ref(0)
 const lastY = ref(0)
@@ -28,7 +13,9 @@ function start(data: InstanceEvents['layer:pointerdown']) {
 }
 
 function draw(data: InstanceEvents['layer:pointermove']) {
-    if (!isDrawing.value) return
+    if (!isDrawing.value || !instance.activeBrush) return
+
+    const brush = instance.activeBrush
 
     const startX = lastX.value
     const startY = lastY.value
@@ -62,19 +49,20 @@ function draw(data: InstanceEvents['layer:pointermove']) {
 
         if (!p1) continue
 
-        let size = model.value.size
-        let opacity = model.value.opacity || 1
+        let size = brush.size
+        let opacity = brush.opacity
+        let color = brush.color || { r: 0, g: 0, b: 0 }
 
-        if (model.value.enable_opacity_pressure) {
-            opacity *= p1.pressure
-        }
-
-        if (model.value.enable_size_pressure) {
-            size *= p1.pressure
-        }
+        // if (brush.enable_opacity_pressure) {
+        //     opacity *= p1.pressure
+        // }
+        //
+        // if (brush.enable_size_pressure) {
+        //     size *= p1.pressure
+        // }
 
         data.ctx.globalAlpha = opacity
-        data.ctx.fillStyle = `rgba(${model.value.color.r}, ${model.value.color.g}, ${model.value.color.b}, ${opacity})`
+        data.ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`
 
         data.ctx.beginPath()
         data.ctx.arc(p1.x, p1.y, size / 2, 0, Math.PI * 2)

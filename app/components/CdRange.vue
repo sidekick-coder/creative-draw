@@ -16,17 +16,17 @@ const model = defineModel({
     type: Number,
 })
 
-const max = defineProp<number>('max', {
+const max = defineProp<number | string>('max', {
     type: [String, Number],
     default: 100,
 })
 
-const min = defineProp<number>('min', {
+const min = defineProp<number | string>('min', {
     type: [String, Number],
     default: 0,
 })
 
-const step = defineProp<number>('step', {
+const step = defineProp<number | string>('step', {
     type: [String, Number],
     default: 1,
 })
@@ -39,45 +39,61 @@ const orientation = defineProp<'horizontal' | 'vertical'>('orientation', {
 
 function setOrientation() {
     const options: Record<string, string> = {
-        horizontal: '',
-        vertical: '[writing-mode:vertical-rl] [direction:rtl]',
+        horizontal: 'w-auto',
+        vertical: '[writing-mode:vertical-rl] [direction:rtl] h-auto',
     }
 
     set('orientation', options[orientation.value] || '')
 }
 
 watch(orientation, setOrientation, { immediate: true })
+
+// thumb
+const size = defineProp<number>('size', {
+    type: String,
+    default: '0.8rem',
+})
+
+const thumb = computed(() => ({
+    width: orientation.value === 'vertical' ? size.value : `calc(${size.value})`,
+    height: orientation.value === 'horizontal' ? size.value : `calc(${size.value} * 1.1)`,
+}))
 </script>
 
 <template>
-    <div :class="classes">
-        <input
-            v-model.number="model"
-            :style="{ [orientation]: '100%' }"
-            type="range"
-            :min
-            :max
-            :step
-        />
-    </div>
+    <input
+        v-model.number="model"
+        :style="{ [orientation]: '100%' }"
+        type="range"
+        :min
+        :max
+        :step
+        :class="classes"
+    />
 </template>
 
 <style lang="scss">
-.cd-range input {
+.cd-range {
+    @apply bg-body-800/50 rounded;
+
     -webkit-appearance: none;
     appearance: none;
-    width: 100%;
-    height: 100%;
-    background: rgb(var(--color-body-800));
     outline: none;
 
     &::-webkit-slider-thumb {
+        @apply bg-body-500 transition-colors;
+
         -webkit-appearance: none;
         appearance: none;
-        width: 1rem;
-        height: 1rem;
-        background: rgb(var(--color-body-100));
+        width: v-bind('thumb.width');
+        height: v-bind('thumb.height');
         cursor: pointer;
+    }
+
+    &:hover {
+        &::-webkit-slider-thumb {
+            @apply bg-body-50;
+        }
     }
 }
 </style>

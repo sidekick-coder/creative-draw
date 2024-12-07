@@ -40,7 +40,7 @@ function onUp() {
 <template>
     <div
         v-if="ctrlSpace"
-        class="absolute inset-0 z-20 size-full cursor-zoom-in bg-blue-500/50"
+        class="absolute inset-0 z-20 size-full cursor-zoom-in"
         @touchmove.prevent
         @pointerdown.prevent="onDown"
         @pointermove.prevent="onMove"

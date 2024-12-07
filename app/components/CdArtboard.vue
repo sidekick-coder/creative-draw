@@ -29,6 +29,16 @@ const y = computed(() => instance.position.y + model.value.y)
         }"
     >
         <div class="absolute left-0 top-0 -mt-7">{{ model.name }}</div>
-        <cd-artboard-layer v-for="l in model.layers" :key="l.id" :model-value="l" />
+
+        <cd-artboard-layer
+            v-for="l in model.layers"
+            :key="l.id"
+            :model-value="l"
+            :style="{
+                'pointer-events': model.activeLayerId === l.id ? 'auto' : 'none',
+                'z-index': l.order,
+                'opacity': model.visibleLayers.includes(l.id) ? 1 : 0,
+            }"
+        />
     </div>
 </template>

@@ -38,7 +38,7 @@ function onUp() {
 <template>
     <div
         v-if="space"
-        class="absolute inset-0 z-20 size-full bg-red-500/50"
+        class="absolute inset-0 z-20 size-full"
         :class="[isPannig ? 'cursor-grabbing' : 'cursor-grab']"
         @touchmove.prevent
         @pointerdown.prevent="onDown"
