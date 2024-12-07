@@ -125,7 +125,7 @@ function onPointerUp(e: PointerEvent) {
 <template>
     <canvas
         ref="canvas"
-        class="absolute left-0 top-0 border border-red-500"
+        class="absolute left-0 top-0"
         @pointerdown="onPointerDown"
         @touchmove.prevent
         @pointerdown.prevent="onPointerDown"

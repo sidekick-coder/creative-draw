@@ -19,13 +19,16 @@ const y = computed(() => instance.position.y + model.value.y)
 
 <template>
     <div
+        :id="model.id"
         class="artboard absolute z-10"
         :style="{
             left: x + 'px',
             top: y + 'px',
+            width: model.width + 'px',
+            height: model.height + 'px',
         }"
     >
-        <div class="absolute left-0 top-0 -mt-6">{{ model.name }}</div>
+        <div class="absolute left-0 top-0 -mt-7">{{ model.name }}</div>
         <cd-artboard-layer v-for="l in model.layers" :key="l.id" :model-value="l" />
     </div>
 </template>

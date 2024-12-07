@@ -5,7 +5,7 @@ export type Instance = ReturnType<typeof makeInstance>
 export interface Layer {
     id: string
     name: string
-    type: 'path'
+    type: 'paint'
     order: number
 }
 
