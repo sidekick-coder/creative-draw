@@ -41,6 +41,7 @@ instance.addArtboard({
     <cd-instance class="h-dvh w-dvw">
         <cd-tool-position />
         <cd-tool-zoom />
+        <cd-tool-brush />
         <cd-artboard v-for="a in instance.artboards" :key="a.id" :model-value="a" />
     </cd-instance>
 </template>

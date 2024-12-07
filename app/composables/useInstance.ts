@@ -9,6 +9,20 @@ export interface Layer {
     order: number
 }
 
+interface LayerPointEvent {
+    event: PointerEvent
+    x: number
+    y: number
+    pressure: number
+    ctx: OffscreenCanvasRenderingContext2D
+}
+
+export interface InstanceEvents {
+    'layer:pointerdown': LayerPointEvent
+    'layer:pointermove': LayerPointEvent
+    'layer:pointerup': LayerPointEvent
+}
+
 export interface Artboard {
     id: string
     name: string
@@ -19,6 +33,11 @@ export interface Artboard {
     layers: Layer[]
 }
 
+export interface Observer {
+    name: string
+    callback: (data: any) => void
+}
+
 const key = Symbol() as InjectionKey<Instance>
 
 export function makeInstance() {
@@ -26,6 +45,7 @@ export function makeInstance() {
     const artboards = ref<Artboard[]>([])
     const position = ref({ x: 0, y: 0 })
     const scale = ref(1)
+    const observers = ref<Observer[]>([])
 
     function setContainer(value: HTMLElement) {
         container.value = value
@@ -43,6 +63,25 @@ export function makeInstance() {
         scale.value = value
     }
 
+    function on<T extends keyof InstanceEvents>(
+        name: T,
+        callback: (data: InstanceEvents[T]) => void
+    ) {
+        observers.value.push({ name, callback })
+    }
+
+    function off(name: string, callback: (data: any) => void) {
+        const index = observers.value.findIndex((o) => o.name === name && o.callback === callback)
+
+        if (index !== -1) {
+            observers.value.splice(index, 1)
+        }
+    }
+
+    function emit<T extends keyof InstanceEvents>(name: T, data: InstanceEvents[T]) {
+        observers.value.filter((o) => o.name === name).forEach((o) => o.callback(data))
+    }
+
     return reactive({
         container: readonly(container),
         artboards: readonly(artboards),
@@ -53,6 +92,9 @@ export function makeInstance() {
         setPosition,
         setScale,
         addArtboard,
+        on,
+        off,
+        emit,
     })
 }
 

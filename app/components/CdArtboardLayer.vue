@@ -63,7 +63,6 @@ onUnmounted(() => {
 })
 
 // load
-
 function loadData() {
     if (!model.value || !offscreen.value) return
 
@@ -84,8 +83,54 @@ function loadData() {
 }
 
 onMounted(loadData)
+
+// events
+function onPointerDown(e: PointerEvent) {
+    const ctx = offscreen.value!.getContext('2d')!
+
+    instance.emit('layer:pointerdown', {
+        event: e,
+        ctx,
+        x: e.offsetX / scale.value,
+        y: e.offsetY / scale.value,
+        pressure: e.pressure,
+    })
+}
+
+function onPointerMove(e: PointerEvent) {
+    const ctx = offscreen.value!.getContext('2d')!
+
+    instance.emit('layer:pointermove', {
+        event: e,
+        ctx,
+        x: e.offsetX / scale.value,
+        y: e.offsetY / scale.value,
+        pressure: e.pressure,
+    })
+}
+
+function onPointerUp(e: PointerEvent) {
+    const ctx = offscreen.value!.getContext('2d')!
+
+    instance.emit('layer:pointerup', {
+        event: e,
+        ctx,
+        x: e.offsetX / scale.value,
+        y: e.offsetY / scale.value,
+        pressure: e.pressure,
+    })
+}
 </script>
 
 <template>
-    <canvas ref="canvas" class="absolute left-0 top-0 border border-red-500" />
+    <canvas
+        ref="canvas"
+        class="absolute left-0 top-0 border border-red-500"
+        @pointerdown="onPointerDown"
+        @touchmove.prevent
+        @pointerdown.prevent="onPointerDown"
+        @pointermove.prevent="onPointerMove"
+        @pointerup.prevent="onPointerUp"
+        @pointerleave.prevent="onPointerUp"
+    />
 </template>
