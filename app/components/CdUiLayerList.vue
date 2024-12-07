@@ -31,6 +31,8 @@ function onClick(id: string) {
     activeId.value = id
 }
 
+const editId = ref<string>()
+
 function onChangeName(id: string, event: Event) {
     const input = event.target as HTMLInputElement
 
@@ -146,11 +148,17 @@ function toggleVisible(id: string) {
                 >
                     <cd-ui-layer-preview :model-value="l" />
 
-                    <div class="flex-1">
+                    <div class="flex-1 text-sm text-body-0" @dblclick="editId = l.id">
                         <input
                             :value="l.name"
-                            class="h-10 w-full bg-transparent px-4 text-sm text-body-0 hover:bg-body-800 focus:bg-body-600 focus:outline-none"
+                            class="h-10 w-full bg-body-600 px-4 focus:outline-none"
+                            :class="
+                                editId === l.id ? 'bg-body-600' : 'bg-transparent cursor-pointer'
+                            "
+                            autofocus
+                            :readonly="editId !== l.id"
                             @change="onChangeName(l.id, $event)"
+                            @blur="editId = undefined"
                             @click.stop
                         />
                     </div>
