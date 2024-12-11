@@ -1,14 +1,6 @@
 <script setup lang="ts">
 const instance = useInstance()
 
-const brush = defineProp<Brush>('brush', {
-    type: Object,
-    default: () => ({
-        size: 10,
-        opacity: 1,
-    }),
-})
-
 const size = computed({
     get: () => instance.activeBrush.size,
     set: (value: number) => {
@@ -19,7 +11,7 @@ const size = computed({
 })
 
 const opacity = computed({
-    get: () => instance.activeBrush.opacity * 100,
+    get: () => (instance.activeBrush.opacity || 1) * 100,
     set: (value: number) => {
         instance.updateActiveBrush({
             opacity: value / 100,

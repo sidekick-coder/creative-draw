@@ -1,30 +1,27 @@
-export interface BrushPosition {
-    x: number
-    y: number
+interface Pressure {
+    size?: boolean
+    opacity?: boolean
 }
 
-export interface BrushSettings {
-    color: string
+interface Grain {
+    density: number
     size: number
     opacity: number
-    [key: string]: any
+    jitter: number
 }
 
-export interface BrushOptions {
-    position: BrushPosition
-    settings: BrushSettings
-    event: PointerEvent
-    ctx: CanvasRenderingContext2D
-    pressure?: number
-}
-
-export interface Brush {
+export interface BrushDefinition {
+    id: string
     name: string
-    start: (options: BrushOptions) => void
-    stop: (options: BrushOptions) => void
-    draw: (options: BrushOptions) => void
+    size: number
+
+    opacity?: number
+    spacing?: number
+    jitter?: number
+    pressure?: Pressure
+    grain?: Grain
 }
 
-export function defineBrush(cb: Brush | (() => Brush)): Brush {
-    return cb instanceof Function ? cb() : cb
+export function defineBrush(data: BrushDefinition): BrushDefinition {
+    return data
 }

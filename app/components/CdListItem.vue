@@ -22,8 +22,15 @@ const color = defineProp<string>('color', {
 
 function setColor() {
     const options: Record<typeof color.value, string> = {
-        none: '',
-        primary: 'hover:bg-primary-300/25 hover:text-primary-100',
+        'none': '',
+        'primary': `
+            hover:bg-primary-300/25 hover:text-primary-100
+            data-[active=true]:bg-primary-300/25 
+        `,
+        'body-800': `
+            bg-body-800 hover:bg-body-700/25 hover:text-body-100
+            data-[active=true]:text-body-100
+        `,
     }
 
     set('color', options[color.value] || '')
@@ -60,21 +67,15 @@ const isRouteActive = computed(() => {
 
     return route.fullPath === resolved.href
 })
-
-function setActive() {
-    if (isRouteActive.value || active.value) {
-        set('active', 'bg-primary-300/25 !text-primary-100')
-        return
-    }
-
-    set('active', '')
-}
-
-watch([active, isRouteActive], setActive, { immediate: true })
 </script>
 
 <template>
-    <component :is="to ? NuxtLink : 'div'" :to="to" :class="classes">
+    <component
+        :is="to ? NuxtLink : 'div'"
+        :to="to"
+        :class="classes"
+        :data-active="isRouteActive || active"
+    >
         <slot />
     </component>
 </template>

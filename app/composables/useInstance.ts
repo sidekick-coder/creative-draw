@@ -2,12 +2,6 @@ import type { InjectionKey } from 'vue'
 
 export type Instance = ReturnType<typeof makeInstance>
 
-export interface BrushDefinition {
-    id: string
-    size: number
-    opacity: number
-}
-
 export interface Layer {
     id: string
     name: string
@@ -50,6 +44,12 @@ export interface Observer {
 }
 
 const key = Symbol() as InjectionKey<Instance>
+
+const files = import.meta.glob<{ default: BrushDefinition }>('@/brushes/*.ts', {
+    eager: true,
+})
+
+const allBrushes = Object.values(files).map((f) => f.default)
 
 export function makeInstance() {
     const container = ref()
@@ -136,9 +136,8 @@ export function makeInstance() {
     }
 
     // brush
-    const initialBrush = { size: 10, opacity: 1, id: 'initial' }
-    const brushes = ref<BrushDefinition[]>([initialBrush])
-    const activeBrush = ref<BrushDefinition>(initialBrush)
+    const brushes = ref<BrushDefinition[]>(allBrushes)
+    const activeBrush = ref<BrushDefinition>(allBrushes[0]!)
 
     function setActiveBrush(id: string) {
         const brush = brushes.value.find((b) => b.id === id)
