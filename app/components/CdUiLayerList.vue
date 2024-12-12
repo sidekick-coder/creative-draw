@@ -1,29 +1,24 @@
 <script setup lang="ts">
+import type { Layer } from '@/composables/useInstance'
 const instance = useInstance()
 
-const artboard = computed(() => instance.activeArtboard)
-
 const activeId = computed({
-    get: () => instance.activeArtboard?.activeLayerId,
+    get: () => instance.activeLayerId,
     set: (value: string) => {
-        instance.setArtboardActiveLayer(instance.activeArtboard!.id, value)
+        instance.setActiveLayer(value)
     },
 })
 
 const layers = computed({
-    get: () => instance.activeArtboard?.layers || [],
-    set: (value: Artboard['layers']) => {
-        if (!instance.activeArtboard) {
-            return
-        }
-
+    get: () => instance.layers || [],
+    set: (value: Layer[]) => {
         value.forEach((l, i) => {
             l.order = value.length - i
         })
 
         value.sort((a, b) => b.order - a.order)
 
-        instance.setArtboardLayers(instance.activeArtboard.id, value)
+        instance.setLayers(value)
     },
 })
 
@@ -50,17 +45,13 @@ function onChangeName(id: string, event: Event) {
 }
 
 function addNew() {
-    if (!instance.activeArtboard) {
-        return
-    }
-
     const index = layers.value.length + 1
     const id = createId()
 
     const newLayers = layers.value.slice().map((l) => ({ ...l }))
 
-    const width = instance.activeArtboard.width
-    const height = instance.activeArtboard.height
+    const width = instance.width
+    const height = instance.height
 
     newLayers.unshift({
         id: id,
@@ -113,11 +104,7 @@ function onDrop({ item, dropTarget }: any) {
 }
 
 function toggleVisible(id: string) {
-    if (!instance.activeArtboard) {
-        return
-    }
-
-    const visible = instance.activeArtboard.visibleLayers.slice()
+    const visible = instance.visibleLayers.slice()
 
     if (visible.includes(id)) {
         visible.splice(visible.indexOf(id), 1)
@@ -125,73 +112,87 @@ function toggleVisible(id: string) {
         visible.push(id)
     }
 
-    instance.setArtboardVisibleLayers(instance.activeArtboard!.id, visible)
+    instance.setVisibleLayers(visible)
 }
+
+const menu = ref(false)
 </script>
 <template>
-    <cd-card v-if="artboard" class="w-96 bg-body-900">
-        <cd-card-head>
-            <cd-card-title class="mr-auto text-base">Layers</cd-card-title>
-
-            <cd-btn variant="text" padding="none" size="sm" @click="addNew">
-                <cd-icon name="heroicons:plus-20-solid" />
+    <cd-menu v-model="menu" :close-on-content-click="false">
+        <template #activator="{ attrs }">
+            <cd-btn v-bind="attrs" variant="text" padding="none" size="md">
+                <cd-icon name="heroicons:square-2-stack-solid" />
             </cd-btn>
-        </cd-card-head>
+        </template>
 
-        <cd-drag-zone @drop="onDrop">
-            <cd-drag-item v-for="l in layers" :key="l.id" :model-value="l">
-                <cd-list-item
-                    class="group flex"
-                    color="none"
-                    :active="l.id === activeId"
-                    @click="onClick(l.id)"
-                >
-                    <cd-ui-layer-preview :model-value="l" />
+        <div class="p-2">
+            <cd-card class="w-96 bg-body-900">
+                <cd-card-head>
+                    <cd-card-title class="mr-auto text-base">Layers</cd-card-title>
 
-                    <div class="flex-1 text-sm text-body-0" @dblclick="editId = l.id">
-                        <input
-                            :value="l.name"
-                            class="h-10 w-full bg-body-600 px-4 focus:outline-none"
-                            :class="
-                                editId === l.id ? 'bg-body-600' : 'bg-transparent cursor-pointer'
-                            "
-                            autofocus
-                            :readonly="editId !== l.id"
-                            @change="onChangeName(l.id, $event)"
-                            @blur="editId = undefined"
-                            @click.stop
-                        />
-                    </div>
+                    <cd-btn variant="text" padding="none" size="sm" @click="addNew">
+                        <cd-icon name="heroicons:plus-20-solid" />
+                    </cd-btn>
+                </cd-card-head>
 
-                    <div class="flex">
-                        <cd-btn
-                            variant="text"
-                            padding="none"
-                            size="sm"
+                <cd-drag-zone @drop="onDrop">
+                    <cd-drag-item v-for="l in layers" :key="l.id" :model-value="l">
+                        <cd-list-item
+                            class="group flex"
                             color="none"
-                            class="text-body-100 hover:text-body-50"
-                            @click="remove(l.id)"
+                            :active="l.id === activeId"
+                            @click="onClick(l.id)"
                         >
-                            <cd-icon name="heroicons:trash-20-solid" />
-                        </cd-btn>
+                            <cd-ui-layer-preview v-if="menu" :model-value="l" />
 
-                        <cd-btn
-                            variant="text"
-                            padding="none"
-                            color="none"
-                            class="text-body-100 hover:text-body-50"
-                            size="sm"
-                            @click.stop="toggleVisible(l.id)"
-                        >
-                            <cd-icon
-                                v-if="artboard.visibleLayers.includes(l.id)"
-                                name="heroicons:eye-20-solid"
-                            />
-                            <cd-icon v-else name="heroicons:eye-slash-20-solid" />
-                        </cd-btn>
-                    </div>
-                </cd-list-item>
-            </cd-drag-item>
-        </cd-drag-zone>
-    </cd-card>
+                            <div class="flex-1 text-sm text-body-0" @dblclick="editId = l.id">
+                                <input
+                                    :value="l.name"
+                                    class="h-10 w-full bg-body-600 px-4 focus:outline-none"
+                                    :class="
+                                        editId === l.id
+                                            ? 'bg-body-600'
+                                            : 'bg-transparent cursor-pointer'
+                                    "
+                                    autofocus
+                                    :readonly="editId !== l.id"
+                                    @change="onChangeName(l.id, $event)"
+                                    @blur="editId = undefined"
+                                    @click.stop
+                                />
+                            </div>
+
+                            <div class="flex">
+                                <cd-btn
+                                    variant="text"
+                                    padding="none"
+                                    size="sm"
+                                    color="none"
+                                    class="text-body-100 hover:text-body-50"
+                                    @click="remove(l.id)"
+                                >
+                                    <cd-icon name="heroicons:trash-20-solid" />
+                                </cd-btn>
+
+                                <cd-btn
+                                    variant="text"
+                                    padding="none"
+                                    color="none"
+                                    class="text-body-100 hover:text-body-50"
+                                    size="sm"
+                                    @click.stop="toggleVisible(l.id)"
+                                >
+                                    <cd-icon
+                                        v-if="instance.visibleLayers.includes(l.id)"
+                                        name="heroicons:eye-20-solid"
+                                    />
+                                    <cd-icon v-else name="heroicons:eye-slash-20-solid" />
+                                </cd-btn>
+                            </div>
+                        </cd-list-item>
+                    </cd-drag-item>
+                </cd-drag-zone>
+            </cd-card>
+        </div>
+    </cd-menu>
 </template>

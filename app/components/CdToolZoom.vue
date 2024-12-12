@@ -22,14 +22,27 @@ function onMove(event: PointerEvent) {
 
     const factor = isPen ? 0.05 : 0.01
     const zoomDelta = shouldInscrease ? 1 : -1
-    let newScale = instance.scale + zoomDelta * factor
+    let newScale = instance.tools.zoomAndPan.scale + zoomDelta * factor
 
     newScale = Math.max(0.1, newScale)
     newScale = Math.min(5, newScale)
 
-    instance.setScale(newScale)
+    instance.tools.zoomAndPan.setScale(newScale)
 
     lastMouseX = event.clientX
+}
+
+function onWheel(event: WheelEvent) {
+    event.preventDefault()
+
+    const factor = 0.1
+    const zoomDelta = event.deltaY < 0 ? 1 : -1
+    let newScale = instance.tools.zoomAndPan.scale + zoomDelta * factor
+
+    newScale = Math.max(0.1, newScale)
+    newScale = Math.min(5, newScale)
+
+    instance.tools.zoomAndPan.setScale(newScale)
 }
 
 function onUp() {
@@ -42,6 +55,7 @@ function onUp() {
         v-if="ctrlSpace"
         class="absolute inset-0 z-20 size-full cursor-zoom-in"
         @touchmove.prevent
+        @wheel.prevent="onWheel"
         @pointerdown.prevent="onDown"
         @pointermove.prevent="onMove"
         @pointerup.prevent="onUp"

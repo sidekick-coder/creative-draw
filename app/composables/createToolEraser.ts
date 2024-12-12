@@ -1,8 +1,8 @@
 import defaultBrush from '@/brushes/basic-10'
 
-export function createBrushTool() {
+export function createToolEraser() {
     const { brushes } = useBrushes()
-    const activeId = useLocalStorage('activeBrushId', defaultBrush.id)
+    const activeId = useLocalStorage('activeEraserId', defaultBrush.id)
     const active = computed(() => brushes.value.find((b) => b.id === activeId.value))
     const settings = ref<BrushDefinition>(defaultBrush)
 

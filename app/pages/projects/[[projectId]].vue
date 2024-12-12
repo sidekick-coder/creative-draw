@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import type { Layer } from '@/composables/useInstance'
 const instance = useInstance()
+const route = useRoute()
 
-const width = 500
-const height = 500
-
-const x = typeof window === 'undefined' ? 0 : window.innerWidth / 2 - width / 2
-const y = typeof window === 'undefined' ? 0 : window.innerHeight / 2 - height / 2
+const width = route.query.width ? Number(route.query.width) : 500
+const height = route.query.height ? Number(route.query.height) : 500
 
 onMounted(() => {
     const bgLayer: Layer = {
@@ -35,46 +33,35 @@ onMounted(() => {
 
     ctx.fillRect(0, 0, width, height)
 
-    instance.addArtboard({
-        id: createId(),
-        name: 'Artboard',
-        width,
-        height,
-        x,
-        y,
-        activeLayerId: paintLayer.id,
-        layers: [paintLayer, bgLayer],
-        visibleLayers: [paintLayer.id, bgLayer.id],
-    })
+    instance.setLayers([bgLayer, paintLayer])
+    instance.setActiveLayer(paintLayer.id)
+    instance.setVisibleLayers([bgLayer.id, paintLayer.id])
+
+    instance.tools.zoomAndPan.fit()
 })
 </script>
 
 <template>
-    <cd-instance class="h-dvh w-dvw">
-        <cd-tool-position />
+    <cd-instance class="h-dvh w-dvw" :height :width>
+        <cd-tool-pan />
         <cd-tool-zoom />
         <cd-tool-brush />
         <cd-tool-eraser />
 
         <cd-ui-brush-settings />
 
+        <cd-ui-toolbar class="absolute left-2 top-2">
+            <cd-btn padding="none" size="sm" variant="text" @click="navigateTo('/')">
+                <cd-icon name="heroicons:home-20-solid" />
+            </cd-btn>
+        </cd-ui-toolbar>
+
         <cd-ui-toolbar class="absolute right-2 top-2">
             <cd-ui-tool-eraser />
             <cd-ui-tool-brush />
-
-            <cd-menu :close-on-content-click="false">
-                <template #activator="{ attrs }">
-                    <cd-btn v-bind="attrs" variant="text" padding="none" size="md">
-                        <cd-icon name="heroicons:square-2-stack-solid" />
-                    </cd-btn>
-                </template>
-
-                <div class="p-2">
-                    <cd-ui-layer-list />
-                </div>
-            </cd-menu>
+            <cd-ui-layer-list />
         </cd-ui-toolbar>
 
-        <cd-artboard v-for="a in instance.artboards" :key="a.id" :model-value="a" />
+        <cd-layer-list />
     </cd-instance>
 </template>

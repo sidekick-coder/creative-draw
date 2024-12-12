@@ -47,9 +47,19 @@ const key = Symbol() as InjectionKey<Instance>
 
 export function makeInstance() {
     const container = ref()
+    const containerWidth = ref(0)
+    const containerHeight = ref(0)
+    const width = ref(0)
+    const height = ref(0)
 
-    function setContainer(value: HTMLElement) {
-        container.value = value
+    function load(el: HTMLElement, w: number, h: number) {
+        container.value = el
+
+        containerWidth.value = el.clientWidth
+        containerHeight.value = el.clientHeight
+
+        width.value = w
+        height.value = h
     }
 
     // events
@@ -74,67 +84,36 @@ export function makeInstance() {
         observers.value.filter((o) => o.name === name).forEach((o) => o.callback(data))
     }
 
-    // artboard
-    const activeArtboardId = ref<string>()
-    const artboards = ref<Artboard[]>([])
-    const activeArtboard = computed(() =>
-        artboards.value.find((a) => a.id === activeArtboardId.value)
-    )
+    // layers
+    const activeLayerId = ref<string>()
+    const layers = ref<Layer[]>([])
+    const activeLayer = computed(() => layers.value.find((l) => l.id === activeLayerId.value))
+    const visibleLayers = ref<string[]>([])
 
-    function setActiveArtboard(id: string) {
-        activeArtboardId.value = id
+    function setActiveLayer(id: string) {
+        activeLayerId.value = id
     }
 
-    function addArtboard(artboard: Artboard) {
-        artboards.value.push(artboard)
-
-        if (artboards.value.length === 1) {
-            setActiveArtboard(artboard.id)
-        }
+    function setLayers(l: Layer[]) {
+        layers.value = l
     }
 
-    function setArtboardLayers(id: string, layers: Layer[]) {
-        const artboard = artboards.value.find((a) => a.id === id)
-
-        if (artboard) {
-            artboard.layers = layers
-        }
-    }
-
-    function setArtboardVisibleLayers(id: string, layerIds: string[]) {
-        const artboard = artboards.value.find((a) => a.id === id)
-
-        if (artboard) {
-            artboard.visibleLayers = layerIds
-        }
-    }
-
-    function setArtboardActiveLayer(id: string, layerId: string) {
-        const artboard = artboards.value.find((a) => a.id === id)
-
-        if (artboard) {
-            artboard.activeLayerId = layerId
-        }
-    }
-
-    // position & scale
-    const position = ref({ x: 0, y: 0 })
-    const scale = ref(1)
-
-    function setPosition(value: { x: number; y: number }) {
-        position.value = value
-    }
-
-    function setScale(value: number) {
-        scale.value = value
+    function setVisibleLayers(layerIds: string[]) {
+        visibleLayers.value = layerIds
     }
 
     // tools
     const activeTool = ref<string>('brush')
 
     const tools = {
-        brush: createBrushTool(),
-        eraser: createEraserTool(),
+        brush: createToolBrush(),
+        eraser: createToolEraser(),
+        zoomAndPan: createToolZoomAndPan({
+            width,
+            height,
+            containerWidth,
+            containerHeight,
+        }),
     }
 
     function setTool(id: string) {
@@ -143,22 +122,19 @@ export function makeInstance() {
 
     return reactive({
         container: readonly(container),
-        setContainer,
+        containerWidth: readonly(containerWidth),
+        containerHeight: readonly(containerHeight),
+        width: readonly(width),
+        height: readonly(height),
+        load,
 
-        artboards: readonly(artboards),
-        activeArtboardId: readonly(activeArtboardId),
-        activeArtboard: readonly(activeArtboard),
-        setActiveArtboard,
-        setArtboardLayers,
-        setArtboardActiveLayer,
-        addArtboard,
-        setArtboardVisibleLayers,
-
-        position: readonly(position),
-        scale: readonly(scale),
-
-        setPosition,
-        setScale,
+        layers: readonly(layers),
+        activeLayer: readonly(activeLayer),
+        activeLayerId: readonly(activeLayerId),
+        visibleLayers: readonly(visibleLayers),
+        setLayers,
+        setActiveLayer,
+        setVisibleLayers,
 
         activeTool: readonly(activeTool),
         tools,

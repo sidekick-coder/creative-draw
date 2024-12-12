@@ -19,12 +19,12 @@ function onDown(event: MouseEvent) {
 function onMove(event: MouseEvent) {
     if (!isPannig.value) return
 
-    const position = instance.position
+    const position = instance.tools.zoomAndPan.position
 
     const x = position.x + event.clientX - lastMouseX
     const y = position.y + event.clientY - lastMouseY
 
-    instance.setPosition({ x, y })
+    instance.tools.zoomAndPan.setPosition({ x, y })
 
     lastMouseX = event.clientX
     lastMouseY = event.clientY

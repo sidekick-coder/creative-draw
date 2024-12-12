@@ -29,7 +29,7 @@ function onClick() {
         </template>
 
         <div class="p-2">
-            <cd-ui-brush-library v-model="instance.tools.eraser.activeId" />
+            <cd-ui-brush-library v-if="menu" v-model="instance.tools.eraser.activeId" />
         </div>
     </cd-menu>
 </template>
