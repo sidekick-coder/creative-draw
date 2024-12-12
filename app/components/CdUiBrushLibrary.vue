@@ -1,13 +1,21 @@
 <script setup lang="ts">
-const instance = useInstance()
+const model = defineModel({
+    type: String,
+})
 
 const categoryId = ref('all')
-const brushes = computed(() => instance.brushes)
+const { brushes } = useBrushes()
+
 const categories = ref([
     {
         id: 'all',
         name: 'All',
         brushes: brushes.value.map((b) => b.id),
+    },
+    {
+        id: 'sketching',
+        name: 'Sketching',
+        brushes: ['pencil-hb', 'pencil-1b', 'pencil-2b', 'pencil-4b', 'pencil-6b'],
     },
 ])
 
@@ -29,9 +37,9 @@ const visibleBrushes = computed(() =>
                 <cd-list-item
                     v-for="b in visibleBrushes"
                     :key="b.id"
-                    :active="instance.activeBrush?.id === b.id"
+                    :active="model === b.id"
                     class="flex flex-col items-start rounded bg-body-800"
-                    @click="instance.setActiveBrush(b.id)"
+                    @click="model = b.id"
                 >
                     <div class="font-bold">
                         {{ b.name }}

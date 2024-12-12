@@ -8,10 +8,13 @@ interface Options {
     lastY: number
     lastPressure: number
     brush: BrushDefinition
+    globalCompositeOperation?: 'source-over' | 'destination-out'
 }
 
 export function draw(options: Options) {
     const ctx = options.ctx
+    const globalCompositeOperation = options.globalCompositeOperation || 'source-over'
+
     const brush = options.brush
 
     const startX = options.lastX
@@ -86,6 +89,7 @@ export function draw(options: Options) {
         }
 
         ctx.globalAlpha = opacity
+        ctx.globalCompositeOperation = globalCompositeOperation
         ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`
 
         ctx.beginPath()

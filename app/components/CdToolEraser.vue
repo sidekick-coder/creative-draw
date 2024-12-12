@@ -12,16 +12,20 @@ function start(data: InstanceEvents['layer:pointerdown']) {
     lastY.value = data.y
 }
 
-const brush = computed(() => instance.tools.brush.settings)
+const brush = computed(() => instance.tools.eraser.settings)
 
 function onDraw(data: InstanceEvents['layer:pointermove']) {
     if (!isDrawing.value || !brush.value) return
 
-    if (instance.activeTool !== 'brush') return
+    if (instance.activeTool !== 'eraser') return
+
+    const eraser = copy(brush.value)
+
+    eraser.opacity = 0
 
     draw({
         ctx: data.ctx,
-        brush: brush.value,
+        brush: eraser,
         color: { r: 0, g: 0, b: 0 },
 
         x: data.x,
@@ -31,6 +35,7 @@ function onDraw(data: InstanceEvents['layer:pointermove']) {
         lastX: lastX.value,
         lastY: lastY.value,
         lastPressure: lastPressure.value,
+        globalCompositeOperation: 'destination-out',
     })
 
     lastX.value = data.x

@@ -54,21 +54,13 @@ onMounted(() => {
         <cd-tool-position />
         <cd-tool-zoom />
         <cd-tool-brush />
+        <cd-tool-eraser />
 
         <cd-ui-brush-settings />
 
         <cd-ui-toolbar class="absolute right-2 top-2">
-            <cd-menu :close-on-content-click="false">
-                <template #activator="{ attrs }">
-                    <cd-btn v-bind="attrs" variant="text" padding="none" size="md">
-                        <cd-icon name="heroicons:paint-brush-solid" />
-                    </cd-btn>
-                </template>
-
-                <div class="p-2">
-                    <cd-ui-brush-library />
-                </div>
-            </cd-menu>
+            <cd-ui-tool-eraser />
+            <cd-ui-tool-brush />
 
             <cd-menu :close-on-content-click="false">
                 <template #activator="{ attrs }">

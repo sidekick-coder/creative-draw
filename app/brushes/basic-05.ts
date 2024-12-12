@@ -1,5 +1,5 @@
 export default defineBrush({
-    id: 'basic-5',
+    id: 'basic-05',
     name: 'Basic 5',
     size: 5,
     opacity: 1,

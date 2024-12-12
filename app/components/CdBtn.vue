@@ -34,13 +34,22 @@ const color = defineProp<'none' | 'primary' | 'secondary' | 'danger' | 'body-700
     default: 'primary',
 })
 
+const active = defineProp<boolean>('active', {
+    type: Boolean,
+    default: false,
+})
+
 function setDefaultColor() {
     const options: Record<typeof color.value, string> = {
         'none': '',
-        'primary': 'bg-primary-300 text-body-0 hover:bg-primary-400',
-        'secondary': 'bg-secondary-300 text-body-0 hover:bg-secondary-400',
-        'danger': 'bg-danger-300 text-body-0 hover:bg-danger-400',
-        'body-700': 'bg-body-700 text-body-0 hover:bg-body-700',
+        'primary': `
+            bg-primary-300 text-body-0
+            hover:bg-primary-400 
+            data-[active=true]:text-primary-300
+        `,
+        'secondary': `bg-secondary-300 text-body-0 hover:bg-secondary-400`,
+        'danger': `bg-danger-300 text-body-0 hover:bg-danger-400`,
+        'body-700': `bg-body-700 text-body-0 hover:bg-body-700`,
     }
 
     const colorValue = options[color.value]
@@ -65,7 +74,12 @@ function setOutlinedColor() {
 function setTextColor() {
     const options: Record<typeof color.value, string> = {
         'none': '',
-        'primary': 'text-body-0 hover:text-primary-100 hover:bg-primary-300/25',
+        'primary': `
+            text-body-0
+            hover:text-primary-100
+            hover:bg-primary-300/25
+            data-[active=true]:text-primary-300
+        `,
         'secondary': 'text-body-0 hover:text-secondary-300',
         'danger': 'text-body-0 hover:text-danger-300',
         'body-700': 'text-body-0 hover:text-body-700',
@@ -207,7 +221,13 @@ const type = defineProp<string>('type', {
 </script>
 
 <template>
-    <component :is="to ? NuxtLink : 'button'" :type="type" :class="classes" :to="to">
+    <component
+        :is="to ? NuxtLink : 'button'"
+        :type="type"
+        :class="classes"
+        :to="to"
+        :data-active="active"
+    >
         <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
             <cd-spinner size="22" />
         </div>

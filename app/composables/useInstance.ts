@@ -45,12 +45,6 @@ export interface Observer {
 
 const key = Symbol() as InjectionKey<Instance>
 
-const files = import.meta.glob<{ default: BrushDefinition }>('@/brushes/*.ts', {
-    eager: true,
-})
-
-const allBrushes = Object.values(files).map((f) => f.default)
-
 export function makeInstance() {
     const container = ref()
 
@@ -135,20 +129,16 @@ export function makeInstance() {
         scale.value = value
     }
 
-    // brush
-    const brushes = ref<BrushDefinition[]>(allBrushes)
-    const activeBrush = ref<BrushDefinition>(allBrushes[0]!)
+    // tools
+    const activeTool = ref<string>('brush')
 
-    function setActiveBrush(id: string) {
-        const brush = brushes.value.find((b) => b.id === id)
-
-        if (brush) {
-            activeBrush.value = brush
-        }
+    const tools = {
+        brush: createBrushTool(),
+        eraser: createEraserTool(),
     }
 
-    function updateActiveBrush(payload: Partial<BrushDefinition>) {
-        activeBrush.value = { ...activeBrush.value, ...payload }
+    function setTool(id: string) {
+        activeTool.value = id
     }
 
     return reactive({
@@ -170,11 +160,9 @@ export function makeInstance() {
         setPosition,
         setScale,
 
-        brushes: readonly(brushes),
-        activeBrush: readonly(activeBrush),
-
-        setActiveBrush,
-        updateActiveBrush,
+        activeTool: readonly(activeTool),
+        tools,
+        setTool,
 
         observers: readonly(observers),
         on,

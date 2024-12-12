@@ -1,32 +1,45 @@
 <script setup lang="ts">
 const instance = useInstance()
 
+const active = computed(() => instance.tools.brush.active)
+
+const settings = computed({
+    get: () => {
+        if (instance.activeTool === 'eraser') {
+            return instance.tools.eraser.settings
+        }
+
+        return instance.tools.brush.settings
+    },
+    set: (value) => {
+        if (instance.activeTool === 'eraser') {
+            return instance.tools.eraser.setSettings(value)
+        }
+
+        instance.tools.brush.setSettings(value)
+    },
+})
+
 const size = computed({
-    get: () => instance.activeBrush.size,
+    get: () => settings.value.size || 1,
     set: (value: number) => {
-        instance.updateActiveBrush({
-            size: value,
-        })
+        settings.value.size = value
     },
 })
 
 const opacity = computed({
-    get: () => (instance.activeBrush.opacity || 1) * 100,
+    get: () => (settings.value?.opacity || 1) * 100,
     set: (value: number) => {
-        instance.updateActiveBrush({
-            opacity: value / 100,
-        })
+        settings.value.opacity = value / 100
     },
 })
 
 function reset() {
-    const brush = instance.brushes.find((brush) => brush.id === instance.activeBrush.id)
+    if (!active.value) return
 
-    if (!brush) return
-
-    instance.updateActiveBrush({
-        size: brush.size,
-        opacity: brush.opacity,
+    instance.tools.brush.setSettings({
+        size: 1,
+        opacity: 1,
     })
 }
 </script>
