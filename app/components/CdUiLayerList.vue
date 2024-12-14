@@ -157,7 +157,6 @@ const menu = ref(false)
                                     :readonly="editId !== l.id"
                                     @change="onChangeName(l.id, $event)"
                                     @blur="editId = undefined"
-                                    @click.stop
                                 />
                             </div>
 

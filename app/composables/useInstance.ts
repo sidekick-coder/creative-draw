@@ -26,18 +26,6 @@ export interface InstanceEvents {
     'layer:pointerup': LayerPointEvent
 }
 
-export interface Artboard {
-    id: string
-    name: string
-    width: number
-    height: number
-    x: number
-    y: number
-    activeLayerId: string
-    visibleLayers: string[]
-    layers: Layer[]
-}
-
 export interface Observer {
     name: string
     callback: (data: any) => void

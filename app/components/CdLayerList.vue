@@ -27,13 +27,13 @@ function focus() {
         @pointerdown="focus"
     >
         <cd-layer-list-item
-            v-for="l in instance.layers"
+            v-for="(l, i) in instance.layers"
             :key="l.id"
             :model-value="l"
             class="absolute left-0 top-0"
             :style="{
                 'pointer-events': instance.activeLayerId === l.id ? 'auto' : 'none',
-                'z-index': l.order,
+                'z-index': instance.layers.length - i,
                 'opacity': instance.visibleLayers.includes(l.id) ? 1 : 0,
             }"
         />

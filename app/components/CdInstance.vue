@@ -13,17 +13,29 @@ const width = defineProp<number>('width', {
     required: true,
 })
 
-onMounted(() => {
-    instance.load(container.value!, width.value, height.value)
-
-    loading.value = false
-})
-
 const size = computed(() => {
     const current = width.value * instance.tools.zoomAndPan.scale
 
     return Math.ceil(current * 0.03)
 })
+
+function load() {
+    loading.value = true
+
+    if (container.value) {
+        instance.load(container.value!, width.value, height.value)
+    }
+
+    nextTick(() => {
+        instance.tools.zoomAndPan.fit()
+    })
+
+    loading.value = false
+}
+
+watch([width, height], load)
+
+onMounted(load)
 </script>
 <template>
     <div

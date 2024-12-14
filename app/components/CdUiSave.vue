@@ -1,10 +1,75 @@
 <script setup lang="ts">
+import { createProject, updateProject, type ProjectData } from '~/repositories/projectRepository'
+
+// general
+const projectId = defineProp<string>('projectId', {
+    type: String,
+    default: null,
+})
+
+// save
 const instance = useInstance()
 
 const menu = ref(false)
 const saving = ref(false)
 
-async function saveFSA() {}
+const isFSAAvailable = 'showSaveFilePicker' in window
+
+async function saveProject() {
+    saving.value = true
+
+    const payload: Omit<ProjectData, 'id' | 'type'> = {
+        width: instance.width,
+        height: instance.height,
+        layers: instance.layers.slice(),
+    }
+
+    const [project, error] = await tryCatch(() => updateProject(projectId.value, payload))
+
+    if (error) {
+        console.error(error)
+        saving.value = false
+        return
+    }
+
+    if (!projectId.value) {
+        navigateTo(`/projects/${project.id}`)
+        return
+    }
+
+    setTimeout(() => {
+        saving.value = false
+    }, 1000)
+}
+
+async function saveAs(type: string) {
+    saving.value = true
+
+    const payload: Omit<ProjectData, 'id'> = {
+        type: type,
+        width: instance.width,
+        height: instance.height,
+        layers: instance.layers.slice(),
+    }
+
+    const [project, error] = await tryCatch(() => createProject(payload))
+
+    if (error) {
+        console.error(error)
+        saving.value = false
+        return
+    }
+
+    if (!projectId.value) {
+        navigateTo(`/projects/${project.id}`)
+        return
+    }
+
+    setTimeout(() => {
+        saving.value = false
+    }, 1000)
+}
+
 async function saveImage(format: 'png' | 'jpeg') {
     saving.value = true
 
@@ -45,13 +110,36 @@ async function saveImage(format: 'png' | 'jpeg') {
         </template>
 
         <div class="p-2">
-            <cd-card>
-                <cd-list-item @click="saveFSA">
-                    <cd-icon name="heroicons:folder-solid" />
-
-                    <div>Project</div>
+            <cd-card class="w-80">
+                <cd-list-item class="py-2 text-sm font-bold text-body-100" color="none">
+                    Project
                 </cd-list-item>
 
+                <cd-list-item v-if="projectId" @click="saveProject">
+                    <cd-icon name="heroicons:folder-solid" />
+
+                    <div>Save</div>
+                </cd-list-item>
+
+                <cd-list-item
+                    :color="isFSAAvailable ? 'primary' : 'none'"
+                    :class="[isFSAAvailable ? '' : 'pointer-events-none opacity-50']"
+                    @click="saveAs('filesystem')"
+                >
+                    <cd-icon name="heroicons:folder-solid" />
+
+                    <div class="flex flex-col">
+                        <div>Save localy</div>
+
+                        <div v-if="!isFSAAvailable" class="text-xs text-body-200">
+                            Not available in this brower
+                        </div>
+                    </div>
+                </cd-list-item>
+
+                <cd-list-item class="py-2 text-sm font-bold text-body-100" color="none">
+                    Image
+                </cd-list-item>
                 <cd-list-item @click="saveImage('png')">
                     <cd-icon name="mdi:image" />
 
