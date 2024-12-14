@@ -67,6 +67,19 @@ const isRouteActive = computed(() => {
 
     return route.fullPath === resolved.href
 })
+
+// disable
+
+const disabled = defineProp<boolean>('disabled', {
+    type: Boolean,
+    default: false,
+})
+
+function setDisabled() {
+    set('disabled', disabled.value ? 'opacity-50 pointer-events-none' : '')
+}
+
+watch(disabled, setDisabled, { immediate: true })
 </script>
 
 <template>

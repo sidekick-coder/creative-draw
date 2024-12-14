@@ -1,40 +1,21 @@
 <script setup lang="ts">
+import {
+    deleteProject,
+    importProjectFromHandle,
+    listProjects,
+} from '~/repositories/projectRepository'
+
 definePageMeta({
     tile: 'Creative draw',
 })
 
-const items = ref<Handle[]>([])
+// sizes
+const dialog = ref(false)
 
-async function setItems() {
-    items.value = await $db.handles.toArray()
-}
-
-async function deleteItem(item: Handle) {
-    await $db.handles.delete(item.id)
-
-    setItems()
-}
-
-onMounted(setItems)
-
-async function open() {
-    const handle = await showDirectoryPicker({
-        mode: 'readwrite',
-    })
-
-    const exists = await $db.handles.where('name').equals(handle.name).first()
-
-    if (exists) {
-        await $db.handles.delete(exists.id)
-    }
-
-    const id = await $db.handles.add({
-        name: handle.name,
-        handle,
-    })
-
-    navigateTo(`/projects/${id}`)
-}
+const customSize = ref({
+    width: 2480,
+    height: 3508,
+})
 
 const sizes = [
     {
@@ -43,114 +24,190 @@ const sizes = [
         height: 3508,
     },
     {
-        label: 'A4 600dpi',
-        width: 4960,
-        height: 7016,
-    },
-    {
         label: 'A5 300dpi',
         width: 1748,
         height: 2480,
-    },
-    {
-        label: 'A5 600dpi',
-        width: 3508,
-        height: 4960,
     },
     {
         label: 'A6 300dpi',
         width: 1240,
         height: 1748,
     },
-    {
-        label: 'A6 600dpi',
-        width: 2480,
-        height: 3508,
-    },
 ]
+
+// projects
+const projects = ref<DBProject[]>([])
+const deletingId = ref<string>()
+
+async function setProjects() {
+    projects.value = await listProjects()
+}
+
+async function deleteItem(project: DBProject) {
+    deletingId.value = project.id
+
+    await deleteProject(project.id)
+
+    setProjects()
+}
+
+async function importProject() {
+    const handle = await window.showDirectoryPicker({
+        mode: 'readwrite',
+    })
+
+    await importProjectFromHandle(handle)
+
+    await setProjects()
+}
+
+onMounted(setProjects)
 </script>
 
 <template>
     <div class="w-dvh flex h-dvh">
-        <div class="flex h-full w-10/12 items-center justify-center">
-            <div class="flex w-full max-w-sm flex-col justify-center text-center">
-                <h1 class="mb-4 text-2xl font-bold">Creative draw</h1>
-                <div class="mb-8 flex flex-col gap-y-2">
-                    <cd-btn @click="open">{{ $t('openEntity', [$t('project')]) }}</cd-btn>
+        <div class="w-10/12 p-5">
+            <div class="flex w-full">
+                <h1 class="mb-4 flex-1 text-2xl font-bold">Projects</h1>
 
-                    <div v-if="items.length" class="flex flex-col gap-y-2 py-4">
-                        <h2 class="text-left text-lg font-bold text-body-100">
-                            {{ $t('recentOpened') }}
-                        </h2>
+                <div class="flex gap-x-2">
+                    <cd-menu>
+                        <template #activator="{ attrs }">
+                            <cd-btn v-bind="attrs" color="body-700"> Import </cd-btn>
+                        </template>
 
-                        <cd-card v-for="item in items" :key="item.id" :to="`/projects/${item.id}`">
-                            <cd-card-content class="flex items-center">
-                                <cd-icon name="heroicons:document-20-solid" class="text-xl" />
+                        <div class="p-2">
+                            <cd-card class="w-80">
+                                <cd-card-head>
+                                    <cd-card-title class="mr-auto text-base">
+                                        Import project
+                                    </cd-card-title>
+                                </cd-card-head>
 
-                                <div class="flex-1 pl-4 text-left">{{ item.name }}</div>
+                                <cd-list-item
+                                    class="mr-auto flex-col items-start text-base"
+                                    :disabled="!$flags.fsa"
+                                    @click="importProject"
+                                >
+                                    <div>Select folder</div>
 
-                                <div class="flex gap-x-2">
-                                    <cd-btn
-                                        color="body-700"
-                                        padding="none"
-                                        size="sm"
-                                        @click="navigateTo(`/projects/${item.id}`)"
-                                    >
-                                        <cd-icon name="heroicons:chevron-right-20-solid" />
-                                    </cd-btn>
-
-                                    <cd-btn
-                                        color="body-700"
-                                        padding="none"
-                                        size="sm"
-                                        @click.stop="deleteItem(item)"
-                                    >
-                                        <cd-icon name="heroicons:trash-20-solid" />
-                                    </cd-btn>
-                                </div>
-                            </cd-card-content>
-                        </cd-card>
-                    </div>
-                    <h2 class="text-left text-lg font-bold text-body-100">
-                        {{ $t('predefinedSizes') }}
-                    </h2>
-
-                    <div class="mt-4 flex flex-col gap-y-4">
-                        <div v-for="size in sizes" :key="size.label">
-                            <cd-card>
-                                <cd-card-content class="flex items-center">
-                                    <div class="flex-1 text-left">{{ size.label }}</div>
-                                    <div class="flex gap-x-2">
-                                        <cd-btn
-                                            color="body-700"
-                                            padding="none"
-                                            size="sm"
-                                            :to="`/projects?width=${size.width}&height=${size.height}`"
-                                        >
-                                            <cd-icon name="streamline:orientation-portrait-solid" />
-                                        </cd-btn>
-
-                                        <cd-btn
-                                            color="body-700"
-                                            padding="none"
-                                            size="sm"
-                                            :to="`/projects?width=${size.height}&height=${size.width}`"
-                                        >
-                                            <cd-icon
-                                                name="streamline:orientation-landscape-solid"
-                                            />
-                                        </cd-btn>
+                                    <div v-if="!$flags.fsa" class="text-xs text-body-200">
+                                        Not available in this browser
                                     </div>
-                                </cd-card-content>
+                                </cd-list-item>
                             </cd-card>
                         </div>
+                    </cd-menu>
+
+                    <cd-menu>
+                        <template #activator="{ attrs }">
+                            <cd-btn v-bind="attrs" color="body-700"> Create new </cd-btn>
+                        </template>
+
+                        <div class="p-2">
+                            <cd-card class="w-80">
+                                <cd-card-head>
+                                    <cd-card-title class="mr-auto text-base">
+                                        New project
+                                    </cd-card-title>
+                                </cd-card-head>
+
+                                <cd-list-item @click="dialog = true">Custom size</cd-list-item>
+
+                                <cd-list-item
+                                    v-for="size in sizes"
+                                    :key="size.label"
+                                    :to="`/projects?width=${size.width}&height=${size.height}`"
+                                >
+                                    {{ size.label }}
+                                </cd-list-item>
+                            </cd-card>
+                        </div>
+                    </cd-menu>
+                </div>
+            </div>
+
+            <cd-dialog v-model="dialog">
+                <cd-card>
+                    <cd-card-head>
+                        <cd-card-title class="mr-auto text-base">Custom size</cd-card-title>
+                    </cd-card-head>
+
+                    <cd-card-content class="flex flex-col gap-y-4">
+                        <cd-text-field
+                            v-model="customSize.width"
+                            label="Width"
+                            type="number"
+                            placeholder="Width"
+                        />
+                        <cd-text-field
+                            v-model="customSize.height"
+                            label="Height"
+                            type="number"
+                            placeholder="Height"
+                        />
+
+                        <cd-btn
+                            :to="`/projects?width=${customSize.width}&height=${customSize.height}`"
+                        >
+                            Create
+                        </cd-btn>
+                    </cd-card-content>
+                </cd-card>
+            </cd-dialog>
+
+            <div class="-mx-2 flex flex-wrap items-start gap-y-4 [&>*]:px-2">
+                <div v-if="!projects.length" color="none" class="text-body-500">
+                    <cd-card-content> No projects yet </cd-card-content>
+                </div>
+
+                <div v-for="project in projects" :key="project.id" class="w-3/12">
+                    <cd-card class="relative h-0 w-full pb-[75%]" :to="`/projects/${project.id}`">
+                        <img
+                            v-if="project.thumbnail"
+                            :src="project.thumbnail"
+                            class="absolute size-full object-cover"
+                        />
+                    </cd-card>
+
+                    <div class="mt-2 flex">
+                        <div class="flex-1">
+                            <div class="font-bold text-body-50">
+                                {{ project.name || 'No title' }}
+                            </div>
+                            <div class="text-sm text-body-500">
+                                {{ project.width }} x {{ project.height }}
+                            </div>
+                        </div>
+
+                        <cd-menu>
+                            <template #activator="{ attrs }">
+                                <cd-btn
+                                    v-bind="attrs"
+                                    variant="text"
+                                    color="body-700"
+                                    padding="none"
+                                    size="sm"
+                                >
+                                    <cd-icon name="heroicons:ellipsis-vertical-20-solid" />
+                                </cd-btn>
+                            </template>
+
+                            <div class="p-2">
+                                <cd-card class="w-40">
+                                    <cd-list-item @click="deleteItem(project)">
+                                        Delete
+                                    </cd-list-item>
+                                </cd-card>
+                            </div>
+                        </cd-menu>
                     </div>
                 </div>
             </div>
         </div>
         <div class="flex w-2/12 flex-col gap-y-8 bg-body-700 p-4">
             <div v-for="i in 3" :key="i">
-                <cd-card class="h-32">ads </cd-card>
+                <cd-card class="flex h-32 items-center justify-center">AD</cd-card>
             </div>
         </div>
     </div>

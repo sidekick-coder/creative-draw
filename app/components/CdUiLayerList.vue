@@ -104,15 +104,17 @@ function onDrop({ item, dropTarget }: any) {
 }
 
 function toggleVisible(id: string) {
-    const visible = instance.visibleLayers.slice()
+    const newLayers = layers.value.slice().map((l) => ({ ...l }))
 
-    if (visible.includes(id)) {
-        visible.splice(visible.indexOf(id), 1)
-    } else {
-        visible.push(id)
+    const item = newLayers.find((l) => l.id === id)
+
+    if (!item) {
+        return
     }
 
-    instance.setVisibleLayers(visible)
+    item.visible = !item.visible
+
+    layers.value = newLayers
 }
 
 const menu = ref(false)
@@ -180,10 +182,7 @@ const menu = ref(false)
                                     size="sm"
                                     @click.stop="toggleVisible(l.id)"
                                 >
-                                    <cd-icon
-                                        v-if="instance.visibleLayers.includes(l.id)"
-                                        name="heroicons:eye-20-solid"
-                                    />
+                                    <cd-icon v-if="l.visible" name="heroicons:eye-20-solid" />
                                     <cd-icon v-else name="heroicons:eye-slash-20-solid" />
                                 </cd-btn>
                             </div>

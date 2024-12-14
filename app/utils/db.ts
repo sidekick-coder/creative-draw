@@ -11,7 +11,7 @@ export interface DBProject {
     id: string
     type: string
     handle?: FileSystemDirectoryHandle
-    data?: ProjectData
+    data?: any
 }
 
 const db = new Dexie('creative-draw') as Dexie & {

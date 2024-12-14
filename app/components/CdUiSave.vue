@@ -13,8 +13,6 @@ const instance = useInstance()
 const menu = ref(false)
 const saving = ref(false)
 
-const isFSAAvailable = 'showSaveFilePicker' in window
-
 async function saveProject() {
     saving.value = true
 
@@ -79,7 +77,7 @@ async function saveImage(format: 'png' | 'jpeg') {
     const layers = instance.layers
         .slice()
         .reverse()
-        .filter((layer) => instance.visibleLayers.includes(layer.id))
+        .filter((layer) => layer.visible)
 
     for (const layer of layers) {
         ctx.drawImage(layer.data, 0, 0)
@@ -121,18 +119,22 @@ async function saveImage(format: 'png' | 'jpeg') {
                     <div>Save</div>
                 </cd-list-item>
 
-                <cd-list-item
-                    :color="isFSAAvailable ? 'primary' : 'none'"
-                    :class="[isFSAAvailable ? '' : 'pointer-events-none opacity-50']"
-                    @click="saveAs('filesystem')"
-                >
+                <cd-list-item @click="saveAs('indexeddb')">
                     <cd-icon name="heroicons:folder-solid" />
 
                     <div class="flex flex-col">
-                        <div>Save localy</div>
+                        <div>Save in browser memory</div>
+                    </div>
+                </cd-list-item>
 
-                        <div v-if="!isFSAAvailable" class="text-xs text-body-200">
-                            Not available in this brower
+                <cd-list-item :disabled="!$flags.fsa" @click="saveAs('filesystem')">
+                    <cd-icon name="heroicons:folder-solid" />
+
+                    <div class="flex flex-col">
+                        <div>Save locally</div>
+
+                        <div v-if="!$flags.fsa" class="text-xs text-body-200">
+                            Not available in this browser
                         </div>
                     </div>
                 </cd-list-item>

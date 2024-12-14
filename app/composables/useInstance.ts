@@ -10,6 +10,7 @@ export interface Layer {
     data: OffscreenCanvas
     width: number
     height: number
+    visible: boolean
 }
 
 interface LayerPointEvent {

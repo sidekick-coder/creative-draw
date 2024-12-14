@@ -34,7 +34,7 @@ function focus() {
             :style="{
                 'pointer-events': instance.activeLayerId === l.id ? 'auto' : 'none',
                 'z-index': instance.layers.length - i,
-                'opacity': instance.visibleLayers.includes(l.id) ? 1 : 0,
+                'opacity': l.visible ? 1 : 0,
             }"
         />
     </div>

@@ -24,8 +24,12 @@ async function setProject() {
     height.value = project.height
 
     instance.setLayers(project.layers)
-    instance.setActiveLayer(project.layers[0].id)
-    instance.setVisibleLayers(project.layers.map((l) => l.id))
+
+    const firstLayerId = project.layers[0]?.id
+
+    if (firstLayerId) {
+        instance.setActiveLayer(firstLayerId)
+    }
 }
 
 function setNewProject() {
@@ -43,6 +47,7 @@ function setNewProject() {
         width: w,
         height: h,
         data: new OffscreenCanvas(w, h),
+        visible: true,
     }
 
     const paintLayer: Layer = {
@@ -53,6 +58,7 @@ function setNewProject() {
         width: w,
         height: h,
         data: new OffscreenCanvas(w, h),
+        visible: true,
     }
 
     const ctx = bgLayer.data.getContext('2d')!
@@ -63,7 +69,6 @@ function setNewProject() {
 
     instance.setLayers([paintLayer, bgLayer])
     instance.setActiveLayer(paintLayer.id)
-    instance.setVisibleLayers([bgLayer.id, paintLayer.id])
 }
 
 onMounted(async () => {
