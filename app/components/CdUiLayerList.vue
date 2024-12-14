@@ -139,7 +139,6 @@ const menu = ref(false)
                     <cd-drag-item v-for="l in layers" :key="l.id" :model-value="l">
                         <cd-list-item
                             class="group flex"
-                            color="none"
                             :active="l.id === activeId"
                             @click="onClick(l.id)"
                         >

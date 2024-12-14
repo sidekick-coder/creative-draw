@@ -51,9 +51,11 @@ onMounted(() => {
         <cd-ui-brush-settings />
 
         <cd-ui-toolbar class="absolute left-2 top-2">
-            <cd-btn padding="none" size="sm" variant="text" @click="navigateTo('/')">
+            <cd-btn padding="none" size="md" variant="text" @click="navigateTo('/')">
                 <cd-icon name="heroicons:home-20-solid" />
             </cd-btn>
+
+            <cd-ui-save />
         </cd-ui-toolbar>
 
         <cd-ui-toolbar class="absolute right-2 top-2">
