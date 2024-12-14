@@ -17,12 +17,14 @@
 		"date-fns": "^4.1.0",
 		"dexie": "^4.0.10",
 		"drive-fsa": "^1.0.2",
+		"maska": "^3.0.4",
 		"nuxt": "^3.13.0",
 		"vue": "latest",
 		"vue-router": "latest"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
+		"@types/lodash-es": "^4.17.12",
 		"@types/wicg-file-system-access": "^2023.10.5",
 		"@vue-macros/nuxt": "^1.12.9",
 		"@vueuse/core": "^11.3.0",

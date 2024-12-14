@@ -3,6 +3,13 @@ export default defineNuxtConfig({
     app: {
         head: {
             title: 'Creative draw',
+            meta: [
+                {
+                    name: 'viewport',
+                    content:
+                        'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+                },
+            ],
         },
     },
     compatibilityDate: '2024-04-03',

@@ -22,7 +22,7 @@ function onDraw(data: InstanceEvents['layer:pointermove']) {
     draw({
         ctx: data.ctx,
         brush: brush.value,
-        color: { r: 0, g: 0, b: 0 },
+        color: instance.tools.color.color,
 
         x: data.x,
         y: data.y,

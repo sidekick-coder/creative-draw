@@ -60,6 +60,7 @@ onMounted(() => {
             <cd-ui-tool-eraser />
             <cd-ui-tool-brush />
             <cd-ui-layer-list />
+            <cd-ui-color-picker />
         </cd-ui-toolbar>
 
         <cd-layer-list />

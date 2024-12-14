@@ -108,6 +108,7 @@ export function makeInstance() {
     const tools = {
         brush: createToolBrush(),
         eraser: createToolEraser(),
+        color: createToolColor(),
         zoomAndPan: createToolZoomAndPan({
             width,
             height,

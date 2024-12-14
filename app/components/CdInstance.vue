@@ -37,7 +37,6 @@ const size = computed(() => {
 
             `,
         }"
-        @wheel.prevent
     >
         <slot v-if="!loading" />
     </div>
