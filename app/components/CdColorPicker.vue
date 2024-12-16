@@ -23,22 +23,55 @@ const hue = computed({
     },
 })
 
-const hsl = computed({
+const rgbString = computed({
+    get: () => {
+        return `${model.value.r} ${model.value.g} ${model.value.b}`
+    },
+    set: (value) => {
+        const args = value
+            .replace('rgb(', '')
+            .replace(')', '')
+            // slit by comma or space
+            .split(/,| /)
+            .filter((v) => v !== '')
+
+        const [r, g, b] = args.map((v) => Number(v)) as [number, number, number]
+
+        if ([r, g, b].some((v) => isNaN(v))) {
+            return
+        }
+
+        model.value = { r, g, b }
+    },
+})
+
+const hslString = computed({
     get: () => {
         const { h, s, l } = rgbToHsl(model.value.r, model.value.g, model.value.b)
 
-        return {
-            h: Math.round(h * 100),
-            s: Math.round(s * 100),
-            l: Math.round(l * 100),
-        }
+        return `${Math.round(h * 360)}° ${Math.round(s * 100)}% ${Math.round(l * 100)}%`
     },
     set: (value) => {
-        const h = value.h / 100
-        const s = value.s / 100
-        const l = value.l / 100
+        const args = value
+            .replace('hsl(', '')
+            .replace(')', '')
+            .replaceAll('%', '')
+            .replace('°', '')
+            // slit by comma or space
+            .split(/,| /)
+            .filter((v) => v !== '')
 
-        model.value = hslToRgb(h, s, l)
+        let [h, s, l] = args.map((v) => Number(v)) as [number, number, number]
+
+        if ([h, s, l].some((v) => isNaN(v))) {
+            return
+        }
+
+        h = Math.min(360, Math.max(0, h))
+        s = Math.min(100, Math.max(0, s))
+        l = Math.min(100, Math.max(0, l))
+
+        model.value = hslToRgb(h / 360, s / 100, l / 100)
     },
 })
 </script>
@@ -54,51 +87,9 @@ const hsl = computed({
                 <cd-color-picker-slider v-model="hue" class="w-4" />
             </div>
 
-            <div class="-mx-2 flex [&>*]:px-2">
-                <div class="w-4/12">
-                    <cd-text-field v-model="model.r" type="number" min="0" max="255" />
-                </div>
+            <cd-text-field v-model.lazy="rgbString" label="RBG" />
 
-                <div class="w-4/12">
-                    <cd-text-field v-model="model.g" type="number" min="0" max="255" />
-                </div>
-
-                <div class="w-4/12">
-                    <cd-text-field v-model="model.b" type="number" min="0" max="255" />
-                </div>
-            </div>
-
-            <div class="-mx-2 flex [&>*]:px-2">
-                <div class="w-4/12">
-                    <cd-text-field
-                        :model-value="hsl.h"
-                        type="number"
-                        min="0"
-                        max="100"
-                        @update:model-value="hsl = { ...hsl, h: $event }"
-                    />
-                </div>
-
-                <div class="w-4/12">
-                    <cd-text-field
-                        :model-value="hsl.s"
-                        type="number"
-                        min="0"
-                        max="100"
-                        @update:model-value="hsl = { ...hsl, s: $event }"
-                    />
-                </div>
-
-                <div class="w-4/12">
-                    <cd-text-field
-                        :model-value="hsl.l"
-                        type="number"
-                        min="0"
-                        max="100"
-                        @update:model-value="hsl = { ...hsl, l: $event }"
-                    />
-                </div>
-            </div>
+            <cd-text-field v-model.lazy="hslString" label="HSL" />
         </cd-card-content>
     </cd-card>
 </template>
