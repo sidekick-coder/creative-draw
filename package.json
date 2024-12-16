@@ -16,7 +16,7 @@
 		"@nuxtjs/i18n": "^9.1.0",
 		"date-fns": "^4.1.0",
 		"dexie": "^4.0.10",
-		"drive-fsa": "^1.0.2",
+		"drive-fsa": "^1.0.7",
 		"maska": "^3.0.4",
 		"nuxt": "^3.13.0",
 		"vue": "latest",

@@ -1,6 +1,6 @@
 import type { ProjectData } from '~/utils/types'
 import type { IProjectProvider } from '../IProjectProvider'
-import { createDrive, findEntry, readEntry } from 'drive-fsa'
+import { createDrive } from 'drive-fsa'
 
 export async function writeProjectToHandle(handle: FileSystemDirectoryHandle, data: ProjectData) {
     const json: any = {
@@ -53,8 +53,11 @@ export async function writeProjectToHandle(handle: FileSystemDirectoryHandle, da
             thumbnailCtx.drawImage(l.data, 0, 0)
         })
 
-    await drive.write('/index.json', new TextEncoder().encode(JSON.stringify(json, null, 4)))
-    await drive.write('/thumbnail.png', (await thumbnailCanvas.convertToBlob()) as any)
+    const blob = await thumbnailCanvas.convertToBlob()
+    const uint8 = new Uint8Array(await blob.arrayBuffer())
+
+    await drive.write('/index.json', json, { contentType: 'json' })
+    await drive.write('/thumbnail.png', uint8)
 
     return json
 }
@@ -66,10 +69,10 @@ export function createProjectProviderFSA(): IProjectProvider {
             throw new Error(`Project ${id} not found`)
         }
 
-        const handle = dbHandle.handle
+        const drive = createDrive(dbHandle.handle)
 
-        const config = await readEntry(handle, 'index.json', {
-            responseType: 'json',
+        const config = await drive.read('index.json', {
+            contentType: 'json',
         })
 
         const response: ProjectData = {
@@ -79,9 +82,7 @@ export function createProjectProviderFSA(): IProjectProvider {
         }
 
         for (const layer of config.layers) {
-            const raw = await readEntry(handle, `/layers/${layer.filename}.raw`, {
-                responseType: 'arraybuffer',
-            })
+            const raw = await drive.read(`/layers/${layer.filename}.raw`)
 
             const data = new Uint8Array(raw)
 
@@ -104,8 +105,8 @@ export function createProjectProviderFSA(): IProjectProvider {
             })
         }
 
-        if (await findEntry(handle, '/thumbnail.png')) {
-            const thumbnail = await readEntry(handle, '/thumbnail.png')
+        if (await drive.find('/thumbnail.png')) {
+            const thumbnail = await drive.read('/thumbnail.png')
 
             const blob = new Blob([thumbnail], { type: 'image/png' })
 

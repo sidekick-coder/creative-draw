@@ -104,6 +104,8 @@ function onClick() {
     if (projectId.value && !menu.value) {
         return saveProject()
     }
+
+    menu.value = !menu.value
 }
 
 function onLongPress(e: PointerEvent) {
