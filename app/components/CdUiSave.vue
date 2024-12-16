@@ -10,7 +10,6 @@ const projectId = defineProp<string>('projectId', {
 // save
 const instance = useInstance()
 
-const menu = ref(false)
 const saving = ref(false)
 
 async function saveProject() {
@@ -97,33 +96,57 @@ async function saveImage(format: 'png' | 'jpeg') {
         saving.value = false
     }, 1000)
 }
+
+// menu
+const menu = ref(false)
+
+function onClick() {
+    if (projectId.value && !menu.value) {
+        return saveProject()
+    }
+}
+
+function onLongPress(e: PointerEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    menu.value = true
+}
 </script>
 
 <template>
-    <cd-menu v-model="menu">
+    <cd-menu v-model="menu" :open-on-click="false">
         <template #activator="{ attrs }">
-            <cd-btn v-bind="attrs" variant="text" padding="none" size="md" :loading="saving">
+            <cd-btn
+                v-long-press="onLongPress"
+                v-bind="attrs"
+                variant="text"
+                padding="none"
+                size="md"
+                :loading="saving"
+                @click="onClick"
+            >
                 <cd-icon name="mdi:content-save" />
             </cd-btn>
         </template>
 
         <div class="p-2">
             <cd-card class="w-80">
-                <cd-list-item class="py-2 text-sm font-bold text-body-100" color="none">
-                    Project
-                </cd-list-item>
-
                 <cd-list-item v-if="projectId" @click="saveProject">
-                    <cd-icon name="heroicons:folder-solid" />
+                    <cd-icon name="mdi:content-save" />
 
                     <div>Save</div>
                 </cd-list-item>
 
+                <cd-list-item class="py-2 text-sm font-bold text-body-100" color="none">
+                    Project
+                </cd-list-item>
+
                 <cd-list-item @click="saveAs('indexeddb')">
-                    <cd-icon name="heroicons:folder-solid" />
+                    <cd-icon name="heroicons:circle-stack-solid" />
 
                     <div class="flex flex-col">
-                        <div>Save in browser memory</div>
+                        <div>Memory</div>
                     </div>
                 </cd-list-item>
 
@@ -131,7 +154,7 @@ async function saveImage(format: 'png' | 'jpeg') {
                     <cd-icon name="heroicons:folder-solid" />
 
                     <div class="flex flex-col">
-                        <div>Save locally</div>
+                        <div>Folder</div>
 
                         <div v-if="!$flags.fsa" class="text-xs text-body-200">
                             Not available in this browser

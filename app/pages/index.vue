@@ -3,10 +3,15 @@ import {
     deleteProject,
     importProjectFromHandle,
     listProjects,
+    providers,
 } from '~/repositories/projectRepository'
 
 definePageMeta({
     tile: 'Creative draw',
+})
+
+defineOptions({
+    name: 'Home',
 })
 
 // sizes
@@ -36,7 +41,7 @@ const sizes = [
 ]
 
 // projects
-const projects = ref<DBProject[]>([])
+const projects = ref<ProjectDataWithIdAndType[]>([])
 const deletingId = ref<string>()
 
 async function setProjects() {
@@ -84,17 +89,19 @@ onMounted(setProjects)
                                     </cd-card-title>
                                 </cd-card-head>
 
-                                <cd-list-item
-                                    class="mr-auto flex-col items-start text-base"
-                                    :disabled="!$flags.fsa"
-                                    @click="importProject"
-                                >
-                                    <div>Select folder</div>
+                                <client-only>
+                                    <cd-list-item
+                                        class="mr-auto flex-col items-start text-base"
+                                        :disabled="!$flags.fsa"
+                                        @click="importProject"
+                                    >
+                                        <div>Select folder</div>
 
-                                    <div v-if="!$flags.fsa" class="text-xs text-body-200">
-                                        Not available in this browser
-                                    </div>
-                                </cd-list-item>
+                                        <div v-if="!$flags.fsa" class="text-xs text-body-200">
+                                            Not available in this browser
+                                        </div>
+                                    </cd-list-item>
+                                </client-only>
                             </cd-card>
                         </div>
                     </cd-menu>
@@ -168,6 +175,14 @@ onMounted(setProjects)
                             :src="project.thumbnail"
                             class="absolute size-full object-cover"
                         />
+
+                        <div class="absolute bottom-2 right-2">
+                            <cd-badge-status
+                                :items="providers"
+                                :model-value="project.type"
+                                value-key="id"
+                            />
+                        </div>
                     </cd-card>
 
                     <div class="mt-2 flex">

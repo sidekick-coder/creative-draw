@@ -1,4 +1,4 @@
-export async function convertUint8ToBlob(buffer: Uint8Array, width: number, height: number) {
+export async function uint8ToBlob(buffer: Uint8Array, width: number, height: number) {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')!
 

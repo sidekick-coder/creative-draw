@@ -2,17 +2,6 @@ import type { InjectionKey } from 'vue'
 
 export type Instance = ReturnType<typeof makeInstance>
 
-export interface Layer {
-    id: string
-    name: string
-    type: 'paint'
-    order: number
-    data: OffscreenCanvas
-    width: number
-    height: number
-    visible: boolean
-}
-
 interface LayerPointEvent {
     event: PointerEvent
     x: number

@@ -74,7 +74,7 @@ export function hslToRgb(h: number, s: number, l: number) {
 }
 
 export function createToolColor() {
-    const color = ref({
+    const color = useLocalStorage('tool-color', {
         r: 0,
         g: 0,
         b: 0,
