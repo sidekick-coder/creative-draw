@@ -135,7 +135,10 @@ function onLongPress(e: PointerEvent) {
                 <cd-list-item v-if="projectId" @click="saveProject">
                     <cd-icon name="mdi:content-save" />
 
-                    <div>Save</div>
+                    <div class="flex flex-col">
+                        <div>Save</div>
+                        <div class="text-xs text-body-200">Save current changes</div>
+                    </div>
                 </cd-list-item>
 
                 <cd-list-item class="py-2 text-sm font-bold text-body-100" color="none">
@@ -147,6 +150,7 @@ function onLongPress(e: PointerEvent) {
 
                     <div class="flex flex-col">
                         <div>Memory</div>
+                        <div class="text-xs text-body-200">Save project in a browser memory</div>
                     </div>
                 </cd-list-item>
 
@@ -155,6 +159,7 @@ function onLongPress(e: PointerEvent) {
 
                     <div class="flex flex-col">
                         <div>Folder</div>
+                        <div class="text-xs text-body-200">Save project in a local folder</div>
 
                         <div v-if="!$flags.fsa" class="text-xs text-body-200">
                             Not available in this browser
@@ -168,13 +173,19 @@ function onLongPress(e: PointerEvent) {
                 <cd-list-item @click="saveImage('png')">
                     <cd-icon name="mdi:image" />
 
-                    <div>PNG</div>
+                    <div class="flex flex-col">
+                        <div>PNG</div>
+                        <div class="text-xs text-body-200">Export project as a PNG image</div>
+                    </div>
                 </cd-list-item>
 
                 <cd-list-item @click="saveImage('jpeg')">
                     <cd-icon name="mdi:image" />
 
-                    <div>JPEG</div>
+                    <div class="flex flex-col">
+                        <div>JPG</div>
+                        <div class="text-xs text-body-200">Export project as a JPG image</div>
+                    </div>
                 </cd-list-item>
             </cd-card>
         </div>
