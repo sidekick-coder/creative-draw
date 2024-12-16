@@ -57,13 +57,13 @@ async function saveAs(type: string) {
         return
     }
 
-    if (!projectId.value) {
-        navigateTo(`/projects/${project.id}`)
-        return
-    }
-
     setTimeout(() => {
         saving.value = false
+
+        if (!projectId.value) {
+            navigateTo(`/projects/${project.id}`)
+            return
+        }
     }, 1000)
 }
 

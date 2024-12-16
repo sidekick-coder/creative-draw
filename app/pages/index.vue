@@ -72,7 +72,7 @@ onMounted(setProjects)
 <template>
     <div class="w-dvh flex h-dvh">
         <div class="w-10/12 p-5">
-            <div class="flex w-full">
+            <div class="mb-8 flex w-full">
                 <h1 class="mb-4 flex-1 text-2xl font-bold">Projects</h1>
 
                 <div class="flex gap-x-2">
@@ -113,20 +113,42 @@ onMounted(setProjects)
 
                         <div class="p-2">
                             <cd-card class="w-80">
-                                <cd-card-head>
-                                    <cd-card-title class="mr-auto text-base">
-                                        New project
-                                    </cd-card-title>
-                                </cd-card-head>
-
                                 <cd-list-item @click="dialog = true">Custom size</cd-list-item>
+                                <cd-list-item
+                                    class="py-2 text-sm font-bold text-body-100"
+                                    color="none"
+                                >
+                                    {{ $t('predefinedSizes') }}
+                                </cd-list-item>
 
                                 <cd-list-item
                                     v-for="size in sizes"
                                     :key="size.label"
-                                    :to="`/projects?width=${size.width}&height=${size.height}`"
+                                    @click="
+                                        navigateTo(
+                                            `/projects?width=${size.width}&height=${size.height}`
+                                        )
+                                    "
                                 >
-                                    {{ size.label }}
+                                    <div class="flex-1">{{ size.label }}</div>
+
+                                    <cd-btn
+                                        color="body-700"
+                                        padding="none"
+                                        size="sm"
+                                        :to="`/projects?width=${size.width}&height=${size.height}`"
+                                    >
+                                        <cd-icon name="streamline:orientation-portrait-solid" />
+                                    </cd-btn>
+
+                                    <cd-btn
+                                        color="body-700"
+                                        padding="none"
+                                        size="sm"
+                                        :to="`/projects?width=${size.height}&height=${size.width}`"
+                                    >
+                                        <cd-icon name="streamline:orientation-landscape-solid" />
+                                    </cd-btn>
                                 </cd-list-item>
                             </cd-card>
                         </div>

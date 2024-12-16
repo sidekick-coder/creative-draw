@@ -91,9 +91,9 @@ export async function createProject(
     }
 
     return {
+        ...project,
         id,
         type: payload.type,
-        ...project,
     }
 }
 
