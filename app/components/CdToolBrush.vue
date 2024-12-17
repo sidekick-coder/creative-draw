@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import debounce from 'lodash/debounce'
+
 const instance = useInstance()
 
 const isDrawing = ref(false)
@@ -6,7 +8,13 @@ const lastX = ref(0)
 const lastY = ref(0)
 const lastPressure = ref(0)
 
+const createDrawCheckpoint = debounce(() => {
+    instance.tools.history.add('draw')
+}, 1000)
+
 function start(data: InstanceEvents['layer:pointerdown']) {
+    createDrawCheckpoint()
+
     isDrawing.value = true
     lastX.value = data.x
     lastY.value = data.y

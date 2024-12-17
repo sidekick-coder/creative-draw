@@ -93,6 +93,12 @@ export function makeInstance() {
             containerWidth,
             containerHeight,
         }),
+        history: createToolHistory({
+            width,
+            height,
+            layers,
+            activeLayerId,
+        }),
     }
 
     function setTool(id: string) {

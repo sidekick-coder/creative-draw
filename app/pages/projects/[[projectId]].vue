@@ -95,6 +95,8 @@ onMounted(async () => {
             </cd-btn>
 
             <cd-ui-save :project-id />
+
+            <cd-ui-history />
         </cd-ui-toolbar>
 
         <cd-ui-toolbar class="absolute right-2 top-2">
