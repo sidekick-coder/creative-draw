@@ -15,7 +15,7 @@ onMounted(() => {
 
     ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
 
-    draw({
+    drawBrush({
         ctx,
         brush: brush.value,
         color: { r: 255, g: 255, b: 255 },

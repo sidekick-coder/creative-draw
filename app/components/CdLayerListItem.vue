@@ -62,10 +62,10 @@ onUnmounted(() => {
 })
 
 // events
-function onPointerDown(e: PointerEvent) {
+function onPointerEvent(e: PointerEvent, type: 'down' | 'move' | 'up') {
     const ctx = model.value.data.getContext('2d')!
 
-    instance.emit('layer:pointerdown', {
+    instance.emit(`layer:pointer${type}`, {
         event: e,
         ctx,
         x: e.offsetX / scale.value,
@@ -74,27 +74,32 @@ function onPointerDown(e: PointerEvent) {
     })
 }
 
-function onPointerMove(e: PointerEvent) {
+function onTouchEvent(e: TouchEvent, type: 'start' | 'move' | 'end') {
     const ctx = model.value.data.getContext('2d')!
 
-    instance.emit('layer:pointermove', {
+    const rect = canvas.value!.getBoundingClientRect()
+
+    const touch = e.touches[0]
+
+    if (!touch) return
+
+    instance.emit(`layer:touch${type}`, {
         event: e,
         ctx,
-        x: e.offsetX / scale.value,
-        y: e.offsetY / scale.value,
-        pressure: e.pressure,
+        x: (touch.clientX - rect.left) / scale.value,
+        y: (touch.clientY - rect.top) / scale.value,
+        pressure: touch.force,
     })
 }
 
-function onPointerUp(e: PointerEvent) {
+function onMouseEvent(e: MouseEvent, type: 'down' | 'move' | 'up') {
     const ctx = model.value.data.getContext('2d')!
 
-    instance.emit('layer:pointerup', {
+    instance.emit(`layer:mouse${type}`, {
         event: e,
         ctx,
         x: e.offsetX / scale.value,
         y: e.offsetY / scale.value,
-        pressure: e.pressure,
     })
 }
 </script>
@@ -103,11 +108,15 @@ function onPointerUp(e: PointerEvent) {
     <canvas
         ref="canvas"
         class="absolute left-0 top-0"
-        @pointerdown="onPointerDown"
-        @touchmove.prevent
-        @pointerdown.prevent="onPointerDown"
-        @pointermove.prevent="onPointerMove"
-        @pointerup.prevent="onPointerUp"
-        @pointerleave.prevent="onPointerUp"
+        @mousedown.prevent="onMouseEvent($event, 'down')"
+        @mousemove.prevent="onMouseEvent($event, 'move')"
+        @mouseup.prevent="onMouseEvent($event, 'up')"
+        @touchstart.prevent="onTouchEvent($event, 'start')"
+        @touchmove.prevent="onTouchEvent($event, 'move')"
+        @touchend.prevent="onTouchEvent($event, 'end')"
+        @pointerdown="onPointerEvent($event, 'down')"
+        @pointermove.prevent="onPointerEvent($event, 'move')"
+        @pointerup.prevent="onPointerEvent($event, 'up')"
+        @pointerleave.prevent="onPointerEvent($event, 'up')"
     />
 </template>

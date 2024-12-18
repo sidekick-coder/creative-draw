@@ -23,7 +23,7 @@ function onDraw(data: InstanceEvents['layer:pointermove']) {
 
     eraser.opacity = 0
 
-    draw({
+    drawBrush({
         ctx: data.ctx,
         brush: eraser,
         color: { r: 0, g: 0, b: 0 },

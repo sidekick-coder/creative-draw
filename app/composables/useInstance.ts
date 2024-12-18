@@ -10,10 +10,33 @@ interface LayerPointEvent {
     ctx: OffscreenCanvasRenderingContext2D
 }
 
+interface LayerTouchEvent {
+    event: TouchEvent
+    x: number
+    y: number
+    pressure: number
+    ctx: OffscreenCanvasRenderingContext2D
+}
+
+interface LayerMouseEvent {
+    event: MouseEvent
+    x: number
+    y: number
+    ctx: OffscreenCanvasRenderingContext2D
+}
+
 export interface InstanceEvents {
     'layer:pointerdown': LayerPointEvent
     'layer:pointermove': LayerPointEvent
     'layer:pointerup': LayerPointEvent
+
+    'layer:touchstart': LayerTouchEvent
+    'layer:touchmove': LayerTouchEvent
+    'layer:touchend': LayerTouchEvent
+
+    'layer:mousedown': LayerMouseEvent
+    'layer:mousemove': LayerMouseEvent
+    'layer:mouseup': LayerMouseEvent
 }
 
 export interface Observer {
@@ -144,4 +167,17 @@ export function useInstance(): Instance {
     provide(key, newInstace)
 
     return newInstace
+}
+
+export function onInstanceEvent<T extends keyof InstanceEvents>(
+    name: T,
+    callback: (data: InstanceEvents[T]) => void
+) {
+    const instance = useInstance()
+
+    instance.on(name, callback)
+
+    onBeforeUnmount(() => {
+        instance.off(name, callback)
+    })
 }

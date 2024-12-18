@@ -12,7 +12,18 @@ const createDrawCheckpoint = debounce(() => {
     instance.tools.history.add('draw')
 }, 1000)
 
-function start(data: InstanceEvents['layer:pointerdown']) {
+type EventParementer = {
+    ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
+    x: number
+    y: number
+    pressure: number
+}
+
+function start(data: EventParementer) {
+    if (!brush.value) return
+
+    if (instance.activeTool !== 'brush') return
+
     createDrawCheckpoint()
 
     isDrawing.value = true
@@ -22,12 +33,12 @@ function start(data: InstanceEvents['layer:pointerdown']) {
 
 const brush = computed(() => instance.tools.brush.settings)
 
-function onDraw(data: InstanceEvents['layer:pointermove']) {
+function draw(data: EventParementer) {
     if (!isDrawing.value || !brush.value) return
 
     if (instance.activeTool !== 'brush') return
 
-    draw({
+    drawBrush({
         ctx: data.ctx,
         brush: brush.value,
         color: instance.tools.color.color,
@@ -50,16 +61,42 @@ function end() {
     isDrawing.value = false
 }
 
-onMounted(() => {
-    instance.on('layer:pointerdown', start)
-    instance.on('layer:pointermove', onDraw)
-    instance.on('layer:pointerup', end)
+// pointer events / pen events
+onInstanceEvent('layer:pointerdown', (data) => {
+    if (data.event.pointerType !== 'pen') return
+
+    start(data)
 })
 
-onUnmounted(() => {
-    instance.off('layer:pointerdown', start)
-    instance.off('layer:pointermove', onDraw)
-    instance.off('layer:pointerup', end)
+onInstanceEvent('layer:pointermove', draw)
+onInstanceEvent('layer:pointerup', end)
+
+// touch events
+onInstanceEvent('layer:touchstart', (data) => {
+    if (data.event.touches.length !== 1) return
+
+    start(data)
+})
+
+onInstanceEvent('layer:touchmove', draw)
+onInstanceEvent('layer:touchend', end)
+
+onInstanceEvent('layer:mousedown', (data) => {
+    start({
+        ctx: data.ctx,
+        x: data.x,
+        y: data.y,
+        pressure: 0.5,
+    })
+})
+
+onInstanceEvent('layer:mousemove', (data) => {
+    draw({
+        ctx: data.ctx,
+        x: data.x,
+        y: data.y,
+        pressure: 0.5,
+    })
 })
 </script>
 

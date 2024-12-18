@@ -1,4 +1,4 @@
-interface Options {
+export interface DrawBrushOptions {
     ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
     color: { r: number; g: number; b: number }
     x: number
@@ -11,7 +11,7 @@ interface Options {
     globalCompositeOperation?: 'source-over' | 'destination-out'
 }
 
-export function draw(options: Options) {
+export function drawBrush(options: DrawBrushOptions) {
     const ctx = options.ctx
     const globalCompositeOperation = options.globalCompositeOperation || 'source-over'
 
