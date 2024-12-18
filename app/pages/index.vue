@@ -41,11 +41,26 @@ const sizes = [
 ]
 
 // projects
+const loading = ref(true)
 const projects = ref<ProjectDataWithIdAndType[]>([])
 const deletingId = ref<string>()
 
 async function setProjects() {
-    projects.value = await listProjects()
+    loading.value = true
+
+    const [response, error] = await tryCatch(() => listProjects())
+
+    if (error) {
+        console.error(error)
+        loading.value = false
+        return
+    }
+
+    projects.value = response
+
+    setTimeout(() => {
+        loading.value = false
+    }, 500)
 }
 
 async function deleteItem(project: DBProject) {
@@ -186,7 +201,11 @@ onMounted(setProjects)
             </cd-dialog>
 
             <div class="-mx-2 flex flex-wrap items-start gap-y-4 [&>*]:px-2">
-                <div v-if="!projects.length" color="none" class="text-body-500">
+                <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
+                    <cd-spinner class="text-2xl" />
+                </div>
+
+                <div v-else-if="!projects.length" color="none" class="text-body-500">
                     <cd-card-content> No projects yet </cd-card-content>
                 </div>
 
