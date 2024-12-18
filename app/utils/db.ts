@@ -1,4 +1,4 @@
-import { Dexie, type EntityTable } from 'dexie'
+import type { Dexie as DexieInstance, EntityTable } from 'dexie'
 import type { ProjectData, ProjectDataLayer } from './types'
 
 export interface DBProject {
@@ -22,16 +22,24 @@ export interface DBProjectData extends Omit<ProjectData, 'layers'> {
     layers: DBProjectDataLayer[]
 }
 
-const db = new Dexie('creative-draw') as Dexie & {
+export let db: DexieInstance & {
     projects: EntityTable<DBProject, 'id'>
     project_handles: EntityTable<DBProjectHandle, 'id'>
     project_data: EntityTable<DBProjectData, 'id'>
 }
 
-db.version(1).stores({
-    projects: 'id',
-    project_handles: '++id,&project_id',
-    project_data: '++id,&project_id',
-})
+export async function useDb() {
+    if (db) return db
 
-export const $db = db
+    const { Dexie } = await import('dexie')
+
+    db = new Dexie('creative-draw') as any
+
+    db.version(1).stores({
+        projects: 'id',
+        project_handles: '++id,&project_id',
+        project_data: '++id,&project_id',
+    })
+
+    return db
+}

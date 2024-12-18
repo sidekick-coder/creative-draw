@@ -63,7 +63,9 @@ export async function writeProjectToHandle(handle: FileSystemDirectoryHandle, da
 }
 export function createProjectProviderFSA(): IProjectProvider {
     const get: IProjectProvider['get'] = async (id: string) => {
-        const dbHandle = await $db.project_handles.where('project_id').equals(id).first()
+        const db = await useDb()
+
+        const dbHandle = await db.project_handles.where('project_id').equals(id).first()
 
         if (!dbHandle) {
             throw new Error(`Project ${id} not found`)
@@ -117,19 +119,23 @@ export function createProjectProviderFSA(): IProjectProvider {
     }
 
     const create: IProjectProvider['create'] = async (id, payload) => {
+        const db = await useDb()
+
         const handle = await window.showDirectoryPicker({
             mode: 'readwrite',
         })
 
         await writeProjectToHandle(handle, payload)
 
-        await $db.project_handles.put({ project_id: id, handle })
+        await db.project_handles.put({ project_id: id, handle })
 
         return payload
     }
 
     const update: IProjectProvider['update'] = async (id, payload) => {
-        const dbHandle = await $db.project_handles.where('project_id').equals(id).first()
+        const db = await useDb()
+
+        const dbHandle = await db.project_handles.where('project_id').equals(id).first()
 
         if (!dbHandle) {
             throw new Error(`Project ${id} not found`)

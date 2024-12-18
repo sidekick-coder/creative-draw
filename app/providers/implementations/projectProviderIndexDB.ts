@@ -4,7 +4,9 @@ import type { DBProjectData } from '~/utils/db'
 
 export function createProjectProviderIndexDB(): IProjectProvider {
     const get: IProjectProvider['get'] = async (id: string) => {
-        const dbData = await $db.project_data.where('project_id').equals(id).first()
+        const db = await useDb()
+
+        const dbData = await db.project_data.where('project_id').equals(id).first()
 
         if (!dbData) {
             throw new Error(`Project ${id} not found`)
@@ -36,6 +38,8 @@ export function createProjectProviderIndexDB(): IProjectProvider {
     }
 
     const create: IProjectProvider['create'] = async (id, payload) => {
+        const db = await useDb()
+
         const json: DBProjectData = {
             project_id: id,
             width: payload.width,
@@ -68,13 +72,14 @@ export function createProjectProviderIndexDB(): IProjectProvider {
 
         json.thumbnail = thumbnail as string
 
-        await $db.project_data.put(json)
+        await db.project_data.put(json)
 
         return json
     }
 
     const update: IProjectProvider['update'] = async (id, payload) => {
-        const dbData = await $db.project_data.where('project_id').equals(id).first()
+        const db = await useDb()
+        const dbData = await db.project_data.where('project_id').equals(id).first()
 
         if (!dbData) {
             throw new Error(`Project ${id} not found`)
@@ -113,7 +118,7 @@ export function createProjectProviderIndexDB(): IProjectProvider {
 
         json.thumbnail = thumbnail as string
 
-        await $db.project_data.put(json)
+        await db.project_data.put(json)
     }
 
     const destroy: IProjectProvider['destroy'] = async (id) => {

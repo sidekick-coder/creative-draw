@@ -5,7 +5,9 @@ import { createProjectProviderIndexDB } from '~/providers/implementations/projec
 export const providers = [createProjectProviderFSA(), createProjectProviderIndexDB()]
 
 export async function listProjects() {
-    const dbProjects = await $db.projects.toArray()
+    const db = await useDb()
+
+    const dbProjects = await db.projects.toArray()
 
     const response: ProjectDataWithIdAndType[] = []
 
@@ -32,7 +34,9 @@ export async function listProjects() {
 }
 
 export async function findProject(id: string): Promise<ProjectDataWithIdAndType> {
-    const dbProject = await $db.projects.get(id)
+    const db = await useDb()
+
+    const dbProject = await db.projects.get(id)
 
     if (!dbProject) {
         throw new Error('Project not found')
@@ -54,15 +58,17 @@ export async function findProject(id: string): Promise<ProjectDataWithIdAndType>
 }
 
 export async function importProjectFromHandle(handle: FileSystemDirectoryHandle) {
+    const db = await useDb()
+
     const config = await readEntry(handle, 'index.json', {
         responseType: 'json',
     })
 
-    const exists = await $db.projects.get(config.id)
+    const exists = await db.projects.get(config.id)
 
     if (exists) return
 
-    await $db.projects.put({
+    await db.projects.put({
         id: config.id,
         type: 'filesystem',
         handle,
@@ -72,6 +78,8 @@ export async function importProjectFromHandle(handle: FileSystemDirectoryHandle)
 export async function createProject(
     payload: Omit<ProjectDataWithIdAndType, 'id'>
 ): Promise<ProjectDataWithIdAndType> {
+    const db = await useDb()
+
     const provider = providers.find((p) => p.id === payload.type)
 
     if (!provider) {
@@ -80,13 +88,13 @@ export async function createProject(
 
     const id = createId()
 
-    await $db.projects.put({ id, type: payload.type })
+    await db.projects.put({ id, type: payload.type })
 
     const [project, error] = await tryCatch(() => provider.create(id, payload))
 
     if (error) {
         console.error(error)
-        await $db.projects.delete(id)
+        await db.projects.delete(id)
         throw new Error('Error creating project')
     }
 
@@ -98,7 +106,7 @@ export async function createProject(
 }
 
 export async function updateProject(id: string, payload: Omit<ProjectData, 'id' | 'type'>) {
-    const dbProject = await $db.projects.get(id)
+    const dbProject = await db.projects.get(id)
 
     if (!dbProject) {
         throw new Error('Project not found')
@@ -114,7 +122,7 @@ export async function updateProject(id: string, payload: Omit<ProjectData, 'id' 
 }
 
 export async function deleteProject(id: string) {
-    const dbProject = await $db.projects.get(id)
+    const dbProject = await db.projects.get(id)
 
     if (!dbProject) {
         throw new Error('Project not found')
@@ -128,5 +136,5 @@ export async function deleteProject(id: string) {
 
     await provider.destroy(id)
 
-    await $db.projects.delete(id)
+    await db.projects.delete(id)
 }
