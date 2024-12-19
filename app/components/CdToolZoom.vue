@@ -72,12 +72,15 @@ function findMidpoint({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; 
 
 onInstanceEvent('container:touchstart', ({ event }) => {
     if (event.touches.length === 4) {
+        event.preventDefault()
+        event.stopPropagation()
         instance.tools.zoomAndPan.fit()
         return
     }
 
     if (event.touches.length !== 2) return
 
+    event.preventDefault()
     event.stopPropagation()
 
     const touch1 = event.touches[0]

@@ -106,6 +106,10 @@ onMounted(async () => {
             <cd-ui-color-picker />
         </cd-ui-toolbar>
 
+        <cd-ui-toolbar class="absolute bottom-2 right-2">
+            <cd-ui-tool-zoom />
+        </cd-ui-toolbar>
+
         <cd-layer-list />
     </cd-instance>
 </template>

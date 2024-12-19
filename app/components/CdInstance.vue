@@ -68,17 +68,17 @@ function onMouseEvent(e: MouseEvent) {
 
             `,
         }"
-        @mousedown.prevent="onMouseEvent"
-        @mousemove.prevent="onMouseEvent"
-        @mouseup.prevent="onMouseEvent"
-        @touchstart.stop.prevent="onTouchEvent"
-        @touchmove.prevent="onTouchEvent"
-        @touchend.prevent="onTouchEvent"
-        @touchcancel.prevent="onTouchEvent"
+        @mousedown="onMouseEvent"
+        @mousemove="onMouseEvent"
+        @mouseup="onMouseEvent"
+        @touchstart="onTouchEvent"
+        @touchmove="onTouchEvent"
+        @touchend="onTouchEvent"
+        @touchcancel="onTouchEvent"
         @pointerdown="onPointerEvent"
-        @pointermove.prevent="onPointerEvent"
-        @pointerup.prevent="onPointerEvent"
-        @pointerleave.prevent="onPointerEvent"
+        @pointermove="onPointerEvent"
+        @pointerup="onPointerEvent"
+        @pointerleave="onPointerEvent"
     >
         <slot v-if="!loading" />
     </div>

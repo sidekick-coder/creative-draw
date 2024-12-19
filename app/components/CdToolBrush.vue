@@ -65,6 +65,9 @@ function end() {
 onInstanceEvent('layer:pointerdown', (data) => {
     if (data.event.pointerType !== 'pen') return
 
+    data.event.preventDefault()
+    data.event.stopPropagation()
+
     start(data)
 })
 
@@ -74,6 +77,8 @@ onInstanceEvent('layer:pointerout', end)
 
 // touch events
 onInstanceEvent('layer:touchstart', (data) => {
+    data.event.preventDefault()
+
     if (data.event.touches.length > 1) {
         end()
     }
