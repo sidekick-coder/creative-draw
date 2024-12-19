@@ -70,16 +70,30 @@ onInstanceEvent('layer:pointerdown', (data) => {
 
 onInstanceEvent('layer:pointermove', draw)
 onInstanceEvent('layer:pointerup', end)
+onInstanceEvent('layer:pointerout', end)
 
 // touch events
 onInstanceEvent('layer:touchstart', (data) => {
-    if (data.event.touches.length !== 1) return
+    if (data.event.touches.length > 1) {
+        end()
+    }
 
-    start(data)
+    if (data.event.touches.length === 1) {
+        start(data)
+    }
 })
 
-onInstanceEvent('layer:touchmove', draw)
-onInstanceEvent('layer:touchend', end)
+onInstanceEvent('layer:touchmove', (data) => {
+    if (data.event.touches.length === 1) {
+        draw(data)
+    }
+})
+
+onInstanceEvent('layer:touchend', (data) => {
+    if (data.event.touches.length === 1) {
+        end()
+    }
+})
 
 onInstanceEvent('layer:mousedown', (data) => {
     start({

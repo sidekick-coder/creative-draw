@@ -16,7 +16,7 @@ function focus() {
 <template>
     <div
         ref="root"
-        class="absolute z-10"
+        class="absolute z-10 transition-transform"
         tabindex="-1"
         :style="{
             width: width + 'px',

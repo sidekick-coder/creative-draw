@@ -25,18 +25,40 @@ interface LayerMouseEvent {
     ctx: OffscreenCanvasRenderingContext2D
 }
 
+interface ContainerPointEvent {
+    event: PointerEvent
+}
+
+interface ContainerTouchEvent {
+    event: TouchEvent
+}
+
+interface ContainerMouseEvent {
+    event: MouseEvent
+}
+
 export interface InstanceEvents {
     'layer:pointerdown': LayerPointEvent
     'layer:pointermove': LayerPointEvent
     'layer:pointerup': LayerPointEvent
-
     'layer:touchstart': LayerTouchEvent
     'layer:touchmove': LayerTouchEvent
     'layer:touchend': LayerTouchEvent
-
     'layer:mousedown': LayerMouseEvent
     'layer:mousemove': LayerMouseEvent
     'layer:mouseup': LayerMouseEvent
+
+    'container:pointerdown': ContainerPointEvent
+    'container:pointermove': ContainerPointEvent
+    'container:pointerup': ContainerPointEvent
+    'container:touchstart': ContainerTouchEvent
+    'container:touchmove': ContainerTouchEvent
+    'container:touchend': ContainerTouchEvent
+    'container:mousedown': ContainerMouseEvent
+    'container:mousemove': ContainerMouseEvent
+    'container:mouseup': ContainerMouseEvent
+
+    [key: string]: any
 }
 
 export interface Observer {
@@ -66,9 +88,9 @@ export function makeInstance() {
     // events
     const observers = ref<Observer[]>([])
 
-    function on<T extends keyof InstanceEvents>(
-        name: T,
-        callback: (data: InstanceEvents[T]) => void
+    function on<T>(
+        name: T extends keyof InstanceEvents ? never : string,
+        callback: (data: T extends keyof InstanceEvents ? InstanceEvents[T] : any) => any
     ) {
         observers.value.push({ name, callback })
     }

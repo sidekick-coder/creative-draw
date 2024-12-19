@@ -16,7 +16,7 @@ export function createToolZoomAndPan({ width, height, containerWidth, containerH
 
     function setScale(value: number) {
         const max = 4
-        const min = 0.25
+        const min = 0.1
 
         let newValue = value
 

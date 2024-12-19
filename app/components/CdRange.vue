@@ -81,7 +81,7 @@ const thumb = computed(() => ({
     outline: none;
 
     &::-webkit-slider-thumb {
-        @apply bg-body-500 transition-colors;
+        @apply bg-body-0 transition-colors;
 
         -webkit-appearance: none;
         appearance: none;

@@ -36,6 +36,25 @@ function load() {
 watch([width, height], load)
 
 onMounted(load)
+
+// events
+function onPointerEvent(e: PointerEvent) {
+    instance.emit(`container:${e.type}`, {
+        event: e,
+    })
+}
+
+function onTouchEvent(e: TouchEvent) {
+    instance.emit(`container:${e.type}`, {
+        event: e,
+    })
+}
+
+function onMouseEvent(e: MouseEvent) {
+    instance.emit(`container:${e.type}`, {
+        event: e,
+    })
+}
 </script>
 <template>
     <div
@@ -49,6 +68,17 @@ onMounted(load)
 
             `,
         }"
+        @mousedown.prevent="onMouseEvent"
+        @mousemove.prevent="onMouseEvent"
+        @mouseup.prevent="onMouseEvent"
+        @touchstart.stop.prevent="onTouchEvent"
+        @touchmove.prevent="onTouchEvent"
+        @touchend.prevent="onTouchEvent"
+        @touchcancel.prevent="onTouchEvent"
+        @pointerdown="onPointerEvent"
+        @pointermove.prevent="onPointerEvent"
+        @pointerup.prevent="onPointerEvent"
+        @pointerleave.prevent="onPointerEvent"
     >
         <slot v-if="!loading" />
     </div>

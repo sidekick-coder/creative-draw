@@ -60,7 +60,7 @@ function reset() {
                     padding="none"
                     variant="text"
                     color="none"
-                    class="text-sm text-body-500 hover:text-body-50"
+                    class="text-sm text-body-100 hover:text-body-50"
                     @click="reset"
                 >
                     <cd-icon name="heroicons:arrow-path" />
