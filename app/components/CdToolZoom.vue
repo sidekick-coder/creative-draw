@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const instance = useInstance()
-
+const root = ref<HTMLElement>()
 const keys = useMagicKeys()
 
 const ctrlSpace = keys['Ctrl+Space']
@@ -12,6 +12,7 @@ let lastMouseX = 0
 function onDown(event: PointerEvent) {
     isPannig.value = true
     lastMouseX = event.clientX
+    root.value?.focus()
 }
 
 function onMove(event: PointerEvent) {
@@ -123,7 +124,7 @@ onInstanceEvent('container:touchmove', ({ event }) => {
     const diff = Math.abs(pinch.value.distance - distance)
 
     if (diff > 100) {
-        const factor = 0.01
+        const factor = 5
         const zoomDelta = distance > pinch.value.distance ? 1 : -1
         const newScale = instance.tools.zoomAndPan.scale + zoomDelta * factor
 
@@ -163,7 +164,9 @@ onInstanceEvent('container:touchend', (data) => {
 <template>
     <div
         v-if="ctrlSpace"
+        ref="root"
         class="absolute inset-0 z-20 size-full cursor-zoom-in"
+        tabindex="-1"
         @touchmove.prevent
         @wheel.prevent="onWheel"
         @pointerdown.prevent="onDown"

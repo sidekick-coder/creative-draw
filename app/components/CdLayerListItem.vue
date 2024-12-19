@@ -1,81 +1,25 @@
 <script setup lang="ts">
-import type { Layer } from '@/composables/useInstance'
-
 const instance = useInstance()
 
 const model = defineModel({
-    type: Object as PropType<Layer>,
-    default: () => ({
-        id: createId(),
-        name: 'Paint',
-        order: 2,
-        type: 'paint',
-        width: 1920,
-        height: 1080,
-        data: new OffscreenCanvas(1920, 1080),
-    }),
+    type: Object as PropType<ProjectDataLayer>,
+    required: true,
 })
-
-const scale = computed(() => instance.tools.zoomAndPan.scale)
-
-// render
-const canvas = ref<HTMLCanvasElement>()
-const interval = ref<NodeJS.Timeout>()
-
-function render(c: HTMLCanvasElement) {
-    const ctx = c.getContext('2d')!
-
-    c.width = model.value.width * scale.value
-    c.height = model.value.height * scale.value
-
-    ctx.clearRect(0, 0, c.width, c.height)
-
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = 'high'
-
-    ctx.drawImage(
-        model.value.data,
-        0,
-        0,
-        model.value.data.width,
-        model.value.data.height,
-        0,
-        0,
-        model.value.data.width * scale.value,
-        model.value.data.height * scale.value
-    )
-}
-
-function load() {
-    if (!canvas.value) return
-
-    canvas.value.width = model.value.width
-    canvas.value.height = model.value.height
-
-    interval.value = setInterval(() => render(canvas.value!), 16)
-}
-
-onMounted(load)
-
-onUnmounted(() => {
-    if (interval.value) clearInterval(interval.value)
-})
-
 // events
 function onPointerEvent(e: PointerEvent) {
-    const ctx = model.value.data.getContext('2d')!
+    const ctx = canvas.value!.getContext('2d')!
 
     instance.emit(`layer:${e.type}`, {
         event: e,
         ctx,
-        x: e.offsetX / scale.value,
-        y: e.offsetY / scale.value,
+        x: e.offsetX,
+        y: e.offsetY,
         pressure: e.pressure,
     })
 }
 
 function onTouchEvent(e: TouchEvent) {
-    const ctx = model.value.data.getContext('2d')!
+    const ctx = canvas.value!.getContext('2d')!
 
     const rect = canvas.value!.getBoundingClientRect()
 
@@ -86,38 +30,72 @@ function onTouchEvent(e: TouchEvent) {
     instance.emit(`layer:${e.type}`, {
         event: e,
         ctx,
-        x: (touch.clientX - rect.left) / scale.value,
-        y: (touch.clientY - rect.top) / scale.value,
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
         pressure: touch.force,
     })
 }
 
 function onMouseEvent(e: MouseEvent) {
-    const ctx = model.value.data.getContext('2d')!
+    const ctx = canvas.value!.getContext('2d')!
 
     instance.emit(`layer:${e.type}`, {
         event: e,
         ctx,
-        x: e.offsetX / scale.value,
-        y: e.offsetY / scale.value,
+        x: e.offsetX,
+        y: e.offsetY,
     })
 }
+// canvas
+const root = ref<HTMLElement>()
+const canvas = ref<HTMLCanvasElement>()
+
+function load() {
+    if (!root.value) return
+
+    canvas.value = model.value.canvas
+
+    root.value.appendChild(canvas.value)
+
+    canvas.value.addEventListener('mousedown', onMouseEvent)
+    canvas.value.addEventListener('mousemove', onMouseEvent)
+    canvas.value.addEventListener('mouseup', onMouseEvent)
+    canvas.value.addEventListener('mouseout', onMouseEvent)
+
+    canvas.value.addEventListener('pointerdown', onPointerEvent)
+    canvas.value.addEventListener('pointermove', onPointerEvent)
+    canvas.value.addEventListener('pointerup', onPointerEvent)
+    canvas.value.addEventListener('pointerout', onPointerEvent)
+
+    canvas.value.addEventListener('touchstart', onTouchEvent)
+    canvas.value.addEventListener('touchmove', onTouchEvent)
+    canvas.value.addEventListener('touchend', onTouchEvent)
+}
+
+function unload() {
+    if (!canvas.value) return
+
+    canvas.value.removeEventListener('mousedown', onMouseEvent)
+    canvas.value.removeEventListener('mousemove', onMouseEvent)
+    canvas.value.removeEventListener('mouseup', onMouseEvent)
+    canvas.value.removeEventListener('mouseout', onMouseEvent)
+
+    canvas.value.removeEventListener('pointerdown', onPointerEvent)
+    canvas.value.removeEventListener('pointermove', onPointerEvent)
+    canvas.value.removeEventListener('pointerup', onPointerEvent)
+    canvas.value.removeEventListener('pointerout', onPointerEvent)
+
+    canvas.value.removeEventListener('touchstart', onTouchEvent)
+    canvas.value.removeEventListener('touchmove', onTouchEvent)
+    canvas.value.removeEventListener('touchend', onTouchEvent)
+
+    canvas.value.remove()
+}
+
+onMounted(load)
+onBeforeUnmount(unload)
 </script>
 
 <template>
-    <canvas
-        ref="canvas"
-        class="absolute left-0 top-0 transition-all"
-        @mousedown="onMouseEvent"
-        @mousemove="onMouseEvent"
-        @mouseup="onMouseEvent"
-        @touchstart="onTouchEvent"
-        @touchmove="onTouchEvent"
-        @touchend="onTouchEvent"
-        @touchcancel="onTouchEvent"
-        @pointerdown="onPointerEvent"
-        @pointermove="onPointerEvent"
-        @pointerup="onPointerEvent"
-        @pointerleave="onPointerEvent"
-    />
+    <div ref="root" class="absolute left-0 top-0 size-full"></div>
 </template>

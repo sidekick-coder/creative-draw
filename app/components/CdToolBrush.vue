@@ -4,6 +4,7 @@ import debounce from 'lodash/debounce'
 const instance = useInstance()
 
 const isDrawing = ref(false)
+const currentDevice = ref('mouse')
 const lastX = ref(0)
 const lastY = ref(0)
 const lastPressure = ref(0)
@@ -24,7 +25,7 @@ function start(data: EventParementer) {
 
     if (instance.activeTool !== 'brush') return
 
-    createDrawCheckpoint()
+    // createDrawCheckpoint()
 
     isDrawing.value = true
     lastX.value = data.x
@@ -65,42 +66,80 @@ function end() {
 onInstanceEvent('layer:pointerdown', (data) => {
     if (data.event.pointerType !== 'pen') return
 
+    currentDevice.value = 'pen'
+
     data.event.preventDefault()
     data.event.stopPropagation()
 
     start(data)
 })
 
-onInstanceEvent('layer:pointermove', draw)
-onInstanceEvent('layer:pointerup', end)
-onInstanceEvent('layer:pointerout', end)
+onInstanceEvent('layer:pointermove', (data) => {
+    if (currentDevice.value !== 'pen') return
+
+    data.event.preventDefault()
+    data.event.stopPropagation()
+
+    draw(data)
+})
+
+onInstanceEvent('layer:pointerup', (data) => {
+    if (currentDevice.value !== 'pen') return
+
+    data.event.preventDefault()
+    data.event.stopPropagation()
+
+    end()
+})
+
+onInstanceEvent('layer:pointerout', (data) => {
+    if (currentDevice.value !== 'pen') return
+
+    data.event.preventDefault()
+    data.event.stopPropagation()
+
+    end()
+})
 
 // touch events
 onInstanceEvent('layer:touchstart', (data) => {
     data.event.preventDefault()
+
+    const touch = data.event.touches[0]
+
+    if (!touch) return
+
+    if (isDrawing.value) return
 
     if (data.event.touches.length > 1) {
         end()
     }
 
     if (data.event.touches.length === 1) {
+        currentDevice.value = 'touch'
         start(data)
     }
 })
 
 onInstanceEvent('layer:touchmove', (data) => {
+    if (currentDevice.value !== 'touch') return
+
     if (data.event.touches.length === 1) {
         draw(data)
     }
 })
 
 onInstanceEvent('layer:touchend', (data) => {
+    if (currentDevice.value !== 'touch') return
+
     if (data.event.touches.length === 1) {
         end()
     }
 })
 
 onInstanceEvent('layer:mousedown', (data) => {
+    currentDevice.value = 'mouse'
+
     start({
         ctx: data.ctx,
         x: data.x,
@@ -110,12 +149,20 @@ onInstanceEvent('layer:mousedown', (data) => {
 })
 
 onInstanceEvent('layer:mousemove', (data) => {
+    if (currentDevice.value !== 'mouse') return
+
     draw({
         ctx: data.ctx,
         x: data.x,
         y: data.y,
         pressure: 0.5,
     })
+})
+
+onInstanceEvent('layer:mouseup', () => {
+    if (currentDevice.value !== 'mouse') return
+
+    end()
 })
 </script>
 

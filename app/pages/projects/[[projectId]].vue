@@ -39,14 +39,14 @@ function setNewProject() {
     width.value = w
     height.value = h
 
-    const bgLayer: Layer = {
+    const bgLayer: ProjectDataLayer = {
         id: createId(),
         name: 'Background',
         order: 1,
         type: 'paint',
         width: w,
         height: h,
-        data: new OffscreenCanvas(w, h),
+        canvas: document.createElement('canvas'),
         visible: true,
     }
 
@@ -57,11 +57,17 @@ function setNewProject() {
         type: 'paint',
         width: w,
         height: h,
-        data: new OffscreenCanvas(w, h),
+        canvas: document.createElement('canvas'),
         visible: true,
     }
 
-    const ctx = bgLayer.data.getContext('2d')!
+    bgLayer.canvas.width = w
+    bgLayer.canvas.height = h
+
+    paintLayer.canvas.width = w
+    paintLayer.canvas.height = h
+
+    const ctx = bgLayer.canvas.getContext('2d')!
 
     ctx.fillStyle = 'white'
 

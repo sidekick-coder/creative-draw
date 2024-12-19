@@ -8,7 +8,7 @@ export interface ProjectDataLayer {
     name: string
     type: 'paint'
     order: number
-    data: OffscreenCanvas
+    canvas: HTMLCanvasElement
     width: number
     height: number
     visible: boolean
