@@ -2,6 +2,12 @@
     <nuxt-layout>
         <nuxt-page />
     </nuxt-layout>
+
+    <dev-only>
+        <client-only>
+            <eruda-devtools />
+        </client-only>
+    </dev-only>
 </template>
 
 <style>
