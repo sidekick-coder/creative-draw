@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import type { Layer } from '@/composables/useInstance'
-
 const layer = defineModel({
-    type: Object as PropType<Layer>,
+    type: Object as PropType<ProjectDataLayer>,
     required: true,
 })
 
@@ -11,7 +9,7 @@ const width = defineProp<number>('width', {
     default: 50,
 })
 
-const height = computed(() => (width.value / layer.value.data.width) * layer.value.data.height)
+const height = computed(() => (width.value / layer.value.canvas.width) * layer.value.canvas.height)
 
 const canvas = ref<HTMLCanvasElement>()
 let interval: NodeJS.Timeout
@@ -27,11 +25,11 @@ function render() {
     ctx.imageSmoothingQuality = 'high'
 
     ctx.drawImage(
-        layer.value.data,
+        layer.value.canvas,
         0,
         0,
-        layer.value.data.width,
-        layer.value.data.height,
+        layer.value.canvas.width,
+        layer.value.canvas.height,
         0,
         0,
         canvas.value.width,
