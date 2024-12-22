@@ -4,7 +4,7 @@ const model = defineModel({
     required: true,
 })
 
-const id = window.crypto.randomUUID()
+const id =  createId()
 const root = ref<HTMLElement>()
 const ghost = ref<HTMLElement>()
 const items = inject('items', ref<any>([]))

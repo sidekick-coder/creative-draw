@@ -82,6 +82,14 @@ if (closeOnOutsideClick.value) {
         },
         { ignore: [activatorRef as any] }
     )
+
+    onPointerdownOutside(
+        contentRef,
+        () => {
+            model.value = false
+        },
+        { ignore: [activatorRef] }
+    )
 }
 
 // floating ui definition

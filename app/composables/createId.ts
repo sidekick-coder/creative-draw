@@ -3,5 +3,9 @@ export function createId() {
         return require('crypto').randomUUID()
     }
 
-    return window.crypto.randomUUID()
+    if (window.crypto.randomUUID) {
+        return window.crypto.randomUUID()
+    }
+
+     return useId()
 }
