@@ -68,13 +68,16 @@ function findColorByPosition(x: number, y: number): ColorRGB {
 
     const ctx = canvas.value.getContext('2d')!
 
-    const pixel = ctx.getImageData(x, y, 1, 1).data
+    const pixelX = Math.max(0, Math.min(x, canvas.value.width - 1))
+    const pixelY = Math.max(0, Math.min(y, canvas.value.height - 1))
 
-    const [r, g, b] = pixel
+    const pixel = ctx.getImageData(pixelX, pixelY, 1, 1).data
 
-    if (!r || !g || !b) return { r: 0, g: 0, b: 0 }
-
-    return { r, g, b }
+    return {
+    r: pixel[0] || 0,
+    g: pixel[1] || 0,
+    b: pixel[2] || 0,
+    }
 }
 
 function setPosition() {
@@ -93,10 +96,10 @@ function setPosition() {
             let pixelX = (i / 4) % canvas.value.width
             let pixelY = Math.floor(i / 4 / canvas.value.width)
 
-            pixelX = Math.max(0, Math.min(pixelX, canvas.value.width - 16))
-            pixelY = Math.max(0, Math.min(pixelY, canvas.value.height - 16))
+            pixelX = Math.max(0, Math.min(pixelX, canvas.value.width))
+            pixelY = Math.max(0, Math.min(pixelY, canvas.value.height))
 
-            position.value = { x: pixelX, y: pixelY }
+            position.value = { x: pixelX, y: pixelY  }
 
             return
         }
@@ -117,12 +120,16 @@ function onPointermove(e: PointerEvent) {
     let x = e.clientX - rect.left
     let y = e.clientY - rect.top
 
-    x = Math.max(0, Math.min(x, canvas.value.width - 16))
-    y = Math.max(0, Math.min(y, canvas.value.height - 16))
+    x = Math.max(0, Math.min(x, canvas.value.width))
+    y = Math.max(0, Math.min(y, canvas.value.height))
+
+    model.value = findColorByPosition(x, y)
+
+    x -= 8
+    y -= 8
 
     position.value = { x, y }
 
-    model.value = findColorByPosition(x, y)
 }
 
 function onPointerup() {
@@ -145,7 +152,9 @@ watch(dragging, () => {
             width: `${size}px`,
             height: `${size}px`,
         }"
-        @pointerdown.prevent="onPointerdown"
+        @touchstart.prevent.stop
+        @mousedown.prevent.stop
+        @pointerdown.prevent.stop="onPointerdown"
         @pointermove="onPointermove"
         @pointerup="onPointerup"
         @pointerleave="onPointerup"

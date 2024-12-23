@@ -43,6 +43,5 @@ function focus() {
             />
         </div>
 
-        <div class="absolute bottom-0 left-0 size-4 bg-red-500"></div>
     </div>
 </template>

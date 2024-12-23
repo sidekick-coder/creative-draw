@@ -68,35 +68,23 @@ onInstanceEvent('layer:pointerdown', (data) => {
 
     currentDevice.value = 'pen'
 
-    data.event.preventDefault()
-    data.event.stopPropagation()
-
     start(data)
 })
 
 onInstanceEvent('layer:pointermove', (data) => {
     if (currentDevice.value !== 'pen') return
 
-    data.event.preventDefault()
-    data.event.stopPropagation()
-
     draw(data)
 })
 
-onInstanceEvent('layer:pointerup', (data) => {
+onInstanceEvent('layer:pointerup', () => {
     if (currentDevice.value !== 'pen') return
-
-    data.event.preventDefault()
-    data.event.stopPropagation()
 
     end()
 })
 
-onInstanceEvent('layer:pointerout', (data) => {
+onInstanceEvent('layer:pointerout', () => {
     if (currentDevice.value !== 'pen') return
-
-    data.event.preventDefault()
-    data.event.stopPropagation()
 
     end()
 })
