@@ -22,7 +22,7 @@ jobs:
             - name: Upload image
               uses: appleboy/scp-action@v0.1.7
               with:
-                host: ${{ secrets.SSH_HOSTNAME }}
+                host: ${{ secrets.SSH_HOST }}
                 username: ${{ secrets.SSH_USERNAME }}
                 key: ${{ secrets.SSH_KEY }}
                 source: creative-draw.tar 
@@ -31,7 +31,7 @@ jobs:
             - name: Load image 
               uses: appleboy/ssh-action@v0.1.10
               with:
-                host: ${{ secrets.SSH_HOSTNAME }}
+                host: ${{ secrets.SSH_HOST }}
                 username: ${{ secrets.SSH_USERNAME }}
                 key: ${{ secrets.SSH_KEY }}
                 port: ${{ secrets.SSH_PORT }}
@@ -40,7 +40,7 @@ jobs:
             - name: restart docker compose
               uses: appleboy/ssh-action@v0.1.10
               with:
-                  host: ${{ secrets.SSH_HOSTNAME }}
+                  host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_KEY }}
                   port: ${{ secrets.SSH_PORT }}
@@ -53,7 +53,7 @@ jobs:
             - name: Clean up 
               uses: appleboy/ssh-action@v0.1.10
               with:
-                  host: ${{ secrets.SSH_HOSTNAME }}
+                  host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_KEY }}
                   port: ${{ secrets.SSH_PORT }}
