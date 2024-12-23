@@ -109,7 +109,7 @@ export function makeInstance() {
 
     // layers
     const activeLayerId = ref<string>()
-    const layers = ref<Layer[]>([])
+    const layers = ref<ProjectDataLayer[]>([])
     const activeLayer = computed(() => layers.value.find((l) => l.id === activeLayerId.value))
     const visibleLayers = ref<string[]>([])
 
@@ -117,7 +117,7 @@ export function makeInstance() {
         activeLayerId.value = id
     }
 
-    function setLayers(l: Layer[]) {
+    function setLayers(l: ProjectDataLayer[]) {
         layers.value = l
     }
 

@@ -53,6 +53,10 @@ const canvas = ref<HTMLCanvasElement>()
 function load() {
     if (!root.value) return
 
+    if (canvas.value) {
+        unload()
+    }
+
     canvas.value = model.value.canvas
 
     root.value.appendChild(canvas.value)
@@ -92,6 +96,7 @@ function unload() {
     canvas.value.remove()
 }
 
+watch(() => model.value.canvas, load)
 onMounted(load)
 onBeforeUnmount(unload)
 </script>

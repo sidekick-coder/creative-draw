@@ -4,19 +4,20 @@ interface Options {
     layers: Ref<ProjectDataLayer[]>
 }
 
+interface CheckpointLayer extends Omit<ProjectDataLayer, 'canvas'> {
+    data: ImageData
+}
+
 interface Checkpoint {
     id: string
     label?: string
-    data: {
-        width: number
-        height: number
-        layers: ProjectDataLayer[]
-    }
+    layers: CheckpointLayer[]
 }
 
 export function createToolHistory({ width, height, layers }: Options) {
     const history = ref<Checkpoint[]>([])
     const activeIndex = ref(-1)
+    const maxHistory = 50
 
     const previousChanges = computed(() => {
         if (activeIndex.value === -1) return []
@@ -36,27 +37,31 @@ export function createToolHistory({ width, height, layers }: Options) {
         const checkpoint: Checkpoint = {
             id,
             label,
-            data: {
-                width: width.value,
-                height: height.value,
-                layers: [],
-            },
+            layers: [],            
         }
 
         for (const layer of layers.value) {
-            const canvas = new OffscreenCanvas(width.value, height.value)
+            const canvas = document.createElement('canvas')
+
+            canvas.width = width.value
+            canvas.height = height.value
 
             const context = canvas.getContext('2d')!
 
-            context.drawImage(layer.data, 0, 0)
+            context.drawImage(layer.canvas, 0, 0)
 
-            checkpoint.data.layers.push({
+            const data = context.getImageData(0, 0, width.value, height.value)
+
+            checkpoint.layers.push({
                 ...layer,
-                data: canvas,
-            })
+                data,
+                canvas: undefined,
+            } as CheckpointLayer)
         }
 
-        history.value = history.value.slice(0, activeIndex.value + 1)
+        if (history.value.length > maxHistory) {
+            history.value.shift()
+        }
 
         history.value.push(checkpoint)
 
@@ -71,23 +76,21 @@ export function createToolHistory({ width, height, layers }: Options) {
 
         activeIndex.value = index
 
-        const { data } = item
-
-        width.value = data.width
-        height.value = data.height
-
         const newLayers: ProjectDataLayer[] = []
 
-        for (const layer of data.layers) {
-            const canvas = new OffscreenCanvas(width.value, height.value)
+        for (const layer of item.layers) {
+            const canvas = document.createElement('canvas') 
+
+            canvas.width = layer.width
+            canvas.height = layer.height
 
             const context = canvas.getContext('2d')!
 
-            context.drawImage(layer.data, 0, 0)
+            context.putImageData(layer.data, 0, 0)
 
             newLayers.push({
                 ...layer,
-                data: canvas,
+                canvas,
             })
         }
 

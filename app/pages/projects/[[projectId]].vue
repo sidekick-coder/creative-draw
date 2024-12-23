@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Layer } from '@/composables/useInstance'
 import { findProject } from '~/repositories/projectRepository'
 const instance = useInstance()
 const route = useRoute()
@@ -50,7 +49,7 @@ function setNewProject() {
         visible: true,
     }
 
-    const paintLayer: Layer = {
+    const paintLayer: ProjectDataLayer = {
         id: createId(),
         name: 'Paint',
         order: 2,
@@ -83,6 +82,10 @@ onMounted(async () => {
     }
 
     await setProject()
+
+    nextTick(() => {
+        instance.tools.history.add('init')
+     })
 })
 </script>
 

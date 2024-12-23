@@ -11,7 +11,7 @@ const lastPressure = ref(0)
 
 const createDrawCheckpoint = debounce(() => {
     instance.tools.history.add('draw')
-}, 1000)
+}, 500)
 
 type EventParementer = {
     ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
@@ -25,7 +25,6 @@ function start(data: EventParementer) {
 
     if (instance.activeTool !== 'brush') return
 
-    // createDrawCheckpoint()
 
     isDrawing.value = true
     lastX.value = data.x
@@ -60,6 +59,7 @@ function draw(data: EventParementer) {
 
 function end() {
     isDrawing.value = false
+    instance.tools.history.add('draw')
 }
 
 // pointer events / pen events

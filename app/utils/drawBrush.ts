@@ -97,4 +97,6 @@ export function drawBrush(options: DrawBrushOptions) {
         ctx.fill()
         ctx.closePath()
     }
+
+    return { points }
 }
