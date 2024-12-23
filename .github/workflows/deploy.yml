@@ -27,7 +27,7 @@ jobs:
                 key: ${{ secrets.SSH_KEY }}
                 port: ${{ secrets.SSH_PORT }}
                 source: creative-draw.tar 
-                target: /home/${{ secrets.SSH_USER }}/creative-draw.tar
+                target: /home/${{ secrets.SSH_USER }}
                 debug: true
 
             - name: Load image 
