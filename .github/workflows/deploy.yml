@@ -28,6 +28,7 @@ jobs:
                 port: ${{ secrets.SSH_PORT }}
                 source: creative-draw.tar 
                 target: /home/${{ secrets.SSH_USER }}/creative-draw.tar
+                debug: true
 
             - name: Load image 
               uses: appleboy/ssh-action@v0.1.10
