@@ -32,6 +32,7 @@ jobs:
     load:
         name: Load and Restart
         runs-on: ubuntu-latest
+        depends-on: build
         steps:
             - name: Load image
               uses: appleboy/ssh-action@v0.1.10
@@ -58,6 +59,7 @@ jobs:
     clean:
         name: Clean up
         runs-on: ubuntu-latest
+        depends-on: load
         steps:
             - name: Clean up
               uses: appleboy/ssh-action@v0.1.10
