@@ -52,7 +52,7 @@ jobs:
                   port: ${{ secrets.SSH_PORT }}
                   command_timeout: 10m
                   script: |
-                      cd {{ secrets.DOCKER_COMPOSE_PATH }}
+                      cd ${{ secrets.DOCKER_COMPOSE_PATH }}
                       docker compose down
                       docker compose up --detach --wait --wait-timeout 120
 
