@@ -12,7 +12,7 @@ export interface DBProjectHandle {
     handle: FileSystemDirectoryHandle
 }
 
-export interface DBProjectDataLayer extends Omit<ProjectDataLayer, 'data'> {
+export interface DBProjectDataLayer extends Omit<ProjectDataLayer, 'canvas'> {
     data: Uint8ClampedArray
 }
 

@@ -17,7 +17,7 @@ export async function projectToImage({ project, type, responseType }: Options) {
         .reverse()
         .filter((layer) => layer.visible)
         .forEach((layer) => {
-            ctx.drawImage(layer.data, 0, 0)
+            ctx.drawImage(layer.canvas, 0, 0)
         })
 
     if (responseType === 'base64') {

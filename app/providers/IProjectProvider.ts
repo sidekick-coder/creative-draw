@@ -1,5 +1,3 @@
-import type { ProjectData } from '@/repositories/projectRepository'
-
 export interface IProjectProvider {
     id: string
     label?: string
