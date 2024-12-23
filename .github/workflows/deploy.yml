@@ -23,8 +23,9 @@ jobs:
               uses: appleboy/scp-action@v0.1.7
               with:
                 host: ${{ secrets.SSH_HOST }}
-                username: ${{ secrets.SSH_USERNAME }}
+                username: ${{ secrets.SSH_USER }}
                 key: ${{ secrets.SSH_KEY }}
+                port: ${{ secrets.SSH_PORT }}
                 source: creative-draw.tar 
                 target: /tmp/creative-draw.tar
 
@@ -32,7 +33,7 @@ jobs:
               uses: appleboy/ssh-action@v0.1.10
               with:
                 host: ${{ secrets.SSH_HOST }}
-                username: ${{ secrets.SSH_USERNAME }}
+                username: ${{ secrets.SSH_USER }}
                 key: ${{ secrets.SSH_KEY }}
                 port: ${{ secrets.SSH_PORT }}
                 script: docker load -i /tmp/creative-draw.tar
@@ -41,7 +42,7 @@ jobs:
               uses: appleboy/ssh-action@v0.1.10
               with:
                   host: ${{ secrets.SSH_HOST }}
-                  username: ${{ secrets.SSH_USERNAME }}
+                  username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   port: ${{ secrets.SSH_PORT }}
                   command_timeout: 10m
@@ -54,7 +55,7 @@ jobs:
               uses: appleboy/ssh-action@v0.1.10
               with:
                   host: ${{ secrets.SSH_HOST }}
-                  username: ${{ secrets.SSH_USERNAME }}
+                  username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   port: ${{ secrets.SSH_PORT }}
                   script: rm -rf /tmp/creative-draw.tar
