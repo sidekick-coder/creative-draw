@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Layer } from '@/composables/useInstance'
 const instance = useInstance()
 
 const activeId = computed({
@@ -10,8 +9,8 @@ const activeId = computed({
 })
 
 const layers = computed({
-    get: () => instance.layers || [],
-    set: (value: Layer[]) => {
+    get: () => instance.layers || [] as ProjectDataLayer[],
+    set: (value: ProjectDataLayer[]) => {
         value.forEach((l, i) => {
             l.order = value.length - i
         })
@@ -31,7 +30,7 @@ const editId = ref<string>()
 function onChangeName(id: string, event: Event) {
     const input = event.target as HTMLInputElement
 
-    const newLayers = layers.value.slice().map((l) => ({ ...l }))
+    const newLayers = layers.value.slice().map((l) => ({ ...l })) as ProjectDataLayer[]
 
     const item = newLayers.find((l) => l.id === id)
 
@@ -48,28 +47,32 @@ function addNew() {
     const index = layers.value.length + 1
     const id = createId()
 
-    const newLayers = layers.value.slice().map((l) => ({ ...l }))
+    const newLayers = layers.value.slice().map((l) => ({ ...l })) as ProjectDataLayer[]
 
     const width = instance.width
     const height = instance.height
+
+    const canvas = document.createElement('canvas')
+
+    canvas.width = width
+    canvas.height = height
 
     newLayers.unshift({
         id: id,
         type: 'paint',
         name: 'Layer ' + index,
         order: index,
-        data: new OffscreenCanvas(width, height),
+        canvas: canvas,
         width: width,
         height: height,
+        visible: true,
     })
 
     layers.value = newLayers
-
-    toggleVisible(id)
 }
 
 function remove(id: string) {
-    const newLayers = layers.value.slice().map((l) => ({ ...l }))
+    const newLayers = layers.value.slice().map((l) => ({ ...l })) as ProjectDataLayer[]
 
     const index = newLayers.findIndex((l) => l.id === id)
 
@@ -87,7 +90,7 @@ function onDrop({ item, dropTarget }: any) {
         return
     }
 
-    let newLayers = layers.value.slice().map((l) => ({ ...l }))
+    let newLayers = layers.value.slice().map((l) => ({ ...l })) as ProjectDataLayer[]
 
     const currentIndex = newLayers.findIndex((l) => l.id === item.id)
     const targetIndex = newLayers.findIndex((l) => l.id === dropTarget.id)
@@ -104,7 +107,7 @@ function onDrop({ item, dropTarget }: any) {
 }
 
 function toggleVisible(id: string) {
-    const newLayers = layers.value.slice().map((l) => ({ ...l }))
+    const newLayers = layers.value.slice().map((l) => ({ ...l })) as ProjectDataLayer[]
 
     const item = newLayers.find((l) => l.id === id)
 
@@ -139,49 +142,26 @@ const menu = ref(false)
 
                 <cd-drag-zone @drop="onDrop">
                     <cd-drag-item v-for="l in layers" :key="l.id" :model-value="l">
-                        <cd-list-item
-                            class="group flex"
-                            :active="l.id === activeId"
-                            @click="onClick(l.id)"
-                        >
+                        <cd-list-item class="group flex" :active="l.id === activeId" @click="onClick(l.id)">
                             <cd-ui-layer-preview v-if="menu" :model-value="l" />
 
                             <div class="flex-1 text-sm text-body-0" @dblclick="editId = l.id">
-                                <input
-                                    :value="l.name"
-                                    class="h-10 w-full bg-body-600 px-4 focus:outline-none"
-                                    :class="
-                                        editId === l.id
-                                            ? 'bg-body-600'
-                                            : 'bg-transparent cursor-pointer'
-                                    "
-                                    autofocus
-                                    :readonly="editId !== l.id"
-                                    @change="onChangeName(l.id, $event)"
-                                    @blur="editId = undefined"
-                                />
+                                <input :value="l.name" class="h-10 w-full bg-body-600 px-4 focus:outline-none" :class="editId === l.id
+                                        ? 'bg-body-600'
+                                        : 'bg-transparent cursor-pointer'
+                                    " autofocus :readonly="editId !== l.id" @change="onChangeName(l.id, $event)"
+                                    @blur="editId = undefined" />
                             </div>
 
                             <div class="flex">
-                                <cd-btn
-                                    variant="text"
-                                    padding="none"
-                                    size="sm"
-                                    color="none"
-                                    class="text-body-100 hover:text-body-50"
-                                    @click="remove(l.id)"
-                                >
+                                <cd-btn variant="text" padding="none" size="sm" color="none"
+                                    class="text-body-100 hover:text-body-50" @click="remove(l.id)">
                                     <cd-icon name="heroicons:trash-20-solid" />
                                 </cd-btn>
 
-                                <cd-btn
-                                    variant="text"
-                                    padding="none"
-                                    color="none"
-                                    class="text-body-100 hover:text-body-50"
-                                    size="sm"
-                                    @click.stop="toggleVisible(l.id)"
-                                >
+                                <cd-btn variant="text" padding="none" color="none"
+                                    class="text-body-100 hover:text-body-50" size="sm"
+                                    @click.stop="toggleVisible(l.id)">
                                     <cd-icon v-if="l.visible" name="heroicons:eye-20-solid" />
                                     <cd-icon v-else name="heroicons:eye-slash-20-solid" />
                                 </cd-btn>
