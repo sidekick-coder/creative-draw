@@ -18,7 +18,7 @@ export async function writeProjectToHandle(handle: FileSystemDirectoryHandle, da
     await drive.mkdir('/layers')
 
     for (const layer of data.layers) {
-        const layerCtx = layer.data.getContext('2d')!
+        const layerCtx = layer.canvas.getContext('2d')!
         const order = layer.order || 99
         const filename = `${$number.pad(order)}_${layer.name}`
 
@@ -33,12 +33,9 @@ export async function writeProjectToHandle(handle: FileSystemDirectoryHandle, da
         await drive.write(`/layers/${filename}.png`, png)
 
         json.layers.push({
+            ...layer,
+            canvas: undefined,
             id: layer.id || createId(),
-            name: layer.name,
-            width: layer.width,
-            height: layer.height,
-            type: layer.type,
-            visible: layer.visible,
             filename,
         })
     }
@@ -50,7 +47,7 @@ export async function writeProjectToHandle(handle: FileSystemDirectoryHandle, da
         .reverse()
         .filter((layer) => layer.visible)
         .forEach((l) => {
-            thumbnailCtx.drawImage(l.data, 0, 0)
+            thumbnailCtx.drawImage(l.canvas, 0, 0)
         })
 
     const blob = await thumbnailCanvas.convertToBlob()
@@ -88,7 +85,11 @@ export function createProjectProviderFSA(): IProjectProvider {
 
             const data = new Uint8Array(raw)
 
-            const canvas = new OffscreenCanvas(layer.width, layer.height)
+            const canvas = document.createElement('canvas')
+
+            canvas.width = layer.width
+            canvas.height = layer.height
+
             const ctx = canvas.getContext('2d')!
 
             const imageData = new ImageData(new Uint8ClampedArray(data), layer.width, layer.height)
@@ -96,14 +97,9 @@ export function createProjectProviderFSA(): IProjectProvider {
             ctx.putImageData(imageData, 0, 0)
 
             response.layers.push({
-                id: layer.id,
-                name: layer.name,
-                type: layer.type,
-                order: layer.order,
-                data: canvas,
-                width: layer.width,
-                height: layer.height,
-                visible: !!layer.visible,
+                ...layer,
+                canvas: canvas,
+                data: undefined,
             })
         }
 

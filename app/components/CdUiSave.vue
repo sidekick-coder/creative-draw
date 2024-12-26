@@ -117,15 +117,8 @@ function onLongPress(e: PointerEvent) {
 <template>
     <cd-menu v-model="menu" :open-on-click="false">
         <template #activator="{ attrs }">
-            <cd-btn
-                v-long-press="onLongPress"
-                v-bind="attrs"
-                variant="text"
-                padding="none"
-                size="md"
-                :loading="saving"
-                @click="onClick"
-            >
+            <cd-btn v-long-press="onLongPress" v-bind="attrs" variant="text" padding="none" size="md" :loading="saving"
+                @click="onClick">
                 <cd-icon name="mdi:content-save" />
             </cd-btn>
         </template>

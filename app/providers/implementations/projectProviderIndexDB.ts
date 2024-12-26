@@ -12,7 +12,6 @@ export function createProjectProviderIndexDB(): IProjectProvider {
             throw new Error(`Project ${id} not found`)
         }
 
-
         const response: ProjectData = {
             name: dbData.name,
             width: dbData.width,
@@ -23,8 +22,8 @@ export function createProjectProviderIndexDB(): IProjectProvider {
 
         for await (const layer of dbData.layers) {
             const canvas = document.createElement('canvas')
-            
-            canvas.width = layer.width 
+
+            canvas.width = layer.width
             canvas.height = layer.height
 
             const ctx = canvas.getContext('2d')!
@@ -58,15 +57,10 @@ export function createProjectProviderIndexDB(): IProjectProvider {
             const data = ctx.getImageData(0, 0, layer.width, layer.height).data
 
             json.layers.push({
-                id: layer.id,
-                name: layer.name,
-                type: layer.type,
-                order: layer.order,
-                width: layer.width,
-                height: layer.height,
-                visible: layer.visible,
+                ...layer,
+                canvas: undefined,
                 data: data,
-            })
+            } as any)
         }
 
         const thumbnail = await projectToImage({
@@ -104,15 +98,10 @@ export function createProjectProviderIndexDB(): IProjectProvider {
             const data = ctx.getImageData(0, 0, layer.width, layer.height).data
 
             json.layers.push({
-                id: layer.id,
-                name: layer.name,
-                type: layer.type,
-                order: layer.order,
-                width: layer.width,
-                height: layer.height,
-                visible: layer.visible,
+                ...layer,
+                canvas: undefined,
                 data: data,
-            })
+            } as any)
         }
 
         const thumbnail = await projectToImage({
