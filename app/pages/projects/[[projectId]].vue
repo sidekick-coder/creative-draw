@@ -78,10 +78,12 @@ function setNewProject() {
 
 onMounted(async () => {
     if (!projectId.value) {
-        return setNewProject()
+        setNewProject()
     }
 
-    await setProject()
+    if (projectId.value) {
+        await setProject()
+    }
 
     nextTick(() => {
         instance.tools.history.add('init')

@@ -58,7 +58,10 @@ function draw(data: EventParementer) {
 }
 
 function end() {
+    if (!isDrawing.value) return
+
     isDrawing.value = false
+
     instance.tools.history.add('draw')
 }
 
