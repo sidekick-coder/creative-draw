@@ -36,9 +36,8 @@ function onUpdate(id: string, layer: Partial<ProjectDataLayer>) {
 
     Object.assign(item, layer)
 
-    layers.value = newLayers 
+    layers.value = newLayers
 }
-
 
 function addNew() {
     const index = layers.value.length + 1
@@ -63,6 +62,7 @@ function addNew() {
         width: width,
         height: height,
         visible: true,
+        opacity: 1,
     })
 
     layers.value = newLayers
@@ -110,6 +110,51 @@ function onDrop({ item, dropTarget }: any) {
     instance.tools.history.add('moveLayer')
 }
 
+function moveDown(id: string) {
+    const newLayers = layers.value.slice().map((l) => ({ ...l }))
+
+    const index = newLayers.findIndex((l) => l.id === id)
+    const item = newLayers[index]
+
+    if (index === -1 || !item) {
+        return
+    }
+
+    if (index === newLayers.length - 1) {
+        return
+    }
+
+    newLayers.splice(index, 1)
+
+    newLayers.splice(index + 1, 0, item)
+
+    layers.value = newLayers
+
+    instance.tools.history.add('moveLayer')
+}
+
+function moveUp(id: string) {
+    const newLayers = layers.value.slice().map((l) => ({ ...l }))
+
+    const index = newLayers.findIndex((l) => l.id === id)
+    const item = newLayers[index]
+
+    if (index === -1 || !item) {
+        return
+    }
+
+    if (index === 0) {
+        return
+    }
+
+    newLayers.splice(index, 1)
+    newLayers.splice(index - 1, 0, item)
+
+    layers.value = newLayers
+
+    instance.tools.history.add('moveLayer')
+}
+
 const menu = ref(false)
 </script>
 <template>
@@ -138,6 +183,8 @@ const menu = ref(false)
                             @select="onSelect(l.id)"
                             @remove="onRemove(l.id)"
                             @update="onUpdate(l.id, $event)"
+                            @move-down="moveDown(l.id)"
+                            @move-up="moveUp(l.id)"
                         />
                     </cd-drag-item>
                 </cd-drag-zone>

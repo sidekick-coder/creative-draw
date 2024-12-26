@@ -6,7 +6,7 @@ const layer = defineModel({
 
 const width = defineProp<number>('width', {
     type: Number,
-    default: 100,
+    default: 50,
 })
 
 const height = computed(() => (width.value / layer.value.canvas.width) * layer.value.canvas.height)

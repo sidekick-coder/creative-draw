@@ -85,12 +85,23 @@ function toggleVisible() {
                     <cd-btn
                         variant="text"
                         padding="none"
-                        size="sm"
                         color="none"
                         class="text-body-100 hover:text-body-50"
-                        @click="emitRemove"
+                        size="sm"
+                        @click.stop="$emit('move-up')"
                     >
-                        <cd-icon name="heroicons:trash-20-solid" />
+                        <cd-icon name="heroicons:chevron-up-20-solid" />
+                    </cd-btn>
+
+                    <cd-btn
+                        variant="text"
+                        padding="none"
+                        color="none"
+                        class="text-body-100 hover:text-body-50"
+                        size="sm"
+                        @click.stop="$emit('move-down')"
+                    >
+                        <cd-icon name="heroicons:chevron-down-20-solid" />
                     </cd-btn>
 
                     <cd-btn
@@ -103,6 +114,17 @@ function toggleVisible() {
                     >
                         <cd-icon v-if="layer.visible" name="heroicons:eye-20-solid" />
                         <cd-icon v-else name="heroicons:eye-slash-20-solid" />
+                    </cd-btn>
+
+                    <cd-btn
+                        variant="text"
+                        padding="none"
+                        size="sm"
+                        color="none"
+                        class="text-body-100 hover:text-body-50"
+                        @click="emitRemove"
+                    >
+                        <cd-icon name="heroicons:trash-20-solid" />
                     </cd-btn>
                 </div>
             </cd-list-item>
