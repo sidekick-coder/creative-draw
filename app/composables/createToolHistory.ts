@@ -59,13 +59,17 @@ export function createToolHistory({ width, height, layers }: Options) {
             } as CheckpointLayer)
         }
 
-        if (history.value.length > maxHistory) {
-            history.value.shift()
+        const newHistory = history.value.slice(0, activeIndex.value + 1)
+
+        if (newHistory.length >= maxHistory) {
+            newHistory.shift()
         }
 
-        history.value.push(checkpoint)
+        newHistory.push(checkpoint)
 
-        activeIndex.value = history.value.length - 1
+        history.value = newHistory 
+
+        activeIndex.value = newHistory.length - 1
     }
 
     function set(id: string) {
