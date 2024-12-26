@@ -19,7 +19,6 @@ function start(data: EventParementer) {
 
     if (instance.activeTool !== 'brush') return
 
-
     isDrawing.value = true
     lastX.value = data.x
     lastY.value = data.y
@@ -98,7 +97,7 @@ onInstanceEvent('layer:touchstart', (data) => {
 
     if (data.event.touches.length === 1) {
         currentDevice.value = 'touch'
-        data.event.preventDefault() 
+        data.event.preventDefault()
         data.event.stopPropagation()
         start(data)
     }
@@ -112,15 +111,11 @@ onInstanceEvent('layer:touchmove', (data) => {
     }
 })
 
-onInstanceEvent('layer:touchend', (data) => {
+onInstanceEvent('layer:touchend', () => {
     if (currentDevice.value !== 'touch') return
 
-    if (data.event.touches.length === 1) {
-        end()
-    }
+    end()
 })
-
-
 
 // mouse events
 onInstanceEvent('layer:mousedown', (data) => {
