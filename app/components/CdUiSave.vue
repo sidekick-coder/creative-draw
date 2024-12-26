@@ -9,7 +9,6 @@ const projectId = defineProp<string>('projectId', {
 
 // save
 const instance = useInstance()
-
 const saving = ref(false)
 
 async function saveProject() {
@@ -73,7 +72,10 @@ async function saveImage(format: 'png' | 'jpeg') {
     const canvas = new OffscreenCanvas(instance.width, instance.height)
     const ctx = canvas.getContext('2d')!
 
-    const layers = instance.layers.slice().reverse().filter(l => l.visible) as ProjectDataLayer[]
+    const layers = instance.layers
+        .slice()
+        .reverse()
+        .filter((l) => l.visible) as ProjectDataLayer[]
 
     for (const layer of layers) {
         ctx.drawImage(layer.canvas as HTMLCanvasElement, 0, 0)
@@ -88,7 +90,6 @@ async function saveImage(format: 'png' | 'jpeg') {
     a.href = url
     a.download = `image.${format}`
     a.click()
-
 
     setTimeout(() => {
         saving.value = false
@@ -112,13 +113,39 @@ function onLongPress(e: PointerEvent) {
 
     menu.value = true
 }
+
+// autosave
+let autoSaveInterval: NodeJS.Timeout
+
+function autosave() {
+    if (!projectId.value) {
+        return
+    }
+
+    saveProject()
+}
+
+onMounted(() => {
+    autoSaveInterval = setInterval(autosave, 1000 * 30 * 1) // 1 minutes
+})
+
+onUnmounted(() => {
+    clearInterval(autoSaveInterval)
+})
 </script>
 
 <template>
     <cd-menu v-model="menu" :open-on-click="false">
         <template #activator="{ attrs }">
-            <cd-btn v-long-press="onLongPress" v-bind="attrs" variant="text" padding="none" size="md" :loading="saving"
-                @click="onClick">
+            <cd-btn
+                v-long-press="onLongPress"
+                v-bind="attrs"
+                variant="text"
+                padding="none"
+                size="md"
+                :loading="saving"
+                @click="onClick"
+            >
                 <cd-icon name="mdi:content-save" />
             </cd-btn>
         </template>
