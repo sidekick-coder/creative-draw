@@ -5,6 +5,29 @@ const model = defineModel({
     type: Object as PropType<ProjectDataLayer>,
     required: true,
 })
+
+const zIndex = defineProp<number>('zIndex', {
+    type: Number,
+    default: 0,
+})
+
+const active = defineProp<boolean>('active', {
+    type: Boolean,
+    default: false,
+})
+
+const opacity = computed(() => {
+    if (!model.value.visible) {
+        return 0
+    }
+
+    if (isNaN(model.value.opacity)) {
+        return 1
+    }
+
+    return model.value.opacity
+})
+
 // events
 function onPointerEvent(e: PointerEvent) {
     const ctx = canvas.value!.getContext('2d')!
@@ -29,13 +52,11 @@ function onTouchEvent(e: TouchEvent) {
     let y = 0
     let force = 0
 
-
     if (touch) {
         x = (touch.clientX - rect.x) * (canvas.value!.width / rect.width)
         y = (touch.clientY - rect.y) * (canvas.value!.height / rect.height)
         force = touch.force
     }
-
 
     instance.emit(`layer:${e.type}`, {
         event: e,
@@ -85,7 +106,6 @@ function load() {
     canvas.value.addEventListener('touchmove', onTouchEvent)
     canvas.value.addEventListener('touchend', onTouchEvent)
     canvas.value.addEventListener('touchcancel', onTouchEvent)
-
 }
 
 function unload() {
@@ -115,5 +135,13 @@ onBeforeUnmount(unload)
 </script>
 
 <template>
-    <div ref="root" class="absolute left-0 top-0 size-full"></div>
+    <div
+        ref="root"
+        class="absolute left-0 top-0 size-full"
+        :style="{
+            'opacity': opacity,
+            'pointer-events': active ? 'auto' : 'none',
+            'z-index': zIndex,
+        }"
+    ></div>
 </template>

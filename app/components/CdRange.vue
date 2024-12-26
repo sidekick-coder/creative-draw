@@ -9,7 +9,7 @@ const { set, classes } = useClassBuilder({
     class: className,
 })
 
-set('base', 'cd-range')
+set('base', 'cd-range bg-body-800/50 rounded')
 
 // model
 const model = defineModel({
@@ -65,6 +65,7 @@ const thumb = computed(() => ({
         v-model.number="model"
         :style="{ [orientation]: '100%' }"
         type="range"
+        autocomplete="off"
         :min
         :max
         :step
@@ -74,8 +75,6 @@ const thumb = computed(() => ({
 
 <style lang="scss">
 .cd-range {
-    @apply bg-body-800/50 rounded;
-
     -webkit-appearance: none;
     appearance: none;
     outline: none;

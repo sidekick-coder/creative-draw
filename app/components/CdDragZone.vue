@@ -1,5 +1,11 @@
 <script setup lang="ts">
-const emitDrop = defineEmit('drop')
+
+interface DropEvent {
+    item: any
+    dropTarget: any
+}
+
+const emitDrop = defineEmit<(data: DropEvent) => any>('drop')
 
 interface Item {
     id: string

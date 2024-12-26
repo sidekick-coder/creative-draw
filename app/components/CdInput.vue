@@ -36,7 +36,7 @@ labelClassMap.value.set(
 )
 
 // input container
-const inputContainerClassName = defineProp<string>('input-container-class', {
+const inputContainerClassName = defineProp<string>('inputContainerClass', {
     type: String,
     default: null,
 })

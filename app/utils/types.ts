@@ -12,6 +12,7 @@ export interface ProjectDataLayer {
     width: number
     height: number
     visible: boolean
+    opacity: number
 }
 
 export interface ProjectData {

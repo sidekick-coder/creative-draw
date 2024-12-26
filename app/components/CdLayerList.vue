@@ -32,16 +32,12 @@ function focus() {
                 v-for="(l, i) in instance.layers"
                 :key="l.id"
                 :model-value="l"
+                :active="instance.activeLayerId === l.id"
+                :width="width"
+                :height="height"
+                :z-index="instance.layers.length - i"
                 class="absolute"
-                :style="{
-                    'pointer-events': instance.activeLayerId === l.id ? 'auto' : 'none',
-                    'z-index': instance.layers.length - i,
-                    'opacity': l.visible ? 1 : 0,
-                    'height': `${height}px`,
-                    'width': `${width}px`,
-                }"
             />
         </div>
-
     </div>
 </template>

@@ -6,7 +6,7 @@ const layer = defineModel({
 
 const width = defineProp<number>('width', {
     type: Number,
-    default: 50,
+    default: 100,
 })
 
 const height = computed(() => (width.value / layer.value.canvas.width) * layer.value.canvas.height)
@@ -43,7 +43,9 @@ onMounted(() => {
     canvas.value.width = width.value
     canvas.value.height = height.value
 
-    interval = setInterval(() => render(), 16)
+    render()
+
+    interval = setInterval(render, 1000 * 60) // 1 minute
 })
 
 onUnmounted(() => {
@@ -60,7 +62,7 @@ const { classes, set } = useClassBuilder({
     class: className,
 })
 
-set('base', 'bg-body-200')
+set('base', 'bg-body-0')
 </script>
 <template>
     <cd-card :class="classes">
