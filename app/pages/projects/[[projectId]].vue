@@ -87,7 +87,7 @@ onMounted(async () => {
 
     nextTick(() => {
         instance.tools.history.add('init')
-     })
+    })
 })
 </script>
 

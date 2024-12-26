@@ -117,4 +117,3 @@ watch(dragging, () => {
         <canvas ref="canvas" :width :height />
     </div>
 </template>
-

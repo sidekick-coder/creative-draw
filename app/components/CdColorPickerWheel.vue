@@ -74,9 +74,9 @@ function findColorByPosition(x: number, y: number): ColorRGB {
     const pixel = ctx.getImageData(pixelX, pixelY, 1, 1).data
 
     return {
-    r: pixel[0] || 0,
-    g: pixel[1] || 0,
-    b: pixel[2] || 0,
+        r: pixel[0] || 0,
+        g: pixel[1] || 0,
+        b: pixel[2] || 0,
     }
 }
 
@@ -99,7 +99,7 @@ function setPosition() {
             pixelX = Math.max(0, Math.min(pixelX, canvas.value.width))
             pixelY = Math.max(0, Math.min(pixelY, canvas.value.height))
 
-            position.value = { x: pixelX, y: pixelY  }
+            position.value = { x: pixelX, y: pixelY }
 
             return
         }
@@ -129,7 +129,6 @@ function onPointermove(e: PointerEvent) {
     y -= 8
 
     position.value = { x, y }
-
 }
 
 function onPointerup() {

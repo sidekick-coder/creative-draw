@@ -1,12 +1,11 @@
 <script setup lang="ts">
 // general
-
 const className = defineProp<string>('class', {
     type: String,
     default: null,
 })
 
-const { set, map, classes } = useClassBuilder({ class: className })
+const { set, classes } = useClassBuilder({ class: className })
 
 set('base', 'inline transition-all rounded-md text-center font-bold')
 

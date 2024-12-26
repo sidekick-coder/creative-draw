@@ -113,7 +113,6 @@ onInstanceEvent('container:touchend', (data) => {
 
     isGesturePanning.value = false
 })
-
 </script>
 
 <template>

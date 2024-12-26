@@ -46,7 +46,6 @@ function onWheel(event: WheelEvent) {
 function onUp() {
     isPannig.value = false
 }
-
 </script>
 
 <template>

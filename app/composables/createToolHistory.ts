@@ -37,7 +37,7 @@ export function createToolHistory({ width, height, layers }: Options) {
         const checkpoint: Checkpoint = {
             id,
             label,
-            layers: [],            
+            layers: [],
         }
 
         for (const layer of layers.value) {
@@ -67,7 +67,7 @@ export function createToolHistory({ width, height, layers }: Options) {
 
         newHistory.push(checkpoint)
 
-        history.value = newHistory 
+        history.value = newHistory
 
         activeIndex.value = newHistory.length - 1
     }
@@ -83,7 +83,7 @@ export function createToolHistory({ width, height, layers }: Options) {
         const newLayers: ProjectDataLayer[] = []
 
         for (const layer of item.layers) {
-            const canvas = document.createElement('canvas') 
+            const canvas = document.createElement('canvas')
 
             canvas.width = layer.width
             canvas.height = layer.height
