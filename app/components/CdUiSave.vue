@@ -73,13 +73,10 @@ async function saveImage(format: 'png' | 'jpeg') {
     const canvas = new OffscreenCanvas(instance.width, instance.height)
     const ctx = canvas.getContext('2d')!
 
-    const layers = instance.layers
-        .slice()
-        .reverse()
-        .filter((layer) => layer.visible)
+    const layers = instance.layers.slice().reverse().filter(l => l.visible) as ProjectDataLayer[]
 
     for (const layer of layers) {
-        ctx.drawImage(layer.data, 0, 0)
+        ctx.drawImage(layer.canvas as HTMLCanvasElement, 0, 0)
     }
 
     const blob = await canvas.convertToBlob({ type: `image/${format}` })
@@ -91,6 +88,7 @@ async function saveImage(format: 'png' | 'jpeg') {
     a.href = url
     a.download = `image.${format}`
     a.click()
+
 
     setTimeout(() => {
         saving.value = false
