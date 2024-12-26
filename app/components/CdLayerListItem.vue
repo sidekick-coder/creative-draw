@@ -25,14 +25,24 @@ function onTouchEvent(e: TouchEvent) {
 
     const touch = e.touches[0]
 
-    if (!touch) return
+    let x = 0
+    let y = 0
+    let force = 0
+
+
+    if (touch) {
+        x = (touch.clientX - rect.x) * (canvas.value!.width / rect.width)
+        y = (touch.clientY - rect.y) * (canvas.value!.height / rect.height)
+        force = touch.force
+    }
+
 
     instance.emit(`layer:${e.type}`, {
         event: e,
         ctx,
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top,
-        pressure: touch.force,
+        x,
+        y,
+        pressure: force,
     })
 }
 
@@ -74,6 +84,8 @@ function load() {
     canvas.value.addEventListener('touchstart', onTouchEvent)
     canvas.value.addEventListener('touchmove', onTouchEvent)
     canvas.value.addEventListener('touchend', onTouchEvent)
+    canvas.value.addEventListener('touchcancel', onTouchEvent)
+
 }
 
 function unload() {
@@ -92,6 +104,7 @@ function unload() {
     canvas.value.removeEventListener('touchstart', onTouchEvent)
     canvas.value.removeEventListener('touchmove', onTouchEvent)
     canvas.value.removeEventListener('touchend', onTouchEvent)
+    canvas.value.removeEventListener('touchcancel', onTouchEvent)
 
     canvas.value.remove()
 }

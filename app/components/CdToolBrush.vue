@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import debounce from 'lodash/debounce'
-
 const instance = useInstance()
 
 const isDrawing = ref(false)
@@ -8,10 +6,6 @@ const currentDevice = ref('mouse')
 const lastX = ref(0)
 const lastY = ref(0)
 const lastPressure = ref(0)
-
-const createDrawCheckpoint = debounce(() => {
-    instance.tools.history.add('draw')
-}, 500)
 
 type EventParementer = {
     ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
@@ -102,12 +96,10 @@ onInstanceEvent('layer:touchstart', (data) => {
 
     if (isDrawing.value) return
 
-    if (data.event.touches.length > 1) {
-        end()
-    }
-
     if (data.event.touches.length === 1) {
         currentDevice.value = 'touch'
+        data.event.preventDefault() 
+        data.event.stopPropagation()
         start(data)
     }
 })
@@ -128,6 +120,9 @@ onInstanceEvent('layer:touchend', (data) => {
     }
 })
 
+
+
+// mouse events
 onInstanceEvent('layer:mousedown', (data) => {
     currentDevice.value = 'mouse'
 

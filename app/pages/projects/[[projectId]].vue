@@ -98,6 +98,8 @@ onMounted(async () => {
         <cd-tool-brush />
         <cd-tool-eraser />
 
+        <cd-gestures />
+
         <cd-ui-brush-settings />
 
         <cd-ui-toolbar class="absolute left-2 top-2">
