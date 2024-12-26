@@ -70,6 +70,8 @@ function addNew() {
 
     layers.value = newLayers
     activeId.value = id
+
+    instance.tools.history.add('addLayer')
 }
 
 function remove(id: string) {
@@ -84,6 +86,8 @@ function remove(id: string) {
     newLayers.splice(index, 1)
 
     layers.value = newLayers
+
+    instance.tools.history.add('removeLayer')
 }
 
 function onDrop({ item, dropTarget }: any) {
@@ -105,6 +109,8 @@ function onDrop({ item, dropTarget }: any) {
     newLayers.splice(targetIndex, 0, removedItem!)
 
     layers.value = newLayers
+
+    instance.tools.history.add('moveLayer')
 }
 
 function toggleVisible(id: string) {
@@ -119,6 +125,8 @@ function toggleVisible(id: string) {
     item.visible = !item.visible
 
     layers.value = newLayers
+
+    instance.tools.history.add('toggleLayerVisibility')
 }
 
 const menu = ref(false)
