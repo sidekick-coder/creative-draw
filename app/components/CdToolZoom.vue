@@ -124,7 +124,7 @@ onInstanceEvent('container:touchmove', ({ event }) => {
     const diff = Math.abs(pinch.value.distance - distance)
 
     if (diff > 100) {
-        const factor = 5
+        const factor = 0.05
         const zoomDelta = distance > pinch.value.distance ? 1 : -1
         const newScale = instance.tools.zoomAndPan.scale + zoomDelta * factor
 

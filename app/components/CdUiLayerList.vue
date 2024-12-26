@@ -69,6 +69,7 @@ function addNew() {
     })
 
     layers.value = newLayers
+    activeId.value = id
 }
 
 function remove(id: string) {
