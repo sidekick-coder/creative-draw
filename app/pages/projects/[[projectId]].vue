@@ -38,18 +38,15 @@ function setNewProject() {
     width.value = w
     height.value = h
 
-    const bgLayer: ProjectDataLayer = {
+    const bgLayer = makeLayer({
         id: createId(),
         name: 'Background',
-        order: 1,
-        type: 'paint',
         width: w,
         height: h,
         canvas: document.createElement('canvas'),
-        visible: true,
-    }
+    })
 
-    const paintLayer: ProjectDataLayer = {
+    const paintLayer = makeLayer({
         id: createId(),
         name: 'Paint',
         order: 2,
@@ -57,8 +54,7 @@ function setNewProject() {
         width: w,
         height: h,
         canvas: document.createElement('canvas'),
-        visible: true,
-    }
+    })
 
     bgLayer.canvas.width = w
     bgLayer.canvas.height = h

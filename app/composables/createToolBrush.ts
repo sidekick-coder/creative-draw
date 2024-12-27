@@ -29,6 +29,12 @@ export function createToolBrush() {
         { immediate: true }
     )
 
+    watch(active, () => {
+        $track('click_brush', {
+            brush_id: active.value?.id,
+        })
+    })
+
     return {
         active,
         activeId,

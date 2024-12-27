@@ -51,4 +51,14 @@ export default defineNuxtConfig({
             },
         },
     },
+    runtimeConfig: {
+        public: {
+            trackingEnabled: false,
+            trackingDebug: false,
+
+            posthogPublicKey: '',
+            posthogHost: '',
+            posthogDebug: false,
+        },
+    },
 })

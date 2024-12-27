@@ -12,7 +12,8 @@ const active = defineProp<boolean>('active', {
 const emitUpdate = defineEmit<(d: Partial<ProjectDataLayer>) => any>('update')
 const emitSelect = defineEmit('select')
 const emitRemove = defineEmit('remove')
-
+const emitMoveUp = defineEmit('move-up')
+const emitMoveDown = defineEmit('move-down')
 // menu
 const menu = ref(false)
 
@@ -88,7 +89,7 @@ function toggleVisible() {
                         color="none"
                         class="text-body-100 hover:text-body-50"
                         size="sm"
-                        @click.stop="$emit('move-up')"
+                        @click.stop="emitMoveUp"
                     >
                         <cd-icon name="heroicons:chevron-up-20-solid" />
                     </cd-btn>
@@ -99,7 +100,7 @@ function toggleVisible() {
                         color="none"
                         class="text-body-100 hover:text-body-50"
                         size="sm"
-                        @click.stop="$emit('move-down')"
+                        @click.stop="emitMoveDown"
                     >
                         <cd-icon name="heroicons:chevron-down-20-solid" />
                     </cd-btn>

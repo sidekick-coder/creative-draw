@@ -19,6 +19,7 @@
 		"drive-fsa": "^1.0.7",
 		"maska": "^3.0.4",
 		"nuxt": "^3.13.0",
+		"posthog-js": "^1.203.2",
 		"vue": "latest",
 		"vue-router": "latest"
 	},
