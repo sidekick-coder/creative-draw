@@ -44,7 +44,10 @@ function onDraw(data: InstanceEvents['layer:pointermove']) {
 }
 
 function end() {
+    if (!isDrawing.value) return
+
     isDrawing.value = false
+    instance.tools.history.add('eraser')
 }
 
 onMounted(() => {
