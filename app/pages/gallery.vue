@@ -85,9 +85,9 @@ onMounted(setProjects)
 </script>
 
 <template>
-    <div class="w-dvh flex h-dvh">
-        <div class="w-10/12 p-5">
-            <div class="mb-8 flex w-full">
+    <div class="w-dvh flex h-dvh flex-col lg:flex-row">
+        <div class="flex-1 overflow-y-auto p-5">
+            <div class="mb-8 flex w-full flex-col md:flex-row">
                 <h1 class="mb-4 flex-1 text-2xl font-bold">Projects</h1>
 
                 <div class="flex gap-x-2">
@@ -123,7 +123,7 @@ onMounted(setProjects)
 
                     <cd-menu>
                         <template #activator="{ attrs }">
-                            <cd-btn v-bind="attrs" color="body-700"> Create new </cd-btn>
+                            <cd-btn v-bind="attrs" color="body-700"> Create </cd-btn>
                         </template>
 
                         <div class="p-2">
@@ -209,7 +209,7 @@ onMounted(setProjects)
                     <cd-card-content> No projects yet </cd-card-content>
                 </div>
 
-                <div v-for="project in projects" :key="project.id" class="w-3/12">
+                <div v-for="project in projects" :key="project.id" class="w-full md:w-3/12">
                     <cd-card class="relative h-0 w-full pb-[75%]" :to="`/projects/${project.id}`">
                         <img
                             v-if="project.thumbnail"
@@ -261,10 +261,12 @@ onMounted(setProjects)
                 </div>
             </div>
         </div>
-        <div class="flex w-2/12 flex-col gap-y-8 bg-body-700 p-4">
-                <client-only>
-                    <cd-ad />
-                </client-only>
+        <div
+            class="flex h-40 w-full flex-col gap-y-8 overflow-auto bg-body-700 lg:h-full lg:w-3/12 xl:w-2/12"
+        >
+            <client-only>
+                <cd-ad />
+            </client-only>
         </div>
     </div>
 </template>
