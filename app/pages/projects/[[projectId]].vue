@@ -99,7 +99,7 @@ onMounted(async () => {
         <cd-ui-brush-settings />
 
         <cd-ui-toolbar class="absolute left-2 top-2">
-            <cd-btn padding="none" size="md" variant="text" @click="navigateTo('/')">
+            <cd-btn padding="none" size="md" variant="text" to="/gallery">
                 <cd-icon name="heroicons:home-20-solid" />
             </cd-btn>
 
