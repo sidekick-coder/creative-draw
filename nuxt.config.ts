@@ -10,6 +10,13 @@ export default defineNuxtConfig({
                         'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
                 },
             ],
+            link: [
+                {
+                    rel: 'icon',
+                    type: 'image/x-icon',
+                    href: '/favicon.ico',
+                },
+            ],
         },
     },
     compatibilityDate: '2024-04-03',
