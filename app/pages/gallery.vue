@@ -262,9 +262,9 @@ onMounted(setProjects)
             </div>
         </div>
         <div class="flex w-2/12 flex-col gap-y-8 bg-body-700 p-4">
-            <div v-for="i in 3" :key="i">
-                <cd-card class="flex h-32 items-center justify-center">AD</cd-card>
-            </div>
+                <client-only>
+                    <cd-ad />
+                </client-only>
         </div>
     </div>
 </template>

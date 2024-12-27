@@ -15,11 +15,9 @@ const { googleAdsenseClientId } = runtimeConfig.public
     </dev-only>
 
     <Head>
-        <Meta
-            v-if="googleAdsenseClientId"
-            name="google-adsense-account"
-            :content="googleAdsenseClientId"
-        />
+        <template v-if="googleAdsenseClientId">
+            <Meta name="google-adsense-account" :content="googleAdsenseClientId" />
+        </template>
     </Head>
 </template>
 
