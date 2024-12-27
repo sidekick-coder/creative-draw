@@ -1,3 +1,8 @@
+<script setup lang="ts">
+const runtimeConfig = useRuntimeConfig()
+
+const { googleAdsenseClientId } = runtimeConfig.public
+</script>
 <template>
     <nuxt-layout>
         <nuxt-page />
@@ -8,12 +13,21 @@
             <eruda-devtools />
         </client-only>
     </dev-only>
+
+    <Head>
+        <Meta
+            v-if="googleAdsenseClientId"
+            name="google-adsense-account"
+            :content="googleAdsenseClientId"
+        />
+    </Head>
 </template>
 
 <style>
 body {
     @apply bg-body-800 text-body-0;
 }
+
 /* Scrollbar */
 *::-webkit-scrollbar {
     width: 0.5em;

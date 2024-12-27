@@ -59,6 +59,9 @@ export default defineNuxtConfig({
             posthogPublicKey: '',
             posthogHost: '',
             posthogDebug: false,
+
+            googleAdsenseEnabled: false,
+            googleAdsenseClientId: '',
         },
     },
 })
