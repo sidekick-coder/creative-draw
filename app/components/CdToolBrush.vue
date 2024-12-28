@@ -31,7 +31,7 @@ function draw(data: EventParementer) {
 
     if (instance.activeTool !== 'brush') return
 
-    drawBrush({
+    const { points } = drawBrush({
         ctx: data.ctx,
         brush: brush.value,
         color: instance.tools.color.color,
@@ -45,6 +45,8 @@ function draw(data: EventParementer) {
         lastPressure: lastPressure.value,
     })
 
+    instance.addPoints(instance.activeLayerId!, points)
+
     lastX.value = data.x
     lastY.value = data.y
     lastPressure.value = data.pressure
@@ -55,7 +57,7 @@ function end() {
 
     isDrawing.value = false
 
-    instance.tools.history.add('draw')
+    // instance.tools.history.add('draw')
 }
 
 // pointer events / pen events

@@ -8,7 +8,7 @@ export interface ProjectDataLayer {
     name: string
     type: 'paint'
     order: number
-    canvas: HTMLCanvasElement
+    points: DrawBrushResultPoint[]
     width: number
     height: number
     visible: boolean

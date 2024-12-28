@@ -82,15 +82,7 @@ const root = ref<HTMLElement>()
 const canvas = ref<HTMLCanvasElement>()
 
 function load() {
-    if (!root.value) return
-
-    if (canvas.value) {
-        unload()
-    }
-
-    canvas.value = model.value.canvas
-
-    root.value.appendChild(canvas.value)
+    if (!canvas.value) return
 
     canvas.value.addEventListener('mousedown', onMouseEvent)
     canvas.value.addEventListener('mousemove', onMouseEvent)
@@ -108,30 +100,39 @@ function load() {
     canvas.value.addEventListener('touchcancel', onTouchEvent)
 }
 
-function unload() {
-    if (!canvas.value) return
+onMounted(load)
 
-    canvas.value.removeEventListener('mousedown', onMouseEvent)
-    canvas.value.removeEventListener('mousemove', onMouseEvent)
-    canvas.value.removeEventListener('mouseup', onMouseEvent)
-    canvas.value.removeEventListener('mouseout', onMouseEvent)
+// render
+function render() {
+    const ctx = canvas.value!.getContext('2d')!
 
-    canvas.value.removeEventListener('pointerdown', onPointerEvent)
-    canvas.value.removeEventListener('pointermove', onPointerEvent)
-    canvas.value.removeEventListener('pointerup', onPointerEvent)
-    canvas.value.removeEventListener('pointerout', onPointerEvent)
+    const strokes = model.value.points.filter((p) => !p.shape)
+    const rects = model.value.points.filter((p) => p.shape === 'rect')
 
-    canvas.value.removeEventListener('touchstart', onTouchEvent)
-    canvas.value.removeEventListener('touchmove', onTouchEvent)
-    canvas.value.removeEventListener('touchend', onTouchEvent)
-    canvas.value.removeEventListener('touchcancel', onTouchEvent)
+    for (const point of strokes) {
+        const { x, y, size, color, opacity } = point
+        
+        ctx.globalAlpha = opacity
+        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`
 
-    canvas.value.remove()
+        ctx.beginPath()
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.closePath()
+    }
+
+
+    for (const point of rects) {
+        const { x, y, width, height, color, opacity } = point
+
+        ctx.globalAlpha = opacity
+        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`
+
+        ctx.fillRect(x, y, width, height)
+    }
 }
 
-watch(() => model.value.canvas, load)
-onMounted(load)
-onBeforeUnmount(unload)
+onMounted(render)
 </script>
 
 <template>
@@ -143,5 +144,7 @@ onBeforeUnmount(unload)
             'pointer-events': active ? 'auto' : 'none',
             'z-index': zIndex,
         }"
-    ></div>
+    >
+        <canvas ref="canvas" :width="model.width" :height="model.height" />
+    </div>
 </template>

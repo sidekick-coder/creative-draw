@@ -1,6 +1,4 @@
 export function makeLayer(payload: Partial<ProjectDataLayer>): ProjectDataLayer {
-    const canvas = payload.canvas || document.createElement('canvas')
-
     return {
         id: createId(),
         name: 'Layer',
@@ -8,9 +6,9 @@ export function makeLayer(payload: Partial<ProjectDataLayer>): ProjectDataLayer 
         opacity: 1,
         visible: true,
         order: 1,
-        width: canvas.width,
-        height: canvas.height,
-        canvas,
+        width: 500,
+        height: 500,
+        points: [],
         ...payload,
     }
 }

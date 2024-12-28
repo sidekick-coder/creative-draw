@@ -43,7 +43,6 @@ function setNewProject() {
         name: 'Background',
         width: w,
         height: h,
-        canvas: document.createElement('canvas'),
     })
 
     const paintLayer = makeLayer({
@@ -53,20 +52,18 @@ function setNewProject() {
         type: 'paint',
         width: w,
         height: h,
-        canvas: document.createElement('canvas'),
     })
 
-    bgLayer.canvas.width = w
-    bgLayer.canvas.height = h
-
-    paintLayer.canvas.width = w
-    paintLayer.canvas.height = h
-
-    const ctx = bgLayer.canvas.getContext('2d')!
-
-    ctx.fillStyle = 'white'
-
-    ctx.fillRect(0, 0, w, h)
+    // fill bg layer
+    bgLayer.points.push({
+        x: 0,
+        y: 0,
+        opacity: 1,
+        color: { r: 255, g: 255, b: 255 },
+        width: w,
+        height: h,
+        shape: 'rect',
+    })
 
     instance.setLayers([paintLayer, bgLayer])
     instance.setActiveLayer(paintLayer.id)
@@ -82,7 +79,7 @@ onMounted(async () => {
     }
 
     nextTick(() => {
-        instance.tools.history.add('init')
+        //       instance.tools.history.add('init')
     })
 })
 </script>

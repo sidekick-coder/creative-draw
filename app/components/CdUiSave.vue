@@ -117,7 +117,7 @@ function autosave() {
         return
     }
 
-    saveProject()
+//    saveProject()
 }
 
 onMounted(() => {

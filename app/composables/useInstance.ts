@@ -124,6 +124,15 @@ export function makeInstance() {
     function setVisibleLayers(layerIds: string[]) {
         visibleLayers.value = layerIds
     }
+    function addPoints(layerId: string, points: DrawBrushResultPoint[]) {
+        const layer = layers.value.find((l) => l.id === layerId)
+
+        if (!layer) {
+            return
+        }
+
+        layer.points.push(...points)
+    }
 
     // tools
     const activeTool = ref<string>('brush')
@@ -165,6 +174,7 @@ export function makeInstance() {
         setLayers,
         setActiveLayer,
         setVisibleLayers,
+        addPoints,
 
         activeTool: readonly(activeTool),
         tools,

@@ -11,9 +11,26 @@ export interface DrawBrushOptions {
     globalCompositeOperation?: 'source-over' | 'destination-out'
 }
 
+export interface DrawBrushResultPoint {
+    x: number
+    y: number
+
+    color: ColorRGB
+    size: number
+    opacity: number
+}
+
+export interface DrawBrushResult {
+    points: DrawBrushResultPoint[]
+}
+
 export function drawBrush(options: DrawBrushOptions) {
     const ctx = options.ctx
     const globalCompositeOperation = options.globalCompositeOperation || 'source-over'
+
+    const result: DrawBrushResult = {
+        points: [],
+    }
 
     const brush = options.brush
 
@@ -83,6 +100,14 @@ export function drawBrush(options: DrawBrushOptions) {
                 ctx.beginPath()
                 ctx.arc(x + offsetX, y + offsetY, grainSize / 2, 0, Math.PI * 2)
                 ctx.fill()
+
+                result.points.push({
+                    x: x + offsetX,
+                    y: y + offsetY,
+                    color,
+                    size: grainSize,
+                    opacity: grainOpacity,
+                })
             }
 
             continue
@@ -96,7 +121,9 @@ export function drawBrush(options: DrawBrushOptions) {
         ctx.arc(x, y, size / 2, 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath()
+
+        result.points.push({ x, y, color, size, opacity })
     }
 
-    return { points }
+    return result
 }

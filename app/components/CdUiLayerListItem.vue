@@ -65,7 +65,7 @@ function toggleVisible() {
                 @click="onClick"
                 @dblclick="menu = true"
             >
-                <cd-ui-layer-list-item-preview :model-value="layer" />
+                <!--               <cd-ui-layer-list-item-preview :model-value="layer" /> -->
 
                 <div class="flex-1 text-sm text-body-0" @dblclick.prevent.stop="edit = true">
                     <input

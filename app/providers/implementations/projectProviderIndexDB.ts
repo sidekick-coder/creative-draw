@@ -17,25 +17,7 @@ export function createProjectProviderIndexDB(): IProjectProvider {
             width: dbData.width,
             height: dbData.height,
             thumbnail: dbData.thumbnail,
-            layers: [],
-        }
-
-        for await (const layer of dbData.layers) {
-            const canvas = document.createElement('canvas')
-
-            canvas.width = layer.width
-            canvas.height = layer.height
-
-            const ctx = canvas.getContext('2d')!
-
-            const imageData = new ImageData(layer.data, layer.width, layer.height)
-
-            ctx.putImageData(imageData, 0, 0)
-
-            response.layers.push({
-                ...layer,
-                canvas,
-            })
+            layers: dbData.layers,
         }
 
         return response
@@ -52,24 +34,8 @@ export function createProjectProviderIndexDB(): IProjectProvider {
         }
 
         for await (const layer of payload.layers) {
-            const ctx = layer.canvas.getContext('2d')!
-
-            const data = ctx.getImageData(0, 0, layer.width, layer.height).data
-
-            json.layers.push({
-                ...layer,
-                canvas: undefined,
-                data: data,
-            } as any)
+            json.layers.push(copy(layer))
         }
-
-        const thumbnail = await projectToImage({
-            project: payload as ProjectData,
-            type: 'png',
-            responseType: 'base64',
-        })
-
-        json.thumbnail = thumbnail as string
 
         await db.project_data.put(json)
 
@@ -93,24 +59,8 @@ export function createProjectProviderIndexDB(): IProjectProvider {
         }
 
         for await (const layer of payload.layers) {
-            const ctx = layer.canvas.getContext('2d')!
-
-            const data = ctx.getImageData(0, 0, layer.width, layer.height).data
-
-            json.layers.push({
-                ...layer,
-                canvas: undefined,
-                data: data,
-            } as any)
+            json.layers.push(copy(layer))
         }
-
-        const thumbnail = await projectToImage({
-            project: payload as ProjectData,
-            type: 'png',
-            responseType: 'base64',
-        })
-
-        json.thumbnail = thumbnail as string
 
         await db.project_data.put(json)
     }
