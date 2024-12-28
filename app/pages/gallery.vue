@@ -6,6 +6,10 @@ import {
     providers,
 } from '~/repositories/projectRepository'
 
+const runtimeConfig = useRuntimeConfig()
+
+const { googleAdsenseEnabled } = runtimeConfig.public
+
 definePageMeta({
     tile: 'Creative draw',
 })
@@ -261,6 +265,7 @@ onMounted(setProjects)
             </div>
         </div>
         <div
+            v-if="googleAdsenseEnabled"
             class="flex h-40 w-full flex-col gap-y-8 overflow-auto bg-body-700 lg:h-full lg:w-3/12 xl:w-2/12"
         >
             <client-only>
