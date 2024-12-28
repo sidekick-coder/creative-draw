@@ -3,7 +3,7 @@ import { findProject } from '~/repositories/projectRepository'
 const instance = useInstance()
 const route = useRoute()
 
-const projectId = computed(() => route.params.projectId as string)
+const projectId = computed(() => route.query.projectId as string)
 
 const width = ref(500)
 const height = ref(500)

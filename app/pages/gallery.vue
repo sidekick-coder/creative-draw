@@ -140,9 +140,7 @@ onMounted(setProjects)
                                     v-for="size in sizes"
                                     :key="size.label"
                                     @click="
-                                        navigateTo(
-                                            `/projects?width=${size.width}&height=${size.height}`
-                                        )
+                                        navigateTo(`/app?width=${size.width}&height=${size.height}`)
                                     "
                                 >
                                     <div class="flex-1">{{ size.label }}</div>
@@ -151,7 +149,7 @@ onMounted(setProjects)
                                         color="body-700"
                                         padding="none"
                                         size="sm"
-                                        :to="`/projects?width=${size.width}&height=${size.height}`"
+                                        :to="`/app?width=${size.width}&height=${size.height}`"
                                     >
                                         <cd-icon name="streamline:orientation-portrait-solid" />
                                     </cd-btn>
@@ -160,7 +158,7 @@ onMounted(setProjects)
                                         color="body-700"
                                         padding="none"
                                         size="sm"
-                                        :to="`/projects?width=${size.height}&height=${size.width}`"
+                                        :to="`/app?width=${size.height}&height=${size.width}`"
                                     >
                                         <cd-icon name="streamline:orientation-landscape-solid" />
                                     </cd-btn>
@@ -191,9 +189,7 @@ onMounted(setProjects)
                             placeholder="Height"
                         />
 
-                        <cd-btn
-                            :to="`/projects?width=${customSize.width}&height=${customSize.height}`"
-                        >
+                        <cd-btn :to="`/app?width=${customSize.width}&height=${customSize.height}`">
                             Create
                         </cd-btn>
                     </cd-card-content>
@@ -210,7 +206,10 @@ onMounted(setProjects)
                 </div>
 
                 <div v-for="project in projects" :key="project.id" class="w-full md:w-3/12">
-                    <cd-card class="relative h-0 w-full pb-[75%]" :to="`/projects/${project.id}`">
+                    <cd-card
+                        class="relative h-0 w-full pb-[75%]"
+                        :to="`/app?projectId=${project.id}`"
+                    >
                         <img
                             v-if="project.thumbnail"
                             :src="project.thumbnail"

@@ -20,16 +20,11 @@ async function saveProject() {
         layers: instance.layers.slice(),
     }
 
-    const [project, error] = await tryCatch(() => updateProject(projectId.value, payload))
+    const [, error] = await tryCatch(() => updateProject(projectId.value, payload))
 
     if (error) {
         console.error(error)
         saving.value = false
-        return
-    }
-
-    if (!projectId.value) {
-        navigateTo(`/projects/${project.id}`)
         return
     }
 
@@ -60,7 +55,7 @@ async function saveAs(type: string) {
         saving.value = false
 
         if (!projectId.value) {
-            navigateTo(`/projects/${project.id}`)
+            navigateTo(`/app?projectId=${project.id}`)
             return
         }
     }, 1000)
