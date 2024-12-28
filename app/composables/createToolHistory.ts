@@ -22,7 +22,7 @@ export function createToolHistory({ width, height, layers }: Options) {
     const previousChanges = computed(() => {
         if (activeIndex.value === -1) return []
 
-        return history.value.slice(0, activeIndex.value)
+        return history.value.slice(0, activeIndex.value + 1)
     })
 
     const nextChanges = computed(() => {

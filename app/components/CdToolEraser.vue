@@ -46,6 +46,8 @@ function onDraw(data: InstanceEvents['layer:pointermove']) {
 function end() {
     if (!isDrawing.value) return
 
+    if (instance.activeTool !== 'eraser') return
+
     isDrawing.value = false
     instance.tools.history.add('eraser')
 }

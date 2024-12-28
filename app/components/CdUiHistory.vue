@@ -53,10 +53,10 @@ function onNextLongPress() {
         </template>
 
         <div class="p-2">
-            <cd-card class="w-40">
+            <cd-card class="max-h-80 w-44 overflow-y-auto">
                 <cd-list-item v-if="prevItems.length === 0" color="none"> No history </cd-list-item>
                 <cd-list-item
-                    v-for="item in prevItems"
+                    v-for="item in prevItems.slice().reverse()"
                     :key="item.id"
                     @click="instance.tools.history.set(item.id)"
                 >
@@ -82,7 +82,7 @@ function onNextLongPress() {
         </template>
 
         <div class="p-2">
-            <cd-card class="w-40">
+            <cd-card class="max-h-80 w-44 overflow-y-auto">
                 <cd-list-item v-if="nextItems.length === 0" color="none"> No history </cd-list-item>
                 <cd-list-item
                     v-for="item in nextItems"
