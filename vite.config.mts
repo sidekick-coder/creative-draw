@@ -2,12 +2,16 @@ import vue from '@vitejs/plugin-vue';
 import tailwindcss from "@tailwindcss/vite";
 import components from 'unplugin-vue-components/vite';
 import imports from 'unplugin-auto-import/vite';
+import router from 'unplugin-vue-router/vite';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [
         tailwindcss(),
+        router({
+            dts: '.output/router.d.ts',
+        }),
         vue(),
         components({
             dirs: ['src/components'],
