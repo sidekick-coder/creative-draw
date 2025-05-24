@@ -1,72 +1,97 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-    --color-primary-50: 244 234 253;
-    --color-primary-75: 210 169 245;
-    --color-primary-100: 192 133 241;
-    --color-primary-200: 165 81 234;
-    --color-primary-300: 146 45 230;
-    --color-primary-400: 102 31 161;
-    --color-primary-500: 89 27 140;
+    --color-primary-50: #f4eafd;
+    --color-primary-75: #d2a9f5;
+    --color-primary-100: #c085f1;
+    --color-primary-200: #a551ea;
+    --color-primary-300: #922de6;
+    --color-primary-400: #661fa1;
+    --color-primary-500: #591b8c;
 
-    --color-secondary-50: 233 242 253;
-    --color-secondary-75: 166 203 246;
-    --color-secondary-100: 129 181 242;
-    --color-secondary-200: 75 149 236;
-    --color-secondary-300: 38 127 232;
-    --color-secondary-400: 27 89 162;
-    --color-secondary-500: 23 77 142;
+    --color-secondary-50: #e9f2fd;
+    --color-secondary-75: #a6cbf6;
+    --color-secondary-100: #81b5f2;
+    --color-secondary-200: #4b95ec;
+    --color-secondary-300: #267fe8;
+    --color-secondary-400: #1b59a2;
+    --color-secondary-500: #174d8e;
 
-    --color-success-50: 234 253 240;
-    --color-success-75: 167 247 195;
-    --color-success-100: 130 244 170;
-    --color-success-200: 77 239 133;
-    --color-success-300: 40 236 108;
-    --color-success-400: 28 165 76;
-    --color-success-500: 24 144 66;
+    --color-success-50: #eafdf0;
+    --color-success-75: #a7f7c3;
+    --color-success-100: #82f4aa;
+    --color-success-200: #4def85;
+    --color-success-300: #28ec6c;
+    --color-success-400: #1ca54c;
+    --color-success-500: #189042;
 
-    --color-danger-50: 253 235 235;
-    --color-danger-75: 248 171 172;
-    --color-danger-100: 245 136 137;
-    --color-danger-200: 241 85 87;
-    --color-danger-300: 238 50 52;
-    --color-danger-400: 167 35 36;
-    --color-danger-500: 145 31 32;
+    --color-danger-50: #fdebeb;
+    --color-danger-75: #f8abab;
+    --color-danger-100: #f58889;
+    --color-danger-200: #f15557;
+    --color-danger-300: #ee3234;
+    --color-danger-400: #a72324;
+    --color-danger-500: #911f20;
 
-    --color-info-50: 233 247 253;
-    --color-info-75: 165 224 246;
-    --color-info-100: 127 211 242;
-    --color-info-200: 72 192 237;
-    --color-info-300: 35 179 233;
-    --color-info-400: 25 125 163;
-    --color-info-500: 21 109 142;
-    
-    --color-warning-50: 253 249 236;
-    --color-warning-75: 248 232 178;
-    --color-warning-100: 245 222 147;
-    --color-warning-200: 240 208 100;
-    --color-warning-300: 237 198 68;
-    --color-warning-400: 166 139 48;
-    --color-warning-500: 145 121 41;
+    --color-info-50: #e9f7fd;
+    --color-info-75: #a5e0f6;
+    --color-info-100: #7fd3f2;
+    --color-info-200: #48c0ed;
+    --color-info-300: #23b3e9;
+    --color-info-400: #197da3;
+    --color-info-500: #156d8e;
+
+    --color-warning-50: #fdf9ec;
+    --color-warning-75: #f8e8b2;
+    --color-warning-100: #f5de93;
+    --color-warning-200: #f0d064;
+    --color-warning-300: #edc644;
+    --color-warning-400: #a68b30;
+    --color-warning-500: #917929;
+
+    --color-body-0: #ffffff;
+    --color-body-10: #fafafa;
+    --color-body-20: #f5f5f5;
+    --color-body-30: #ebebec;
+    --color-body-40: #dfdee0;
+    --color-body-50: #c2c0c3;
+    --color-body-60: #b3b1b5;
+    --color-body-70: #a7a5a9;
+    --color-body-80: #99969a;
+    --color-body-90: #8a878c;
+    --color-body-100: #7b777d;
+    --color-body-200: #6d686f;
+    --color-body-300: #5e5961;
+    --color-body-400: #524d55;
+    --color-body-500: #433e46;
+    --color-body-600: #37313a;
+    --color-body-700: #262029;
+    --color-body-800: #17111b;
+    --color-body-900: #0b040f;
+}
 
 
-    --color-body-0: 255 255 255;
-    --color-body-10: 250 250 250;
-    --color-body-20: 245 245 245;
-    --color-body-30: 235 235 236;
-    --color-body-40: 223 222 224;
-    --color-body-50: 194 192 195;
-    --color-body-60: 179 177 181;
-    --color-body-70: 167 165 169;
-    --color-body-80: 153 150 154;
-    --color-body-90: 138 135 140;
-    --color-body-100: 123 119 125;
-    --color-body-200: 109 104 111;
-    --color-body-300: 94 89 97;
-    --color-body-400: 82 77 85;
-    --color-body-500: 67 62 70;
-    --color-body-600: 55 49 58;
-    --color-body-700: 38 32 41;
-    --color-body-800: 23 17 27;
-    --color-body-900: 11 4 15;
- }
+ body {
+    @apply bg-body-800 text-body-0;
+}
+
+/* Scrollbar */
+*::-webkit-scrollbar {
+    width: 0.5em;
+    height: 0.5em;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgb(var(--color-body-800));
+}
+
+*::-webkit-scrollbar-corner {
+    background: rgb(var(--color-body-800));
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-body-600));
+}
+

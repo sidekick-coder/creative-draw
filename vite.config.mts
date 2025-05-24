@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import components from 'unplugin-vue-components/vite';
 import imports from 'unplugin-auto-import/vite';
 import router from 'unplugin-vue-router/vite';
+import macros from 'vue-macros/vite';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
@@ -12,7 +13,6 @@ export default defineConfig({
         router({
             dts: '.output/router.d.ts',
         }),
-        vue(),
         components({
             dirs: ['src/components'],
             extensions: ['vue'],
@@ -22,7 +22,18 @@ export default defineConfig({
             dirs: ['src/composables', 'src/utils'],
             dts: '.output/imports.d.ts',
             vueTemplate: true,
-            imports: ['vue'],
+            imports: [
+                'vue', 
+                {
+                    from: 'tailwind-merge',
+                    imports: ['twMerge'],
+                }
+            ],
+        }),
+        macros({
+            plugins: {
+                vue: vue(),
+            },
         })
     ],
     resolve: {
