@@ -1,7 +1,8 @@
 <script setup lang="ts">
+const board = useBoard()
+
 const loading = ref(true)
 const container = ref<HTMLElement>()
-const instance = useInstance()
 
 const height = defineProp<number>('height', {
     type: Number,
@@ -14,7 +15,7 @@ const width = defineProp<number>('width', {
 })
 
 const size = computed(() => {
-    const current = width.value * instance.tools.zoomAndPan.scale
+    const current = width.value
 
     return Math.ceil(current * 0.03)
 })
@@ -22,13 +23,12 @@ const size = computed(() => {
 function load() {
     loading.value = true
 
-    if (container.value) {
-        instance.load(container.value!, width.value, height.value)
-    }
+    container.value!.style.width = `${width.value}px`
+    container.value!.style.height = `${height.value}px`
 
-    nextTick(() => {
-        instance.tools.zoomAndPan.fit()
-    })
+    // make x & y center
+    container.value!.style.marginLeft = `${width.value / 2}px`
+    container.value!.style.marginTop = `${height.value / 2}px`
 
     loading.value = false
 }
@@ -39,34 +39,27 @@ onMounted(load)
 
 // events
 function onPointerEvent(e: PointerEvent) {
-    instance.emit(`container:${e.type}`, {
-        event: e,
-    })
+    // instance.emit(`container:${e.type}`, {
+    //     event: e,
+    // })
 }
 
 function onTouchEvent(e: TouchEvent) {
-    instance.emit(`container:${e.type}`, {
-        event: e,
-    })
+    // instance.emit(`container:${e.type}`, {
+    //     event: e,
+    // })
 }
 
 function onMouseEvent(e: MouseEvent) {
-    instance.emit(`container:${e.type}`, {
-        event: e,
-    })
+    // instance.emit(`container:${e.type}`, {
+    //     event: e,
+    // })
 }
 </script>
 <template>
     <div
         ref="container"
-        class="relative overflow-hidden"
-        :style="{
-            'background-size': `${size}px ${size}px`,
-            'background-image': `
-                linear-gradient(to right, rgb(var(--color-body-500)) 1px, transparent 1px),
-                linear-gradient(to bottom, rgb(var(--color-body-500)) 1px, transparent 1px)
-            `,
-        }"
+        class="relative"
         @mousedown="onMouseEvent"
         @mousemove="onMouseEvent"
         @mouseup="onMouseEvent"
