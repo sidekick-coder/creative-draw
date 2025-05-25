@@ -1,13 +1,10 @@
 import pen from '@/brushes/pen'
 import { defineLayerPlugin } from './defineLayerPlugin'
 import type { LayerMouseEvent } from './createLayer'
-
-const settings = {
-    size: 5,
-    color: '#000000',
-}
+import type { Layer } from './useLayer'
 
 export function createBrush() {
+    let layer: Layer
     let drawing = false
     let lastX = 0
     let lastY = 0
@@ -18,6 +15,10 @@ export function createBrush() {
         drawing = true
         lastX = x
         lastY = y
+
+        paths = []
+
+        paths.push(...pen.draw({ x, y, lastX, lastY, lastPressure, pressure: 0.5 }))
     }
 
     function move(x: number, y: number, pressure: number) {
@@ -42,11 +43,28 @@ export function createBrush() {
     function end() {
         drawing = false
 
+        const items = layer.get<any[]>('data', [])
+
+        items.push({
+            type: 'brush',
+            paths,
+        })
+
+        layer.set('data', items)
+
         paths = []
     }
 
-    function draw(ctx: CanvasRenderingContext2D) {
-        paths.forEach((p) => {
+    function clear() {
+        const ctx = layer.get<CanvasRenderingContext2D>('context')
+
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    }
+
+    function draw(pathsToDraw: BrushPath[]) {
+        const ctx = layer.get<CanvasRenderingContext2D>('context')
+
+        pathsToDraw.forEach((p) => {
             ctx.fillStyle = p.color
             ctx.beginPath()
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
@@ -54,34 +72,40 @@ export function createBrush() {
         })
     }
 
+    function redraw() {
+        clear()
+
+        const items = layer.get<any[]>('data', [])
+
+        console.log('redraw')
+        items.forEach((item) => {
+            if (item.type === 'brush') {
+                draw(item.paths)
+            }
+        })
+    }
+
     return defineLayerPlugin({
-        install(layer) {
+        install(_layer) {
+            layer = _layer
+
+            layer.emitter.on('render', redraw)
+
             layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
                 start(e.x, e.y)
+                draw(paths)
             })
 
             layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
                 move(e.x, e.y, 0.5)
-                draw(layer.get('context'))
+                draw(paths)
             })
 
-            layer.emitter.on('mouseup', () => {
-                const data = layer.get<any[]>('objects', [])
-
-                data.push({
-                    type: 'brush',
-                    paths,
-                })
-
-                layer.set('objects', data)
-
-                console.log('data', data)
-
-                end()
-            })
+            layer.emitter.on('mouseup', end)
+            layer.emitter.on('mouseout', end)
         },
-        draw() {
-            console.log('draw')
-        },
+        draw,
+        redraw,
+        clear,
     })
 }

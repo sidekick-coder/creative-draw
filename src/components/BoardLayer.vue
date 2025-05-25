@@ -147,29 +147,15 @@ onMounted(() => {
     canvas.addEventListener('pointerup', onPointerEvent)
     canvas.addEventListener('pointermove', onPointerEvent)
 
-    canvas.addEventListener('touchstart', onTouchEvent)
-    canvas.addEventListener('touchend', onTouchEvent)
-    canvas.addEventListener('touchmove', onTouchEvent)
+    canvas.addEventListener('touchstart', onTouchEvent, { passive: false })
+    canvas.addEventListener('touchend', onTouchEvent, { passive: false })
+    canvas.addEventListener('touchmove', onTouchEvent, { passive: false })
 
     canvas.addEventListener('mousedown', onMouseEvent)
     canvas.addEventListener('mouseup', onMouseEvent)
     canvas.addEventListener('mousemove', onMouseEvent)
 })
 
-onBeforeUnmount(() => {
-    const canvas = getCanvas()
-
-    canvas.removeEventListener('pointerdown', onPointerEvent)
-    canvas.removeEventListener('pointerup', onPointerEvent)
-    canvas.removeEventListener('pointermove', onPointerEvent)
-
-    canvas.removeEventListener('touchstart', onTouchEvent)
-    canvas.removeEventListener('touchend', onTouchEvent)
-    canvas.removeEventListener('touchmove', onTouchEvent)
-
-    canvas.removeEventListener('mousedown', onMouseEvent)
-    canvas.removeEventListener('mouseup', onMouseEvent)
-})
 // plugins
 const plugins = defineProp<LayerPlugin[]>('plugins', {
     type: Array,
@@ -181,6 +167,11 @@ onMounted(() => {
         plugin.install(layer)
     }
 })
+
+// board link
+const board = useBoard()
+
+board.addLayer(layer)
 </script>
 <template>
     <canvas ref="root" class="absolute" />

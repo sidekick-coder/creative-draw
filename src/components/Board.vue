@@ -1,9 +1,11 @@
 <script setup lang="ts">
+// general
 const board = useBoard()
 
 const loading = ref(true)
 const container = ref<HTMLElement>()
 
+// size
 const height = defineProp<number>('height', {
     type: Number,
     required: true,
@@ -12,12 +14,6 @@ const height = defineProp<number>('height', {
 const width = defineProp<number>('width', {
     type: Number,
     required: true,
-})
-
-const size = computed(() => {
-    const current = width.value
-
-    return Math.ceil(current * 0.03)
 })
 
 function load() {
@@ -36,6 +32,18 @@ function load() {
 watch([width, height], load)
 
 onMounted(load)
+
+// plugins
+const plugins = defineProp<BoardPlugin[]>('plugins', {
+    type: Array,
+    default: () => [],
+})
+
+onMounted(() => {
+    for (const plugin of plugins.value) {
+        plugin.install(board)
+    }
+})
 
 // events
 function onPointerEvent(e: PointerEvent) {

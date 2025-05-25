@@ -22,6 +22,7 @@ export interface LayerMouseEvent {
 }
 
 export function createLayer() {
+    const id = crypto.randomUUID()
     const emitter = createEmitter()
     const context = new Map<string, any>()
 
@@ -41,9 +42,12 @@ export function createLayer() {
 
     function set<T = any>(key: string, value: T) {
         context.set(key, value)
+
+        emitter.emit('set', { key, value })
     }
 
     return reactive({
+        id,
         emitter,
         get,
         set,

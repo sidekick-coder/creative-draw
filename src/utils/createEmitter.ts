@@ -3,11 +3,19 @@ export interface EmitterObserver {
     callback: Function
 }
 
-export function createEmitter() {
+export interface Options {
+    debug?: boolean
+}
+
+export function createEmitter(options: Options = {}) {
     const observers = [] as EmitterObserver[]
 
     function on(name: string, callback: Function) {
         observers.push({ name, callback })
+
+        if (options.debug) {
+            console.debug(`[emitter]: Registered observer for ${name}`)
+        }
     }
 
     function off(name: string, callback: Function) {
@@ -15,6 +23,10 @@ export function createEmitter() {
 
         if (index !== -1) {
             observers.splice(index, 1)
+
+            if (options.debug) {
+                console.debug(`[emitter]: Unregistered observer for ${name}`)
+            }
         }
     }
 
@@ -24,6 +36,10 @@ export function createEmitter() {
                 o.callback(...args)
             }
         })
+
+        if (options.debug) {
+            console.debug(`[emitter]: ${name}`, ...args)
+        }
     }
 
     return {
