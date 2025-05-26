@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { NuxtLink } from '#components'
-import type { NuxtLinkProps } from 'nuxt/app'
+import { RouterLink, type RouterLinkProps } from 'vue-router'
 
 // general
 const className = defineProp<string>('class', {
@@ -41,7 +40,7 @@ function setColor() {
 watch(color, setColor, { immediate: true })
 
 // link
-const to = defineProp<NuxtLinkProps['to']>('to', {
+const to = defineProp<RouterLinkProps['to']>('to', {
     type: [String, Object],
     default: null,
 })
@@ -56,7 +55,7 @@ watch(to, setClickable, { immediate: true })
 </script>
 
 <template>
-    <component :is="to ? NuxtLink : 'div'" :class="classes" :to="to">
+    <component :is="to ? RouterLink : 'div'" :class="classes" :to="to">
         <slot />
     </component>
 </template>

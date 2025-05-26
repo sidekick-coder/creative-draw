@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NuxtLink } from '#components'
+import { RouterLink } from 'vue-router'
 
 // general
 const router = useRouter()
@@ -84,7 +84,7 @@ watch(disabled, setDisabled, { immediate: true })
 
 <template>
     <component
-        :is="to ? NuxtLink : 'div'"
+        :is="to ? RouterLink : 'div'"
         :to="to"
         :class="classes"
         :data-active="isRouteActive || active"

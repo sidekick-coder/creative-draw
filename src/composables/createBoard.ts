@@ -3,8 +3,8 @@ import type { Layer } from './useLayer'
 export type Board = ReturnType<typeof createBoard>
 
 export function createBoard() {
-    const container = ref()
     const emitter = createEmitter()
+    const context = createContext()
 
     // layers
     const layers = ref([] as Layer[])
@@ -14,14 +14,14 @@ export function createBoard() {
 
         emitter.emit('layer:add', layer)
 
-        layer.emitter.on('set', ({ key, value }) => {
+        layer.emitter.on('set', ({ key, value }: { key: string; value: any }) => {
             emitter.emit(`layer:set:${key}`, { key, value, layer })
         })
     }
 
     return reactive({
-        container,
         emitter,
+        context,
 
         layers,
 

@@ -42,10 +42,10 @@ const y = defineProp<number>('y', {
 })
 
 function setPosition() {
-    if (!root.value) return
+    const canvas = getCanvas()
 
-    root.value.style.left = `${x.value}px`
-    root.value.style.top = `${y.value}px`
+    canvas.style.left = `${x.value}px`
+    canvas.style.top = `${y.value}px`
 }
 
 watch([x, y], setPosition)
@@ -172,6 +172,45 @@ onMounted(() => {
 const board = useBoard()
 
 board.addLayer(layer)
+
+// draw
+function clear() {
+    const ctx = getContext()
+
+    ctx.clearRect(0, 0, width.value, height.value)
+}
+
+function drawPaths(paths: Path[]) {
+    const ctx = getContext()
+
+    paths.forEach((p) => {
+        ctx.fillStyle = p.color
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fill()
+    })
+}
+
+function draw() {
+    const items = layer.get<any[]>('data', [])
+
+    items.forEach((item) => {
+        if (item.type === 'brush') {
+            drawPaths(item.paths)
+        }
+    })
+}
+
+function redraw() {
+    clear()
+    draw()
+}
+
+layer.emitter.on('clear', clear)
+layer.emitter.on('render', redraw)
+
+layer.emitter.on('draw', draw)
+layer.emitter.on('draw-paths', drawPaths)
 </script>
 <template>
     <canvas ref="root" class="absolute" />

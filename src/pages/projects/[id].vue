@@ -1,24 +1,87 @@
 <script setup lang="ts">
-const width = ref(500)
-const height = ref(500)
-
-onMounted(() => {
-    width.value = window.innerWidth
-    height.value = window.innerHeight
-})
-
+// general
+const board = useBoard()
 const brush = createBrush()
 const history = createHistory()
+const zoom = createZoom()
+
+onMounted(() => {
+    setTimeout(() => {
+        history.commit('Board ready')
+    }, 1000)
+})
+
+// board
+const boardWidth = ref(500)
+const boardHeight = ref(500)
+
+function setSizes() {
+    boardWidth.value = window.innerWidth
+    boardHeight.value = window.innerHeight
+}
+
+onMounted(() => {
+    setSizes()
+
+    window.addEventListener('resize', setSizes)
+})
+
+// canvas
+const canvasWidth = ref(1920)
+const canvasHeight = ref(1080)
+const canvasX = ref(0)
+const canvasY = ref(0)
+
+function setCanvasSizes() {
+    canvasWidth.value = 1920
+    canvasHeight.value = 1080
+}
+
+function centerCanvas() {
+    const scale = zoom.scale
+    canvasX.value = (boardWidth.value / 2) * -1 * scale
+    canvasY.value = (boardHeight.value / 2) * -1 * scale
+}
+
+watch([boardWidth, boardHeight, () => zoom.scale], setCanvasSizes)
+
+// other
+const layer = useLayer()
+
+function clear() {
+    layer.emitter.emit('clear')
+}
+
+function redraw() {
+    layer.emitter.emit('render')
+}
+
+function save() {
+    const data = layer.get<any[]>('data', [])
+
+    console.log('Saved data:', data)
+}
 </script>
 <template>
     <div>
-        <cd-btn @click="history.undo">undo</cd-btn>
-        <cd-btn @click="history.redo">redo</cd-btn>
-        <cd-btn @click="brush.clear">clear</cd-btn>
-        <cd-btn @click="brush.redraw">redraw</cd-btn>
+        <div class="fixed top-0 right-0 flex flex-wrap gap-2 bg-body-900 z-20 p-4">
+            <cd-btn @click="history.undo">undo</cd-btn>
+            <cd-btn @click="history.redo">redo</cd-btn>
+            <cd-btn @click="clear">clear</cd-btn>
+            <cd-btn @click="redraw">redraw</cd-btn>
+            <cd-btn @click="save">save</cd-btn>
+            <cd-btn @click="centerCanvas">center</cd-btn>
+            <cd-text-field v-model="zoom.scale" type="number" label="Zoom" step="0.1" />
+        </div>
 
-        <board :width :height :plugins="[history]">
-            <board-layer :width="500" :height="500" :x="-250" :y="-250" :plugins="[brush]" />
-        </board>
+        <cd-board :width="boardWidth" :height="boardHeight" :plugins="[history, zoom]">
+            <cd-board-layer
+                :width="canvasWidth"
+                :height="canvasHeight"
+                :x="canvasX"
+                :y="canvasY"
+                :plugins="[brush]"
+            />
+        </cd-board>
     </div>
 </template>

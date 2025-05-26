@@ -23,8 +23,10 @@ function load() {
     container.value!.style.height = `${height.value}px`
 
     // make x & y center
-    container.value!.style.marginLeft = `${width.value / 2}px`
-    container.value!.style.marginTop = `${height.value / 2}px`
+    // container.value!.style.marginLeft = `${width.value / 2}px`
+    // container.value!.style.marginTop = `${height.value / 2}px`
+
+    board.context.set('container', container.value!)
 
     loading.value = false
 }
@@ -43,6 +45,8 @@ onMounted(() => {
     for (const plugin of plugins.value) {
         plugin.install(board)
     }
+
+    board.emitter.emit('ready')
 })
 
 // events

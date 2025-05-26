@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import merge from 'lodash-es/merge'
+import merge from 'lodash/merge'
 import { Mask, type MaskOptions } from 'maska'
 
 // general
@@ -112,16 +112,6 @@ function onChange(event: Event) {
 }
 
 // others
-const type = defineProp<string>('type', {
-    type: String,
-    default: 'text',
-})
-
-const placeholder = defineProp<string>('placeholder', {
-    type: String,
-    default: null,
-})
-
 const disabled = defineProp<boolean>('disabled', {
     type: Boolean,
     default: false,
@@ -139,12 +129,11 @@ const readonly = defineProp<boolean>('readonly', {
             <input
                 :id="id"
                 ref="inputRef"
-                :type="type"
                 :class="classes"
-                :placeholder="placeholder"
                 :value="model"
                 :disabled="disabled"
                 :readonly="readonly"
+                v-bind="$attrs"
                 @input="onInput"
                 @change="onChange"
             />

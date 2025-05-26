@@ -5,11 +5,15 @@ export type Layer = ReturnType<typeof createLayer>
 const key = Symbol('layer') as InjectionKey<Layer>
 
 export function useLayer() {
-    const board = inject(key, null)
+    let layer = inject(key, null)
 
-    if (!board) {
-        return createLayer()
+    if (!layer) {
+        layer = createLayer()
+
+        provide(key, layer)
+
+        return layer
     }
 
-    return board
+    return layer
 }

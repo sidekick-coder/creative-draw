@@ -1,9 +1,8 @@
 import type { Board } from './createBoard'
-import type { Layer } from './useLayer'
-import debounce from 'lodash/debounce'
 
 export interface Snapshot {
     timestamp: number
+    label?: string
     data: Map<string, any[]>
 }
 
@@ -15,21 +14,34 @@ export function createHistory() {
 
     function snapshot() {
         const data = new Map<string, any[]>()
+        const timestamp = Date.now()
 
-        board.layers.forEach((layer) => {
-            data.set(layer.id, structuredClone(layer.get('data')))
+        console.debug('[history] snapshot', {
+            timestamp,
+            layers: board.layers.map((layer) => ({
+                id: layer.id,
+            })),
+        })
+
+        board?.layers.forEach((layer) => {
+            data.set(layer.id, structuredClone(layer.get('data', [])))
         })
 
         return {
-            timestamp: Date.now(),
+            timestamp,
             data,
+            label: '',
         }
     }
 
-    function commit() {
+    function commit(label?: string) {
         if (appling) return
 
         const current = snapshot()
+
+        if (label) {
+            current.label = label
+        }
 
         undoStack.push(current)
 
@@ -83,6 +95,9 @@ export function createHistory() {
     return defineBoardPlugin({
         undo,
         redo,
+        commit,
+        undoStack,
+        redoStack,
         install(_board) {
             board = _board
 
