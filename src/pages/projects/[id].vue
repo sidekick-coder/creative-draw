@@ -1,14 +1,12 @@
 <script setup lang="ts">
 // general
-const board = useBoard()
 const brush = createBrush()
 const history = createHistory()
 const zoom = createZoom()
+const pan = createPan()
 
 onMounted(() => {
-    setTimeout(() => {
-        history.commit('Board ready')
-    }, 1000)
+    setTimeout(() => history.commit('Board ready'), 1000)
 })
 
 // board
@@ -63,7 +61,7 @@ function save() {
 }
 </script>
 <template>
-    <div>
+    <div class="relative w-screen h-screen overflow-hidden">
         <div class="fixed top-0 right-0 flex flex-wrap gap-2 bg-body-900 z-20 p-4">
             <cd-btn @click="history.undo">undo</cd-btn>
             <cd-btn @click="history.redo">redo</cd-btn>
@@ -74,7 +72,7 @@ function save() {
             <cd-text-field v-model="zoom.scale" type="number" label="Zoom" step="0.1" />
         </div>
 
-        <cd-board :width="boardWidth" :height="boardHeight" :plugins="[history, zoom]">
+        <cd-board :width="boardWidth" :height="boardHeight" :plugins="[history, zoom, pan]">
             <cd-board-layer
                 :width="canvasWidth"
                 :height="canvasHeight"

@@ -6,7 +6,11 @@ export interface Snapshot {
     data: Map<string, any[]>
 }
 
-export function createHistory() {
+export interface Options {
+    debug?: boolean
+}
+
+export function createHistory(options: Options = {}) {
     let board: Board
     let appling = false
     const undoStack = [] as Snapshot[]
@@ -16,12 +20,14 @@ export function createHistory() {
         const data = new Map<string, any[]>()
         const timestamp = Date.now()
 
-        console.debug('[history] snapshot', {
-            timestamp,
-            layers: board.layers.map((layer) => ({
-                id: layer.id,
-            })),
-        })
+        if (options.debug) {
+            console.debug('[history] snapshot', {
+                timestamp,
+                layers: board.layers.map((layer) => ({
+                    id: layer.id,
+                })),
+            })
+        }
 
         board?.layers.forEach((layer) => {
             data.set(layer.id, structuredClone(layer.get('data', [])))
