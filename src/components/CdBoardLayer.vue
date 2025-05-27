@@ -211,6 +211,17 @@ layer.emitter.on('render', redraw)
 
 layer.emitter.on('draw', draw)
 layer.emitter.on('draw-paths', drawPaths)
+
+// data
+const data = defineProp<any[]>('data', {
+    type: Array,
+    default: () => [],
+})
+
+onMounted(() => {
+    layer.set('data', data.value)
+    redraw()
+})
 </script>
 <template>
     <canvas ref="root" class="absolute" />

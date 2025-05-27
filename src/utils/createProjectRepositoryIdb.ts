@@ -1,4 +1,5 @@
 import type { Dexie, EntityTable } from 'dexie'
+import { createProjectThumbnail } from './createProjectThumbnail'
 
 interface Store {
     id: string
@@ -19,13 +20,40 @@ export function createProjectRepositoryIdb(db: Dexie & Instance) {
         get: async (id) => {
             return (await db.projects.get(id)) || null
         },
-        create: async (project) => {
-            const id = await db.projects.add(project)
+        create: async (payload) => {
+            const id = crypto.randomUUID()
 
-            return { ...project, id }
+            const project = {
+                name: payload.name,
+                ...payload,
+                id,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            }
+
+            await db.projects.add(project)
+
+            return project
         },
-        update: async (id: string, project: Partial<Omit<Store, 'id'>>) => {
-            await db.projects.update(id, project)
+        update: async (id: string, payload: Partial<Omit<Store, 'id'>>) => {
+            const project = await db.projects.get(id)
+
+            const newProject: any = {
+                ...project,
+                ...payload,
+                id,
+                updated_at: new Date().toISOString(),
+            }
+
+            if (newProject.layers) {
+                newProject.thumbnail = await createProjectThumbnail(
+                    newProject.width,
+                    newProject.height,
+                    newProject.layers
+                )
+            }
+
+            await db.projects.update(id, newProject)
         },
         destroy: async (id) => {
             await db.projects.delete(id)

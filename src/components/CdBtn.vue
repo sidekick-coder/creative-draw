@@ -22,12 +22,10 @@ const classes = computed(() => {
 
 // color
 const variant = defineModel<'default' | 'none' | 'outlined' | 'text' | 'tonal'>('variant', {
-    type: String,
     default: 'default',
 })
 
 const color = defineModel<'none' | 'primary' | 'secondary' | 'danger' | 'body-700'>('color', {
-    type: String,
     default: 'primary',
 })
 
@@ -46,7 +44,10 @@ function setDefaultColor() {
         `,
         'secondary': `bg-secondary-300 text-body-0 hover:bg-secondary-400`,
         'danger': `bg-danger-300 text-body-0 hover:bg-danger-400`,
-        'body-700': `bg-body-700 text-body-0 hover:bg-body-700`,
+        'body-700': [
+            `bg-body-700 text-body-0 hover:bg-body-700 `,
+            'data-[loading=true]:text-body-700/0 [&>*:is(.spinner)]:text-body-0',
+        ].join(' '),
     }
 
     const colorValue = options[color.value]
@@ -206,6 +207,7 @@ function setRounded() {
 watch(rounded, setRounded, { immediate: true })
 
 // others
+
 const loading = defineModel<boolean>('loading', {
     type: Boolean,
     default: false,
@@ -224,8 +226,9 @@ const type = defineModel<string>('type', {
         :class="classes"
         :to="to"
         :data-active="active"
+        :data-loading="loading"
     >
-        <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
+        <div v-if="loading" class="absolute inset-0 spinner flex items-center justify-center">
             <cd-spinner size="22" />
         </div>
 

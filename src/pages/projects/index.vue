@@ -31,14 +31,43 @@ const sizes = [
     },
 ]
 
+// projects
+const loading = ref(false)
+
+async function setProjects() {
+    loading.value = true
+
+    await $project.load()
+
+    setTimeout(() => {
+        loading.value = false
+    }, 500)
+}
+
+onMounted(() => {
+    setProjects()
+})
+
+// delete
+const deletingId = ref<string>()
+
+async function deleteItem(project: DBProject) {
+    const db = $database.selected
+
+    deletingId.value = project.id
+
+    await db.projects.destroy(project.id)
+
+    setProjects()
+}
 // create
 async function create(width: number, height: number) {
     const db = $database.selected
 
     const project = await db.projects.create({
         name: 'New Project',
-        width,
-        height,
+        width: Number(width),
+        height: Number(height),
     })
 
     const existsInPredefined = predefinedSizes.value.find(
@@ -66,36 +95,6 @@ async function create(width: number, height: number) {
     }
 
     router.push(`/projects/${project.id}`)
-}
-
-// projects
-const loading = ref(false)
-const deletingId = ref<string>()
-
-async function setProjects() {
-    // loading.value = true
-    //
-    // const [response, error] = await tryCatch(() => listProjects())
-    //
-    // if (error) {
-    //     console.error(error)
-    //     loading.value = false
-    //     return
-    // }
-    //
-    // projects.value = response
-    //
-    // setTimeout(() => {
-    //     loading.value = false
-    // }, 500)
-}
-
-async function deleteItem(project: DBProject) {
-    deletingId.value = project.id
-
-    await deleteProject(project.id)
-
-    setProjects()
 }
 </script>
 
@@ -127,6 +126,10 @@ async function deleteItem(project: DBProject) {
                 <div class="flex-1" />
 
                 <div class="flex gap-x-2">
+                    <cd-btn color="body-700" @click="setProjects" :loading="loading">
+                        <cd-icon name="heroicons:arrow-path-20-solid" />
+                    </cd-btn>
+
                     <cd-menu>
                         <template #activator="{ attrs }">
                             <cd-btn v-bind="attrs" color="body-700"> {{ $t('create') }} </cd-btn>
@@ -218,7 +221,10 @@ async function deleteItem(project: DBProject) {
             <div
                 class="flex flex-wrap items-start gap-y-4 [&>*]:px-2 relative min-h-[calc(100%-80px)] px-2"
             >
-                <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
+                <div
+                    v-if="loading && !$project.items.length"
+                    class="absolute inset-0 flex items-center justify-center"
+                >
                     <cd-spinner class="text-2xl" />
                 </div>
 
@@ -228,9 +234,8 @@ async function deleteItem(project: DBProject) {
 
                 <div v-for="project in $project.items" :key="project.id" class="w-full md:w-3/12">
                     <cd-card class="relative h-0 w-full pb-[75%]" :to="`/projects/${project.id}`">
-                        <img
-                            v-if="project.thumbnail"
-                            :src="project.thumbnail"
+                        <project-thumbnail
+                            :project="project"
                             class="absolute size-full object-cover"
                         />
                     </cd-card>

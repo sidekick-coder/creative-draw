@@ -24,6 +24,13 @@ export function createPan(options: CreatePanOptions = {}) {
         container.style.marginTop = `${y.value}px`
     }
 
+    function reset() {
+        if (options.debug) console.debug('[pan] reset')
+
+        x.value = 0
+        y.value = 0
+    }
+
     function start(event: MouseEvent) {
         if (panning.value) return
 
@@ -78,6 +85,7 @@ export function createPan(options: CreatePanOptions = {}) {
     grabbler.addEventListener('mouseup', end)
 
     return defineBoardPlugin({
+        reset,
         install(_board) {
             board = _board
 

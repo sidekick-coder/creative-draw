@@ -30,7 +30,7 @@ export function createHistory(options: Options = {}) {
         }
 
         board?.layers.forEach((layer) => {
-            data.set(layer.id, structuredClone(layer.get('data', [])))
+            data.set(layer.id, JSON.parse(JSON.stringify(layer.get('data', []))))
         })
 
         return {

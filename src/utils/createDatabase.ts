@@ -16,12 +16,12 @@ export function createDatabase(definition: DatabaseDefinition): Database {
         const db = new Dexie(definition.db_name)
 
         db.version(1).stores({
-            projects: '++id',
+            projects: 'id',
         })
 
         return {
             ...definition,
-            projects: createProjectRepositoryIdb(db),
+            projects: createProjectRepositoryIdb(db as any),
         }
     }
 
