@@ -1,15 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import App from './App.vue';
-import { createApp } from 'vue';
-import { routes } from 'vue-router/auto-routes';
+import App from './App.vue'
+import { createApp } from 'vue'
+import { vVisible } from './directives/vVisible'
+import type { Plugin } from './utils/definePlugin'
 
-const app = createApp(App);
+const app = createApp(App)
 
-const router = createRouter({
-    history: createWebHistory(),
-    routes 
-})
+app.directive('visible', vVisible)
 
-app.use(router);
+Object.values(import.meta.glob('./directives/*.ts', { eager: true }))
+    .map((mod: any) => Object.entries(mod))
+    .flat()
+    .forEach(([name, directive]) => {
+        if (name !== 'default' && directive) {
+            app.directive(name, directive)
+        }
+    })
 
-app.mount('#app');
+const plugins: Plugin[] = Object.values(import.meta.glob('./plugins/*.ts', { eager: true }))
+    .map((mod: any) => mod.default)
+    .filter(Boolean)
+
+plugins.forEach((plugin) => plugin({ app }))
+
+app.mount('#app')

@@ -1,11 +1,9 @@
 <script setup lang="ts">
-const runtimeConfig = useRuntimeConfig()
-
-const { googleAdsenseClientId } = runtimeConfig.public
+const googleAdsenseClientId = ''
 
 let script = document.createElement('script')
 
-onMounted(() => {
+function load() {
     script.setAttribute('async', '')
     script.setAttribute(
         'src',
@@ -18,11 +16,17 @@ onMounted(() => {
     }
 
     window.adsbygoogle.push({})
-})
+}
 
-onUnmounted(() => {
+function unload() {
     document.head.removeChild(script)
-})
+}
+
+if (import.meta.env.GOOGLE_ADSENSE_CLIENT_ID) {
+    onMounted(load)
+
+    onUnmounted(unload)
+}
 </script>
 
 <template>

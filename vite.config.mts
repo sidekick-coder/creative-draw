@@ -24,6 +24,7 @@ export default defineConfig({
             vueTemplate: true,
             imports: [
                 'vue',
+                'vue-router',
                 {
                     from: 'tailwind-merge',
                     imports: ['twMerge'],
