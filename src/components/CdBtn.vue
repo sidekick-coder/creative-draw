@@ -7,14 +7,12 @@ const className = defineModel<string>('class', {
     default: null,
 })
 
-const contentClass = defineModel<string>('contentClass', {
-    type: String,
-    default: null,
-})
-
 const classMap = ref(new Map<string, string>())
 
-classMap.value.set('base', 'relative transition-colors duration-300 cursor-pointer')
+classMap.value.set(
+    'base',
+    'relative transition-colors duration-300 cursor-pointer flex items-center justify-center'
+)
 
 const classes = computed(() => {
     const all = Array.from(classMap.value.values()).join(' ')
@@ -231,16 +229,6 @@ const type = defineModel<string>('type', {
             <cd-spinner size="22" />
         </div>
 
-        <div
-            :class="
-                twMerge([
-                    loading ? 'opacity-0' : 'opacity-100',
-                    'flex min-h-full min-w-full items-center justify-center',
-                    contentClass,
-                ])
-            "
-        >
-            <slot />
-        </div>
+        <slot />
     </component>
 </template>

@@ -1,12 +1,12 @@
 import type { Board } from './createBoard'
 
-export interface Snapshot {
+interface Snapshot {
     timestamp: number
     label?: string
     data: Map<string, any[]>
 }
 
-export interface Options {
+interface Options {
     debug?: boolean
 }
 

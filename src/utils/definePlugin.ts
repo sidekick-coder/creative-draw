@@ -1,11 +1,11 @@
 import type { App } from 'vue'
 
-export interface Options {
+export interface DefinePluginOptions {
     app: App
 }
 
 export interface Plugin {
-    (options: Options): void
+    (options: DefinePluginOptions): void
 }
 
 export function definePlugin(plugin: Plugin): Plugin {

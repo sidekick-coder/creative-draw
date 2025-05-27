@@ -3,11 +3,11 @@ export interface EmitterObserver {
     callback: Function
 }
 
-export interface Options {
+export interface EmitterOptions {
     debug?: boolean
 }
 
-export function createEmitter(options: Options = {}) {
+export function createEmitter(options: EmitterOptions = {}) {
     const observers = [] as EmitterObserver[]
 
     function on(name: string, callback: Function) {

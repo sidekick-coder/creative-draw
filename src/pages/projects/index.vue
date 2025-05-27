@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import { useLocalStorage } from '@vueuse/core'
+
+// general
+const router = useRouter()
+
 // sizes
 const dialog = ref(false)
+const predefinedSizes = useLocalStorage<any[]>('predefined-sizes', [])
 
 const customSize = ref({
     width: 2480,
@@ -25,27 +31,63 @@ const sizes = [
     },
 ]
 
+// create
+async function create(width: number, height: number) {
+    const db = $database.selected
+
+    const project = await db.projects.create({
+        name: 'New Project',
+        width,
+        height,
+    })
+
+    const existsInPredefined = predefinedSizes.value.find(
+        (size) => size.width === width && size.height === height
+    )
+
+    const existsInSizes = sizes.find((size) => {
+        if (size.width === width && size.height === height) {
+            return true
+        }
+
+        if (size.width === height && size.height === width) {
+            return true
+        }
+
+        return false
+    })
+
+    if (!existsInPredefined && !existsInSizes) {
+        predefinedSizes.value.push({
+            label: `${width} x ${height}`,
+            width,
+            height,
+        })
+    }
+
+    router.push(`/projects/${project.id}`)
+}
+
 // projects
-const loading = ref(true)
-const projects = ref<any[]>([])
+const loading = ref(false)
 const deletingId = ref<string>()
 
 async function setProjects() {
-    loading.value = true
-
-    const [response, error] = await tryCatch(() => listProjects())
-
-    if (error) {
-        console.error(error)
-        loading.value = false
-        return
-    }
-
-    projects.value = response
-
-    setTimeout(() => {
-        loading.value = false
-    }, 500)
+    // loading.value = true
+    //
+    // const [response, error] = await tryCatch(() => listProjects())
+    //
+    // if (error) {
+    //     console.error(error)
+    //     loading.value = false
+    //     return
+    // }
+    //
+    // projects.value = response
+    //
+    // setTimeout(() => {
+    //     loading.value = false
+    // }, 500)
 }
 
 async function deleteItem(project: DBProject) {
@@ -58,65 +100,44 @@ async function deleteItem(project: DBProject) {
 </script>
 
 <template>
-    <div class="w-dvh flex h-dvh flex-col lg:flex-row">
-        <div class="flex-1 overflow-y-auto p-5">
-            <div class="mb-8 flex w-full flex-col md:flex-row">
-                <h1 class="mb-4 flex-1 text-2xl font-bold">Projects</h1>
+    <div class="w-dvw flex h-dvh flex-col lg:flex-row">
+        <div class="flex-1 overflow-y-auto">
+            <div class="flex w-full flex-col md:flex-row px-5 py-4 items-center">
+                <cd-menu>
+                    <template #activator="{ attrs }">
+                        <cd-btn v-bind="attrs" color="body-700" class="gap-x-2">
+                            <cd-icon name="heroicons:circle-stack" />
+                            <div>{{ $database.selected?.name }}</div>
+                        </cd-btn>
+                    </template>
+
+                    <div class="p-2">
+                        <cd-card class="w-80">
+                            <cd-list-item
+                                v-for="db in $database.items"
+                                :key="db.id"
+                                @click="$database.select(db.id)"
+                            >
+                                <div>{{ db.name }}</div>
+                            </cd-list-item>
+                        </cd-card>
+                    </div>
+                </cd-menu>
+
+                <div class="flex-1" />
 
                 <div class="flex gap-x-2">
                     <cd-menu>
                         <template #activator="{ attrs }">
-                            <cd-btn v-bind="attrs" color="body-700"> Import </cd-btn>
+                            <cd-btn v-bind="attrs" color="body-700"> {{ $t('create') }} </cd-btn>
                         </template>
 
                         <div class="p-2">
                             <cd-card class="w-80">
-                                <cd-card-head>
-                                    <cd-card-title class="mr-auto text-base">
-                                        Import project
-                                    </cd-card-title>
-                                </cd-card-head>
-
-                                <client-only>
-                                    <cd-list-item
-                                        class="mr-auto flex-col items-start text-base"
-                                        :disabled="!$flags.fsa"
-                                        @click="importProject"
-                                    >
-                                        <div>Select folder</div>
-
-                                        <div v-if="!$flags.fsa" class="text-xs text-body-200">
-                                            Not available in this browser
-                                        </div>
-                                    </cd-list-item>
-                                </client-only>
-                            </cd-card>
-                        </div>
-                    </cd-menu>
-
-                    <cd-menu>
-                        <template #activator="{ attrs }">
-                            <cd-btn v-bind="attrs" color="body-700"> Create </cd-btn>
-                        </template>
-
-                        <div class="p-2">
-                            <cd-card class="w-80">
-                                <cd-list-item @click="dialog = true">Custom size</cd-list-item>
-                                <cd-list-item
-                                    class="py-2 text-sm font-bold text-body-100"
-                                    color="none"
-                                >
-                                    {{ $t('predefinedSizes') }}
-                                </cd-list-item>
-
                                 <cd-list-item
                                     v-for="size in sizes"
                                     :key="size.label"
-                                    @click="
-                                        navigateTo(
-                                            `/projects?width=${size.width}&height=${size.height}`
-                                        )
-                                    "
+                                    @click="create(size.width, size.height)"
                                 >
                                     <div class="flex-1">{{ size.label }}</div>
 
@@ -124,7 +145,7 @@ async function deleteItem(project: DBProject) {
                                         color="body-700"
                                         padding="none"
                                         size="sm"
-                                        :to="`/projects?width=${size.width}&height=${size.height}`"
+                                        @click.stop="create(size.width, size.height)"
                                     >
                                         <cd-icon name="streamline:orientation-portrait-solid" />
                                     </cd-btn>
@@ -133,10 +154,33 @@ async function deleteItem(project: DBProject) {
                                         color="body-700"
                                         padding="none"
                                         size="sm"
-                                        :to="`/projects?width=${size.height}&height=${size.width}`"
+                                        @click.stop="create(size.height, size.width)"
                                     >
                                         <cd-icon name="streamline:orientation-landscape-solid" />
                                     </cd-btn>
+                                </cd-list-item>
+
+                                <template v-if="predefinedSizes.length">
+                                    <cd-list-item
+                                        v-for="(s, index) in predefinedSizes"
+                                        :key="s.label"
+                                        @click="create(s.width, s.height)"
+                                    >
+                                        <div class="flex-1">{{ s.label }}</div>
+
+                                        <cd-btn
+                                            color="body-700"
+                                            padding="none"
+                                            size="sm"
+                                            @click.stop="predefinedSizes.splice(index, 1)"
+                                        >
+                                            <cd-icon name="heroicons:trash-20-solid" />
+                                        </cd-btn>
+                                    </cd-list-item>
+                                </template>
+
+                                <cd-list-item @click="dialog = true">
+                                    {{ $t('custom') }}
                                 </cd-list-item>
                             </cd-card>
                         </div>
@@ -164,39 +208,31 @@ async function deleteItem(project: DBProject) {
                             placeholder="Height"
                         />
 
-                        <cd-btn
-                            :to="`/projects?width=${customSize.width}&height=${customSize.height}`"
-                        >
-                            Create
+                        <cd-btn @click="create(customSize.width, customSize.height)">
+                            {{ $t('create') }}
                         </cd-btn>
                     </cd-card-content>
                 </cd-card>
             </cd-dialog>
 
-            <div class="-mx-2 flex flex-wrap items-start gap-y-4 [&>*]:px-2">
+            <div
+                class="flex flex-wrap items-start gap-y-4 [&>*]:px-2 relative min-h-[calc(100%-80px)] px-2"
+            >
                 <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
                     <cd-spinner class="text-2xl" />
                 </div>
 
-                <div v-else-if="!projects.length" color="none" class="text-body-500">
+                <div v-else-if="!$project.items.length" color="none" class="text-body-500">
                     <cd-card-content> No projects yet </cd-card-content>
                 </div>
 
-                <div v-for="project in projects" :key="project.id" class="w-full md:w-3/12">
+                <div v-for="project in $project.items" :key="project.id" class="w-full md:w-3/12">
                     <cd-card class="relative h-0 w-full pb-[75%]" :to="`/projects/${project.id}`">
                         <img
                             v-if="project.thumbnail"
                             :src="project.thumbnail"
                             class="absolute size-full object-cover"
                         />
-
-                        <div class="absolute bottom-2 right-2">
-                            <cd-badge-status
-                                :items="providers"
-                                :model-value="project.type"
-                                value-key="id"
-                            />
-                        </div>
                     </cd-card>
 
                     <div class="mt-2 flex">
@@ -237,9 +273,7 @@ async function deleteItem(project: DBProject) {
         <div
             class="flex h-40 w-full flex-col gap-y-8 overflow-auto bg-body-700 lg:h-full lg:w-3/12 xl:w-2/12"
         >
-            <client-only>
-                <cd-ad />
-            </client-only>
+            <cd-ad />
         </div>
     </div>
 </template>
