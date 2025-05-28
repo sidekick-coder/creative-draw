@@ -11,6 +11,8 @@ export interface BrushDrawOptions {
     x: number
     y: number
     pressure: number
+    sizePercentage: number
+    opacityPercentage: number
 }
 
 export interface BrushEndOptions {

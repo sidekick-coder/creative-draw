@@ -3,14 +3,22 @@ import type { Board } from './createBoard'
 import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
 
-export function createBrush() {
+export interface CreateBrushOptions {
+    size?: MaybeRef<number>
+    opacity?: MaybeRef<number>
+}
+
+export function createBrush(options?: CreateBrushOptions) {
+    const size = options?.size ? ref(options.size) : ref(1)
+    const opacity = options?.opacity ? ref(options.opacity) : ref(1)
+
     let drawing = false
     let lastX = 0
     let lastY = 0
     let lastPressure = 0
     let paths = [] as BrushPath[]
 
-    function start(x: number, y: number) {
+    function start(layer: Layer, x: number, y: number) {
         drawing = true
         lastX = x
         lastY = y
@@ -22,11 +30,15 @@ export function createBrush() {
             lastY,
             lastPressure,
             pressure: 0.5,
+            sizePercentage: unref(size),
+            opacityPercentage: unref(opacity),
         })
         paths.push(...drawPath)
+        layer.emitter.emit('paths:begin')
+        layer.emitter.emit('paths:draw', paths)
     }
 
-    function move(x: number, y: number, pressure: number) {
+    function move(layer: Layer, x: number, y: number, pressure: number) {
         if (!drawing) return
         const payload = {
             lastX,
@@ -35,11 +47,14 @@ export function createBrush() {
             x,
             y,
             pressure,
+            sizePercentage: unref(size),
+            opacityPercentage: unref(opacity),
         }
         paths.push(...pen.draw(payload))
         lastX = x
         lastY = y
         lastPressure = pressure
+        layer.emitter.emit('paths:draw', paths)
     }
 
     function end(layer: Layer) {
@@ -51,6 +66,7 @@ export function createBrush() {
         })
         layer.set('data', items)
         paths = []
+        layer.emitter.emit('paths:end')
     }
 
     return defineBoardPlugin({
@@ -58,13 +74,12 @@ export function createBrush() {
             watch(board.layers,
                 (layers) => {
                     for (const layer of layers) {
+                        console.log('installing brush on layer', layer.id)
                         layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
-                            start(e.x, e.y)
-                            layer.emitter.emit('draw-paths', paths)
+                            start(layer, e.x, e.y)
                         })
                         layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
-                            move(e.x, e.y, 0.5)
-                            layer.emitter.emit('draw-paths', paths)
+                            move(layer, e.x, e.y, 0.5)
                         })
                         layer.emitter.on('mouseup', () => end(layer))
                         layer.emitter.on('mouseout', () => end(layer))

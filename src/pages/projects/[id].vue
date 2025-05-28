@@ -2,8 +2,6 @@
 // general
 const route = useRoute()
 
-const brush = createBrush()
-
 // board
 const board = useBoard()
 const boardWidth = ref(500)
@@ -115,6 +113,14 @@ async function save() {
         layers,
     })
 }
+
+// brush 
+const brushSize = ref(1)
+const brushOpacity = ref(0.5)
+const brush = createBrush({
+    size: brushSize,
+    opacity: brushOpacity
+})
 </script>
 <template>
     <div class="relative w-screen h-screen overflow-hidden">
