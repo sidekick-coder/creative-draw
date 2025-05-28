@@ -20,7 +20,7 @@
                 <cd-icon name="mdi:github" class="mr-2" />
                 <span>Github</span>
             </cd-btn>
-            <cd-btn to="/gallery"> Open app </cd-btn>
+            <cd-btn to="/projects"> Open app </cd-btn>
         </div>
 
         <div class="flex flex-1 flex-col items-center justify-center gap-y-8">
@@ -33,7 +33,7 @@
                 </h2>
             </div>
             <div class="flex flex-col items-center gap-y-2">
-                <cd-btn to="/gallery"> Start drawing </cd-btn>
+                <cd-btn to="/projects"> Start drawing </cd-btn>
             </div>
         </div>
     </div>
