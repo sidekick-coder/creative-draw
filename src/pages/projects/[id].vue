@@ -127,7 +127,7 @@ async function save() {
             <cd-text-field v-model="zoom.scale" type="number" label="Zoom" step="0.1" />
         </div>
 
-        <cd-board :width="boardWidth" :height="boardHeight" :plugins="[history, zoom, pan]">
+        <cd-board :width="boardWidth" :height="boardHeight" :plugins="[history, zoom, pan, brush]">
             <cd-board-layer
                 v-for="layer in layers"
                 :key="layer.id"
@@ -136,7 +136,6 @@ async function save() {
                 :x="canvasX"
                 :y="canvasY"
                 :data="layer.data"
-                :plugins="[brush]"
             />
         </cd-board>
     </div>

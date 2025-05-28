@@ -156,18 +156,6 @@ onMounted(() => {
     canvas.addEventListener('mousemove', onMouseEvent)
 })
 
-// plugins
-const plugins = defineProp<LayerPlugin[]>('plugins', {
-    type: Array,
-    default: () => [],
-})
-
-onMounted(() => {
-    for (const plugin of plugins.value) {
-        plugin.install(layer)
-    }
-})
-
 // board link
 const board = useBoard()
 
@@ -180,7 +168,7 @@ function clear() {
     ctx.clearRect(0, 0, width.value, height.value)
 }
 
-function drawPaths(paths: Path[]) {
+function drawPaths(paths: BrushPath[]) {
     const ctx = getContext()
 
     paths.forEach((p) => {
