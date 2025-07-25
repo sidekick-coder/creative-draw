@@ -179,16 +179,18 @@ function drawPaths(paths: BrushPath[]) {
 
     paths.forEach((p) => {
         const key = createPathKey(p.x, p.y, p.pressure, p.size, p.color)
-        
+
         if (map.has(key)) {
             return
         }
 
         map.add(key)
 
+        const opacity = p.opacity || 1
+
         ctx.globalCompositeOperation = 'source-over'
-        ctx.globalAlpha = 0.50
-        ctx.fillStyle = `rgba(0,0,0,0.50)`
+        ctx.globalAlpha = opacity
+        ctx.fillStyle = `rgba(0,0,0,${opacity})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
         ctx.fill()
@@ -225,7 +227,6 @@ layer.emitter.on('clear', clear)
 layer.emitter.on('render', redraw)
 
 layer.emitter.on('draw', draw)
-
 
 // data
 const data = defineProp<any[]>('data', {
