@@ -155,7 +155,16 @@ watch(
 )
 </script>
 <template>
-    <div class="relative w-screen h-screen overflow-hidden">
+    <div
+        class="relative w-screen h-screen overflow-hidden"
+        :style="{
+            'background-size': `${boardWidth * 0.02}px ${boardWidth * 0.02}px`,
+            'background-image': `
+                linear-gradient(to right, var(--color-body-700) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--color-body-700) 1px, transparent 1px)
+            `,
+        }"
+    >
         <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
             <cd-btn color="body-900" to="/" size="sq-sm" class="flex items-center justify-center">
                 <cd-icon name="home" />
