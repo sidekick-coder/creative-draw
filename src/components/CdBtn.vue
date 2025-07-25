@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { useModelClassProp } from '@/composables/useClassBuilder'
+import { RouterLink, type RouterLinkProps } from 'vue-router'
 
 // general
 const className = defineModel<string>('class', {
@@ -7,25 +8,34 @@ const className = defineModel<string>('class', {
     default: null,
 })
 
-const classMap = ref(new Map<string, string>())
-
-classMap.value.set(
-    'base',
-    'relative transition-colors duration-300 cursor-pointer flex items-center justify-center'
-)
-
-const classes = computed(() => {
-    const all = Array.from(classMap.value.values()).join(' ')
-
-    return twMerge(all, className.value)
-})
+const { set, classes } = useClassBuilder({ class: className })
 
 // color
+
+const colorOptions: Record<string, string | string[]> = {
+    'none': '',
+    'primary': `
+            bg-primary-300 text-body-0
+            hover:bg-primary-400 
+            data-[active=true]:text-primary-300
+        `,
+    'secondary': `bg-secondary-300 text-body-0 hover:bg-secondary-400`,
+    'danger': `bg-danger-300 text-body-0 hover:bg-danger-400`,
+    'body-700': [
+        `bg-body-700 text-body-0 hover:bg-body-700 `,
+        'data-[loading=true]:text-body-700/0 [&>*:is(.spinner)]:text-body-0',
+    ],
+    'body-900': [
+        `bg-body-900 text-body-0 hover:bg-body-900 `,
+        'data-[loading=true]:text-body-900/0 [&>*:is(.spinner)]:text-body-0',
+    ],
+}
+
 const variant = defineModel<'default' | 'none' | 'outlined' | 'text' | 'tonal'>('variant', {
     default: 'default',
 })
 
-const color = defineModel<'none' | 'primary' | 'secondary' | 'danger' | 'body-700'>('color', {
+const color = defineModel<keyof typeof colorOptions>('color', {
     default: 'primary',
 })
 
@@ -35,24 +45,9 @@ const active = defineModel<boolean>('active', {
 })
 
 function setDefaultColor() {
-    const options: Record<typeof color.value, string> = {
-        'none': '',
-        'primary': `
-            bg-primary-300 text-body-0
-            hover:bg-primary-400 
-            data-[active=true]:text-primary-300
-        `,
-        'secondary': `bg-secondary-300 text-body-0 hover:bg-secondary-400`,
-        'danger': `bg-danger-300 text-body-0 hover:bg-danger-400`,
-        'body-700': [
-            `bg-body-700 text-body-0 hover:bg-body-700 `,
-            'data-[loading=true]:text-body-700/0 [&>*:is(.spinner)]:text-body-0',
-        ].join(' '),
-    }
+    const colorValue = colorOptions[color.value]
 
-    const colorValue = options[color.value]
-
-    classMap.value.set('color', colorValue || '')
+    set('color', colorValue || '')
 }
 
 function setOutlinedColor() {
@@ -66,7 +61,7 @@ function setOutlinedColor() {
 
     const colorValue = options[color.value]
 
-    classMap.value.set('color', colorValue || '')
+    set('color', colorValue || '')
 }
 
 function setTextColor() {
@@ -85,7 +80,7 @@ function setTextColor() {
 
     const colorValue = options[color.value]
 
-    classMap.value.set('color', colorValue || '')
+    set('color', colorValue || '')
 }
 
 function setTonalColor() {
@@ -99,12 +94,12 @@ function setTonalColor() {
 
     const colorValue = options[color.value]
 
-    classMap.value.set('color', colorValue || '')
+    set('color', colorValue || '')
 }
 
 function setVariant() {
     const options: Record<typeof variant.value, Function> = {
-        none: () => classMap.value.set('color', ''),
+        none: () => set('color', ''),
         default: setDefaultColor,
         outlined: setOutlinedColor,
         text: setTextColor,
@@ -120,53 +115,33 @@ function setVariant() {
 
 watch([color, variant], setVariant, { immediate: true })
 
-// padding
-const padding = defineModel<'none' | 'xs' | 'sm' | 'md' | 'lg'>('padding', {
-    type: String,
+// size
+const sizeOptions = {
+    'none': '',
+    'xs': 'px-2 py-1 text-xs',
+    'sm': 'px-4 py-1 text-xs',
+    'md': 'px-5 py-2 text-base',
+    'lg': 'px-6 py-3 text-lg',
+    'sq-xs': 'size-6 text-xs',
+    'sq-sm': 'size-8 text-base',
+    'sq-md': 'size-10 text-lg',
+    'sq-lg': 'size-12 text-xl',
+}
+
+const size = defineModel<keyof typeof sizeOptions>('size', {
     default: 'md',
 })
 
-function setPadding() {
-    const options: Record<typeof padding.value, string> = {
-        none: '',
-        xs: 'px-2 py-1 text-xs',
-        sm: 'px-4 py-1 text-xs',
-        md: 'px-5 py-2 text-base',
-        lg: 'px-6 py-3 text-lg',
-    }
-
-    const option = options[padding.value]
-
-    classMap.value.set('padding', option || '')
-}
-
-watch(padding, setPadding, { immediate: true })
-
-// size
-const size = defineModel<'none' | 'xs' | 'sm' | 'md' | 'lg'>('size', {
-    type: String,
-    default: 'none',
-})
-
 function setSize() {
-    const options: Record<typeof size.value, string> = {
-        none: '',
-        xs: 'w-6 h-6 text-xs',
-        sm: 'w-8 h-8 text-base',
-        md: 'w-10 h-10 text-lg',
-        lg: 'w-12 h-12 text-xl',
-    }
+    const option = sizeOptions[size.value]
 
-    const option = options[size.value]
-
-    classMap.value.set('size', option || '')
+    set('size', option || '')
 }
 
 watch(size, setSize, { immediate: true })
 
 // clickable
-const to = defineModel<NuxtLinkProps['to']>('to', {
-    type: [String, Object],
+const to = defineModel<RouterLinkProps['to']>('to', {
     default: null,
 })
 
@@ -179,7 +154,7 @@ const disabled = defineModel<boolean>('disabled', {
 function setDisabled() {
     const disabledValue = disabled.value ? 'opacity-50 cursor-not-allowed' : ''
 
-    classMap.value.set('disabled', disabledValue)
+    set('disabled', disabledValue)
 }
 
 watch(disabled, setDisabled, { immediate: true })
@@ -201,7 +176,7 @@ function setRounded() {
 
     const roundedValue = options[rounded.value]
 
-    classMap.value.set('rounded', roundedValue || '')
+    set('rounded', roundedValue || '')
 }
 
 watch(rounded, setRounded, { immediate: true })
