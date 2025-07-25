@@ -30,8 +30,8 @@ export function createBrush(options?: CreateBrushOptions) {
             lastY,
             lastPressure,
             pressure: 0.5,
-            sizePercentage: size.value,
-            opacityPercentage: opacity.value,
+            size: size.value,
+            opacity: opacity.value,
         })
         paths.push(...drawPath)
         layer.emitter.emit('paths:begin')
@@ -40,6 +40,7 @@ export function createBrush(options?: CreateBrushOptions) {
 
     function move(layer: Layer, x: number, y: number, pressure: number) {
         if (!drawing) return
+
         const payload = {
             lastX,
             lastY,
@@ -47,9 +48,10 @@ export function createBrush(options?: CreateBrushOptions) {
             x,
             y,
             pressure,
-            sizePercentage: size.value,
-            opacityPercentage: opacity.value,
+            size: size.value,
+            opacity: opacity.value,
         }
+
         paths.push(...pen.draw(payload))
         lastX = x
         lastY = y

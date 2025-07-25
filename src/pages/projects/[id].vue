@@ -124,19 +124,26 @@ async function save() {
 
 // brush
 const brushSize = ref(1)
-const brushOpacity = ref(0.3)
+const brushOpacity = ref(1)
 const brush = createBrush({
     size: brushSize,
     opacity: brushOpacity,
 })
 
+const minBrushSize = computed(() => {
+    return project.value.width * 0.001
+})
+
+const maxBrushSize = computed(() => {
+    return project.value.width * 0.05
+})
+
 watch(
-    [brushSize, brushOpacity],
-    () => {
-        console.log({
-            size: brushSize.value,
-            opacity: brushOpacity.value,
-        })
+    project,
+    (value) => {
+        if (!value) return
+        brushSize.value = value.width * 0.01
+        brushOpacity.value = 1
     },
     { immediate: true }
 )
@@ -178,8 +185,8 @@ watch(
             <div class="bg-body-900 p-2 flex flex-col gap-y-4">
                 <cd-range
                     v-model="brushSize"
-                    min="1"
-                    max="100"
+                    :min="minBrushSize"
+                    :max="maxBrushSize"
                     step="1"
                     orientation="vertical"
                     class="h-56"

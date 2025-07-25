@@ -32,13 +32,11 @@ export default defineBrush({
         for (let i = 0; i < points.length - 1; i++) {
             const p1 = points[i]
 
-            let size = 10
-            size = size * (options.sizePercentage ?? 1)
+            let size = options.size || 1
             size = size * p1.pressure
 
-            let opacity = 1
-            opacity = opacity * (options.opacityPercentage ?? 1)
-            // opacity = opacity * p1.pressure
+            let opacity = options.opacity || 1
+            opacity = opacity * p1.pressure
 
             const x = p1.x
             const y = p1.y
