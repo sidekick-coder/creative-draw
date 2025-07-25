@@ -99,10 +99,14 @@ watch(project, setCanvasSizes)
 onMounted(setCanvasSizes)
 
 // save
+const saving = ref(false)
+
 async function save() {
+    if (saving.value || !project.value) return
+
     const db = $database.selected!
 
-    if (!project.value) return
+    saving.value = true
 
     const layers = board.layers.map((layer) => ({
         id: layer.id,
@@ -112,6 +116,10 @@ async function save() {
     await db.projects.update(project.value.id, {
         layers,
     })
+
+    setTimeout(() => {
+        saving.value = false
+    }, 1000)
 }
 
 // brush
@@ -130,9 +138,10 @@ const brush = createBrush({
             </cd-btn>
             <cd-btn
                 color="body-900"
-                @click="save"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                :loading="saving"
+                @click="save"
             >
                 <cd-icon name="mdi:content-save" />
             </cd-btn>

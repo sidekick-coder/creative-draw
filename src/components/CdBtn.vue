@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useModelClassProp } from '@/composables/useClassBuilder'
 import { RouterLink, type RouterLinkProps } from 'vue-router'
 
 // general
@@ -9,6 +8,8 @@ const className = defineModel<string>('class', {
 })
 
 const { set, classes } = useClassBuilder({ class: className })
+
+set('base', 'cursor-pointer relative')
 
 // color
 
