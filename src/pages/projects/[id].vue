@@ -197,7 +197,7 @@ watch(
                         class="flex items-center justify-center"
                     >
                         <div
-                            class="size-4 rounded-full outline"
+                            class="size-6 rounded-full border-2 border-body-500"
                             :style="{
                                 backgroundColor: `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`,
                             }"
