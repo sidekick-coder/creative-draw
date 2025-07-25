@@ -9,8 +9,8 @@ export interface CreateBrushOptions {
 }
 
 export function createBrush(options?: CreateBrushOptions) {
-    const size = options?.size ? ref(options.size) : ref(1)
-    const opacity = options?.opacity ? ref(options.opacity) : ref(1)
+    const size = toRef(options?.size ?? 1)
+    const opacity = toRef(options?.opacity ?? 1)
 
     let drawing = false
     let lastX = 0
@@ -30,8 +30,8 @@ export function createBrush(options?: CreateBrushOptions) {
             lastY,
             lastPressure,
             pressure: 0.5,
-            sizePercentage: unref(size),
-            opacityPercentage: unref(opacity),
+            sizePercentage: size.value,
+            opacityPercentage: opacity.value,
         })
         paths.push(...drawPath)
         layer.emitter.emit('paths:begin')
@@ -47,8 +47,8 @@ export function createBrush(options?: CreateBrushOptions) {
             x,
             y,
             pressure,
-            sizePercentage: unref(size),
-            opacityPercentage: unref(opacity),
+            sizePercentage: size.value,
+            opacityPercentage: opacity.value,
         }
         paths.push(...pen.draw(payload))
         lastX = x
@@ -71,7 +71,8 @@ export function createBrush(options?: CreateBrushOptions) {
 
     return defineBoardPlugin({
         install(board: Board) {
-            watch(board.layers,
+            watch(
+                board.layers,
                 (layers) => {
                     for (const layer of layers) {
                         console.log('installing brush on layer', layer.id)

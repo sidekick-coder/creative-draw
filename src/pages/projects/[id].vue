@@ -124,15 +124,26 @@ async function save() {
 
 // brush
 const brushSize = ref(1)
-const brushOpacity = ref(0.5)
+const brushOpacity = ref(0.3)
 const brush = createBrush({
     size: brushSize,
     opacity: brushOpacity,
 })
+
+watch(
+    [brushSize, brushOpacity],
+    () => {
+        console.log({
+            size: brushSize.value,
+            opacity: brushOpacity.value,
+        })
+    },
+    { immediate: true }
+)
 </script>
 <template>
     <div class="relative w-screen h-screen overflow-hidden">
-        <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-20 p-4">
+        <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
             <cd-btn color="body-900" to="/" size="sq-sm" class="flex items-center justify-center">
                 <cd-icon name="home" />
             </cd-btn>
@@ -147,36 +158,57 @@ const brush = createBrush({
             </cd-btn>
             <cd-btn
                 color="body-900"
-                @click="history.undo"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                @click="history.undo"
             >
                 <cd-icon name="heroicons:arrow-uturn-left" />
             </cd-btn>
             <cd-btn
                 color="body-900"
-                @click="history.redo"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                @click="history.redo"
             >
                 <cd-icon name="heroicons:arrow-uturn-right" />
             </cd-btn>
         </div>
 
+        <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">
+            <div class="bg-body-900 p-2 flex flex-col gap-y-4">
+                <cd-range
+                    v-model="brushSize"
+                    min="1"
+                    max="100"
+                    step="1"
+                    orientation="vertical"
+                    class="h-56"
+                />
+                <cd-range
+                    v-model="brushOpacity"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    orientation="vertical"
+                    class="h-56"
+                />
+            </div>
+        </div>
+
         <div class="fixed bottom-0 right-0 flex flex-wrap gap-2 z-20 p-4">
             <cd-btn
                 color="body-900"
-                @click="zoom.scale -= 0.1"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                @click="zoom.scale -= 0.1"
             >
                 <cd-icon name="mdi:magnify-minus" />
             </cd-btn>
             <cd-btn
                 color="body-900"
-                @click="fit"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                @click="fit"
             >
                 <cd-icon name="mdi:fit-to-screen" />
             </cd-btn>

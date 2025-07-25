@@ -9,7 +9,7 @@ const { set, classes } = useClassBuilder({
     class: className,
 })
 
-set('base', 'cd-range bg-body-800/50 rounded')
+set('base', 'cd-range bg-body-800/50')
 
 // model
 const model = defineModel({
@@ -53,11 +53,6 @@ const size = defineProp<number>('size', {
     type: String,
     default: '0.8rem',
 })
-
-const thumb = computed(() => ({
-    width: orientation.value === 'vertical' ? size.value : `calc(${size.value})`,
-    height: orientation.value === 'horizontal' ? size.value : `calc(${size.value} * 1.1)`,
-}))
 </script>
 
 <template>
@@ -78,14 +73,15 @@ const thumb = computed(() => ({
     -webkit-appearance: none;
     appearance: none;
     outline: none;
+    width: v-bind('size');
 
     &::-webkit-slider-thumb {
-        @apply bg-body-0 transition-colors;
-
         -webkit-appearance: none;
         appearance: none;
-        width: v-bind('thumb.width');
-        height: v-bind('thumb.height');
+        background-color: currentColor;
+        width: calc(v-bind('size') * 0.9);
+        height: calc(v-bind('size') * 0.9);
+        border-radius: 0;
         cursor: pointer;
     }
 
