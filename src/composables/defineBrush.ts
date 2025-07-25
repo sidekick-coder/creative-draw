@@ -1,3 +1,5 @@
+import type { ColorRGB } from '@/utils/colors'
+
 export interface BrushStartOptions {
     x: number
     y: number
@@ -13,6 +15,7 @@ export interface BrushDrawOptions {
     pressure: number
     size: number
     opacity: number
+    color: ColorRGB
 }
 
 export interface BrushEndOptions {
@@ -27,7 +30,7 @@ export interface BrushPath {
     size: number
     opacity: number
     pressure: number
-    color: string
+    color: ColorRGB
 }
 
 export interface BrushDefinition {

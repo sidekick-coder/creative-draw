@@ -2,15 +2,18 @@ import pen from '@/brushes/pen'
 import type { Board } from './createBoard'
 import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
+import type { ColorRGB } from '@/utils/colors'
 
 export interface CreateBrushOptions {
     size?: MaybeRef<number>
     opacity?: MaybeRef<number>
+    color?: MaybeRef<ColorRGB>
 }
 
 export function createBrush(options?: CreateBrushOptions) {
     const size = toRef(options?.size ?? 1)
     const opacity = toRef(options?.opacity ?? 1)
+    const color = toRef(options?.color ?? { r: 0, g: 0, b: 0 })
 
     let drawing = false
     let lastX = 0
@@ -32,6 +35,7 @@ export function createBrush(options?: CreateBrushOptions) {
             pressure: 0.5,
             size: size.value,
             opacity: opacity.value,
+            color: color.value,
         })
         paths.push(...drawPath)
         layer.emitter.emit('paths:begin')
@@ -50,6 +54,7 @@ export function createBrush(options?: CreateBrushOptions) {
             pressure,
             size: size.value,
             opacity: opacity.value,
+            color: color.value,
         }
 
         paths.push(...pen.draw(payload))

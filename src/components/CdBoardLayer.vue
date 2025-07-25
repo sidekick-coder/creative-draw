@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ColorRGB } from '@/utils/colors'
+
 // general
 const root = ref<HTMLCanvasElement | null>(null)
 const layer = useLayer()
@@ -170,8 +172,8 @@ function clear() {
 // paths
 const map = new Set<string>()
 
-function createPathKey(x: number, y: number, pressure: number, size: number, color: string) {
-    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color}`
+function createPathKey(x: number, y: number, pressure: number, size: number, color: ColorRGB) {
+    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
 }
 
 function drawPaths(paths: BrushPath[]) {
@@ -190,7 +192,7 @@ function drawPaths(paths: BrushPath[]) {
 
         ctx.globalCompositeOperation = 'source-over'
         ctx.globalAlpha = opacity
-        ctx.fillStyle = `rgba(0,0,0,${opacity})`
+        ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
         ctx.fill()

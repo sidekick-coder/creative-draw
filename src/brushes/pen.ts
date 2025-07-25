@@ -38,9 +38,10 @@ export default defineBrush({
             let opacity = options.opacity || 1
             opacity = opacity * p1.pressure
 
+            const color = options.color || { r: 0, g: 0, b: 0 }
+
             const x = p1.x
             const y = p1.y
-            const color = '#000000'
 
             paths.push({
                 x: x,

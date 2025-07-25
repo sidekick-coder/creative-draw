@@ -125,9 +125,15 @@ async function save() {
 // brush
 const brushSize = ref(1)
 const brushOpacity = ref(1)
+const brushColor = ref({
+    r: 0,
+    g: 0,
+    b: 0,
+})
 const brush = createBrush({
     size: brushSize,
     opacity: brushOpacity,
+    color: brushColor,
 })
 
 const minBrushSize = computed(() => {
@@ -179,6 +185,29 @@ watch(
             >
                 <cd-icon name="heroicons:arrow-uturn-right" />
             </cd-btn>
+        </div>
+
+        <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
+            <cd-menu :close-on-content-click="false">
+                <template #activator="{ attrs }">
+                    <cd-btn
+                        v-bind="attrs"
+                        size="sq-md"
+                        color="body-900"
+                        class="flex items-center justify-center"
+                    >
+                        <div
+                            class="size-4 rounded-full outline"
+                            :style="{
+                                backgroundColor: `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`,
+                            }"
+                        ></div>
+                    </cd-btn>
+                </template>
+                <div class="py-2 px-4">
+                    <cd-color-picker v-model="brushColor" />
+                </div>
+            </cd-menu>
         </div>
 
         <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">
