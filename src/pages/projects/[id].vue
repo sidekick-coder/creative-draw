@@ -92,6 +92,18 @@ function moveLayer(layer: Layer, direction: 'up' | 'down') {
     layers.value.splice(index + 1, 0, layer)
 }
 
+function deleteLayer(layer: Layer) {
+    const index = layers.value.indexOf(layer)
+
+    if (index === -1) return
+
+    layers.value.splice(index, 1)
+
+    if (activeLayerId.value === layer.id) {
+        activeLayerId.value = layers.value[index - 1]?.id || null
+    }
+}
+
 watch(project, loadLayers, { immediate: true })
 
 // canvas
@@ -268,6 +280,7 @@ watch(
                             :layer
                             @move-up="moveLayer(layer, 'up')"
                             @move-down="moveLayer(layer, 'down')"
+                            @delete="deleteLayer(layer)"
                         >
                             {{ layer.id }}
                         </cd-board-layer-list-item>

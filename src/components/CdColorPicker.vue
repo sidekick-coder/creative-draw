@@ -12,8 +12,8 @@ defineProps({
     },
 })
 
-const model = defineModel({
-    type: Object as PropType<ColorRGB>,
+const model = defineModel<ColorRGB>({
+    type: Object,
     default: { red: 0, green: 0, blue: 0 },
 })
 

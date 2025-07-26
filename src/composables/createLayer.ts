@@ -38,18 +38,18 @@ export function createLayer(payload: Partial<Payload> = {}) {
     const emitter = createEmitter()
     const context = createContext({
         data: payload.data || [],
-        name: payload.name || `Layer ${id}`,
+        name: payload.name || `New Layer`,
         order: payload.order || 0,
         visible: payload.visible !== undefined ? payload.visible : true,
         opacity: payload.opacity || 1,
-        background_color: payload.background_color || null,
+        background_color: payload.background_color || undefined,
     })
 
     const name = context.createRef<string>(`name`)
     const visible = context.createRef<boolean>(`visible`)
     const order = context.createRef<number>(`order`)
     const opacity = context.createRef<number>(`opacity`)
-    const backgroundColor = context.createRef<ColorRGB | null>(`background_color`)
+    const backgroundColor = context.createRef<ColorRGB | undefined>(`background_color`)
 
     function get<T = any>(key: string, defaultValue?: T): T {
         const value = context.get(key) || defaultValue

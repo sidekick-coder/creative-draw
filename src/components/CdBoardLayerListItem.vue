@@ -13,6 +13,7 @@ const emit = defineEmits<{
     (e: 'update:layer', layer: Layer): void
     (e: 'move-up', layer: Layer): void
     (e: 'move-down', layer: Layer): void
+    (e: 'delete', layer: Layer): void
 }>()
 </script>
 <template>
@@ -80,7 +81,7 @@ const emit = defineEmits<{
                                 size="sq-md"
                                 :variant="!layer.backgroundColor ? 'tonal' : 'text'"
                                 class="flex items-center justify-center"
-                                @click="layer.backgroundColor = null"
+                                @click="layer.backgroundColor = undefined"
                             >
                                 <cd-icon name="mdi:image-off" />
                             </cd-btn>
@@ -90,7 +91,7 @@ const emit = defineEmits<{
                                 v-model="layer.backgroundColor"
                             />
                         </cd-list-item>
-                        <cd-list-item color="primary">
+                        <cd-list-item color="primary" @click="emit('delete', layer)">
                             <cd-icon name="heroicons:trash-16-solid" />
                             <span>Delete</span>
                         </cd-list-item>
