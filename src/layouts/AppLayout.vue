@@ -1,0 +1,41 @@
+<script setup lang="ts">
+import { groupBy } from 'lodash-es'
+
+const links = ref([
+    { label: 'Home', to: '/', icon: 'mdi:home', group: 'General' },
+    { label: 'Projects', to: '/projects', icon: 'mdi:folder', group: 'General' },
+])
+
+const groups = computed(() => groupBy(links.value, 'group'))
+</script>
+<template>
+    <div class="flex h-dvh w-dvw">
+        <aside class="w-72 bg-body-900 border-r-2 border-body-600">
+            <nav>
+                <cd-list-item to="/" class="py-6 flex items-center px-8">
+                    <cd-logo class="size-8 text-primary-300" />
+                    <span class="font-bold text-body-300">Creative draw</span>
+                </cd-list-item>
+                <template v-for="(group, groupName) in groups" :key="groupName">
+                    <cd-list-item class="px-8 py-1 text-body-200 font-bold text-sm">
+                        {{ groupName }}
+                    </cd-list-item>
+
+                    <template v-for="link in group" :key="link.to">
+                        <cd-list-item
+                            :to="link.to"
+                            class="px-8 flex items-center gap-x-3 hover:bg-body-700"
+                            active-class="bg-body-800 text-body-100"
+                        >
+                            <cd-icon :name="link.icon" />
+                            <span>{{ link.label }}</span>
+                        </cd-list-item>
+                    </template>
+                </template>
+            </nav>
+        </aside>
+        <main class="flex-1">
+            <slot />
+        </main>
+    </div>
+</template>

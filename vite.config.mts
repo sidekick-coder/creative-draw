@@ -14,7 +14,7 @@ export default defineConfig({
             dts: '.output/router.d.ts',
         }),
         components({
-            dirs: ['src/components'],
+            dirs: ['src/components', 'src/layouts'],
             extensions: ['vue'],
             dts: '.output/components.d.ts',
         }),
