@@ -32,7 +32,7 @@ const colorOptions: Record<string, string | string[]> = {
     ],
 }
 
-const variant = defineModel<'default' | 'none' | 'outlined' | 'text' | 'tonal'>('variant', {
+const variant = defineModel<keyof typeof colorOptions>('variant', {
     default: 'default',
 })
 

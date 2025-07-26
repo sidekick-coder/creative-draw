@@ -58,7 +58,12 @@ onMounted(setPosition)
 
 // bg
 function setColor() {
-    if (!root.value || !layer.value.backgroundColor) return
+    if (!root.value) return
+
+    if (!layer.value.backgroundColor) {
+        root.value.style.backgroundColor = 'transparent'
+        return
+    }
 
     const color = layer.value.backgroundColor
 

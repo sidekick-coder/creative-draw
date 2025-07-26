@@ -49,7 +49,7 @@ export function createLayer(payload: Partial<Payload> = {}) {
     const visible = context.createRef<boolean>(`visible`)
     const order = context.createRef<number>(`order`)
     const opacity = context.createRef<number>(`opacity`)
-    const backgroundColor = context.createRef<ColorRGB>(`background_color`)
+    const backgroundColor = context.createRef<ColorRGB | null>(`background_color`)
 
     function get<T = any>(key: string, defaultValue?: T): T {
         const value = context.get(key) || defaultValue

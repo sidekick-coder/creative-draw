@@ -319,13 +319,16 @@ watch(
             :plugins="[transform, zoom, pan, rotate, history, brush]"
         >
             <cd-board-layer
-                v-for="layer in layers"
+                v-for="(layer, index) in layers"
                 :key="layer.id"
                 :width="canvasWidth"
                 :height="canvasHeight"
                 :x="canvasX"
                 :y="canvasY"
                 :layer="layer"
+                :style="{
+                    'z-index': layers.length - index,
+                }"
             />
         </cd-board>
     </div>
