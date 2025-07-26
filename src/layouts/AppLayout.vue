@@ -9,10 +9,10 @@ const links = ref([
         group: __('General'),
     },
     {
-        label: __('Layers'),
+        label: __('Projects'),
         to: '/projects',
         icon: 'mdi:folder',
-        group: __('Projects'),
+        group: __('General'),
     },
     {
         label: __('Threads'),
@@ -41,7 +41,7 @@ const groups = computed(() => groupBy(links.value, 'group'))
                         <cd-list-item
                             :to="link.to"
                             class="px-8 flex items-center gap-x-3 hover:bg-body-700"
-                            active-class="bg-body-800 text-body-100"
+                            active-class="bg-body-800 text-body-50"
                         >
                             <cd-icon :name="link.icon" />
                             <span>{{ link.label }}</span>
