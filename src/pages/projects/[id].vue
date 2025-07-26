@@ -40,6 +40,7 @@ watch(projectId, setProject, { immediate: true })
 
 // layers
 const layers = ref<Layer[]>([])
+const activeLayerId = ref<string | null>(null)
 
 function loadLayers() {
     if (!project.value) return
@@ -53,10 +54,21 @@ function loadLayers() {
     })
 
     if (!projectLayers.length) {
-        layers.value.push(createLayer())
+        projectLayers.push(
+            createLayer({ name: 'New Layer' }),
+            createLayer({
+                name: 'Background',
+                background_color: {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                },
+            })
+        )
     }
 
     layers.value = projectLayers
+    activeLayerId.value = layers.value[0]?.id || null
 }
 
 function addLayer() {
@@ -252,6 +264,7 @@ watch(
                         <cd-board-layer-list-item
                             v-for="layer in layers"
                             :key="layer.id"
+                            v-model:active-id="activeLayerId"
                             :layer
                             @move-up="moveLayer(layer, 'up')"
                             @move-down="moveLayer(layer, 'down')"
@@ -328,6 +341,7 @@ watch(
                 :layer="layer"
                 :style="{
                     'z-index': layers.length - index,
+                    'pointer-events': activeLayerId === layer.id ? 'auto' : 'none',
                 }"
             />
         </cd-board>

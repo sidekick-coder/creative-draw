@@ -1,6 +1,11 @@
 <script setup lang="ts">
-const layer = defineProp<Layer>('layer', {
+const layer = defineModel<Layer>('layer', {
     type: Object,
+    required: true,
+})
+
+const activeId = defineModel('activeId', {
+    type: String,
     required: true,
 })
 
@@ -9,13 +14,18 @@ const emit = defineEmits<{
     (e: 'move-up', layer: Layer): void
     (e: 'move-down', layer: Layer): void
 }>()
-
-// menu
-const menu = ref(false)
 </script>
 <template>
-    <cd-list-item class="flex border-b border-body-600 p-0" color="none" @dblclick="menu = true">
+    <cd-list-item
+        class="flex border-b border-body-600 py-0 px-2 gap-x-0"
+        color="none"
+        :class="[activeId === layer.id ? 'bg-body-700/50' : '']"
+    >
         <!-- <cd-ui-layer-list-item-preview :model-value="layer" /> -->
+
+        <cd-btn size="none" color="none" class="p-2" @click="activeId = layer.id">
+            <div class="size-12 bg-white rounded"></div>
+        </cd-btn>
 
         <div class="flex-1 text-sm text-body-0">
             <input
@@ -41,7 +51,7 @@ const menu = ref(false)
             </cd-btn>
             <cd-menu :close-on-content-click="false">
                 <template #activator="{ attrs }">
-                    <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                    <cd-btn v-bind="attrs" size="sq-md" variant="text">
                         <cd-icon name="heroicons:ellipsis-vertical" />
                     </cd-btn>
                 </template>
