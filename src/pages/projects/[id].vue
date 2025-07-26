@@ -39,22 +39,48 @@ async function setProject() {
 watch(projectId, setProject, { immediate: true })
 
 // layers
-const layers = ref<any[]>([])
+const layers = ref<Layer[]>([])
 
-function setLayers() {
+function loadLayers() {
     if (!project.value) return
 
-    layers.value = project.value.layers || []
+    const projectLayers = [] as Layer[]
 
-    if (!layers.value.length) {
-        layers.value.push({
-            id: 'default',
-            data: [],
-        })
+    project.value.layers?.forEach((layerData: any) => {
+        const layer = createLayer(layerData)
+
+        projectLayers.push(layer)
+    })
+
+    if (!projectLayers.length) {
+        layers.value.push(createLayer())
     }
+
+    layers.value = projectLayers
 }
 
-watch(project, setLayers, { immediate: true })
+function addLayer() {
+    const newLayer = createLayer()
+
+    layers.value.unshift(newLayer)
+}
+
+function moveLayer(layer: Layer, direction: 'up' | 'down') {
+    const index = layers.value.indexOf(layer)
+
+    if (index === -1) return
+
+    if (direction === 'up' && index > 0) {
+        layers.value.splice(index, 1)
+        layers.value.splice(index - 1, 0, layer)
+        return
+    }
+
+    layers.value.splice(index, 1)
+    layers.value.splice(index + 1, 0, layer)
+}
+
+watch(project, loadLayers, { immediate: true })
 
 // canvas
 const canvasWidth = ref(1920)
@@ -121,13 +147,12 @@ async function save() {
 
     saving.value = true
 
-    const layers = board.layers.map((layer) => ({
-        id: layer.id,
-        data: JSON.parse(JSON.stringify(layer.get('data', []))),
-    }))
+    const projectLayers = layers.value.map((layer) => layer.serialize())
+
+    console.debug('[save]', projectLayers)
 
     await db.projects.update(project.value.id, {
-        layers,
+        layers: projectLayers,
     })
 
     setTimeout(() => {
@@ -212,24 +237,32 @@ watch(
         <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
             <cd-menu :close-on-content-click="false">
                 <template #activator="{ attrs }">
-                    <cd-btn
-                        v-bind="attrs"
-                        size="sq-md"
-                        color="body-900"
-                        class="flex items-center justify-center"
-                    >
-                        <div
-                            class="size-6 rounded-full border-2 border-body-500"
-                            :style="{
-                                backgroundColor: `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`,
-                            }"
-                        ></div>
+                    <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                        <cd-icon name="streamline-ultimate:layers-stacked-bold" />
                     </cd-btn>
                 </template>
                 <div class="py-2 px-4">
-                    <cd-color-picker v-model="brushColor" />
+                    <cd-card class="border-2 border-body-600">
+                        <cd-card-head class="border-b border-body-600">
+                            <cd-card-title class="mr-auto text-base">Layers</cd-card-title>
+                            <cd-btn variant="text" size="sq-md" @click="addLayer">
+                                <cd-icon name="heroicons:plus-20-solid" />
+                            </cd-btn>
+                        </cd-card-head>
+                        <cd-board-layer-list-item
+                            v-for="layer in layers"
+                            :key="layer.id"
+                            :layer
+                            @move-up="moveLayer(layer, 'up')"
+                            @move-down="moveLayer(layer, 'down')"
+                        >
+                            {{ layer.id }}
+                        </cd-board-layer-list-item>
+                    </cd-card>
                 </div>
             </cd-menu>
+
+            <cd-color-picker v-model="brushColor" />
         </div>
 
         <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">
@@ -240,7 +273,7 @@ watch(
                     :max="maxBrushSize"
                     step="1"
                     orientation="vertical"
-                    class="h-56"
+                    class="h-56 w-4"
                 />
                 <cd-range
                     v-model="brushOpacity"
@@ -248,7 +281,7 @@ watch(
                     max="1"
                     step="0.01"
                     orientation="vertical"
-                    class="h-56"
+                    class="h-56 w-4"
                 />
             </div>
         </div>
@@ -292,7 +325,7 @@ watch(
                 :height="canvasHeight"
                 :x="canvasX"
                 :y="canvasY"
-                :data="layer.data"
+                :layer="layer"
             />
         </cd-board>
     </div>

@@ -125,6 +125,10 @@ const readonly = defineProp<boolean>('readonly', {
 
 <template>
     <cd-input v-bind="$props">
+        <template v-if="$slots.prepend" #prepend>
+            <slot name="prepend" />
+        </template>
+
         <template #default="{ id }">
             <input
                 :id="id"

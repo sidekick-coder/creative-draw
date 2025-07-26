@@ -17,7 +17,7 @@ set('base', 'flex items-center gap-x-5 px-4 py-3 transition-colors')
 
 const color = defineProp<string>('color', {
     type: String,
-    default: 'primary',
+    default: 'none',
 })
 
 function setColor() {

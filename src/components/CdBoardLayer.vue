@@ -3,7 +3,10 @@ import type { ColorRGB } from '@/utils/colors'
 
 // general
 const root = ref<HTMLCanvasElement | null>(null)
-const layer = useLayer()
+const layer = defineModel('layer', {
+    type: Object as () => Layer,
+    required: true,
+})
 
 function getCanvas() {
     const canvas = root.value
@@ -28,8 +31,8 @@ function getContext() {
 }
 
 onMounted(() => {
-    layer.set('canvas', getCanvas())
-    layer.set('context', getContext())
+    layer.value.set('canvas', getCanvas())
+    layer.value.set('context', getContext())
 })
 
 // position
@@ -53,19 +56,16 @@ function setPosition() {
 watch([x, y], setPosition)
 onMounted(setPosition)
 
-// color
-const backgroundColor = defineProp<string>('backgroundColor', {
-    type: String,
-    default: '#ffffff',
-})
-
+// bg
 function setColor() {
-    if (!root.value) return
+    if (!root.value || !layer.value.backgroundColor) return
 
-    root.value.style.backgroundColor = backgroundColor.value
+    const color = layer.value.backgroundColor
+
+    root.value.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`
 }
 
-watch(backgroundColor, setColor)
+watch(() => layer.value.backgroundColor, setColor)
 
 onMounted(setColor)
 
@@ -95,7 +95,7 @@ onMounted(setSize)
 function onPointerEvent(e: PointerEvent) {
     const ctx = getContext()
 
-    layer.emitter.emit(e.type, {
+    layer.value.emitter.emit(e.type, {
         event: e,
         ctx,
         x: e.offsetX,
@@ -122,7 +122,7 @@ function onTouchEvent(e: TouchEvent) {
         force = touch.force
     }
 
-    layer.emitter.emit(e.type, {
+    layer.value.emitter.emit(e.type, {
         event: e,
         ctx,
         x,
@@ -134,7 +134,7 @@ function onTouchEvent(e: TouchEvent) {
 function onMouseEvent(e: MouseEvent) {
     const ctx = getContext()
 
-    layer.emitter.emit(e.type, {
+    layer.value.emitter.emit(e.type, {
         event: e,
         ctx,
         x: e.offsetX,
@@ -200,18 +200,18 @@ function drawPaths(paths: BrushPath[]) {
     })
 }
 
-layer.emitter.on('paths:draw', drawPaths)
+layer.value.emitter.on('paths:draw', drawPaths)
 
-layer.emitter.on('paths:begin', () => {
+layer.value.emitter.on('paths:begin', () => {
     map.clear()
 })
 
-layer.emitter.on('paths:end', () => {
+layer.value.emitter.on('paths:end', () => {
     map.clear()
 })
 
 function draw() {
-    const items = layer.get<any[]>('data', [])
+    const items = layer.value.get<any[]>('data', [])
 
     items.forEach((item) => {
         if (item.type === 'brush') {
@@ -225,22 +225,20 @@ function redraw() {
     draw()
 }
 
-layer.emitter.on('clear', clear)
-layer.emitter.on('render', redraw)
+layer.value.emitter.on('clear', clear)
+layer.value.emitter.on('render', redraw)
 
-layer.emitter.on('draw', draw)
+layer.value.emitter.on('draw', draw)
 
 // data
-const data = defineProp<any[]>('data', {
-    type: Array,
-    default: () => [],
-})
-
-onMounted(() => {
-    layer.set('data', data.value)
-    redraw()
-})
+onMounted(redraw)
 </script>
 <template>
-    <canvas ref="root" class="absolute" />
+    <canvas
+        ref="root"
+        class="absolute"
+        :class="{
+            'opacity-0': !layer.visible,
+        }"
+    />
 </template>

@@ -1,3 +1,5 @@
+import type { ColorRGB } from '@/utils/colors'
+
 export interface LayerPointEvent {
     event: PointerEvent
     x: number
@@ -21,10 +23,33 @@ export interface LayerMouseEvent {
     ctx: OffscreenCanvasRenderingContext2D
 }
 
-export function createLayer() {
-    const id = crypto.randomUUID()
+interface Payload {
+    id: string
+    name: string
+    visible: boolean
+    order: number
+    opacity: number
+    background_color?: ColorRGB
+    data: any[]
+}
+
+export function createLayer(payload: Partial<Payload> = {}) {
+    const id = payload.id || crypto.randomUUID()
     const emitter = createEmitter()
-    const context = new Map<string, any>()
+    const context = createContext({
+        data: payload.data || [],
+        name: payload.name || `Layer ${id}`,
+        order: payload.order || 0,
+        visible: payload.visible !== undefined ? payload.visible : true,
+        opacity: payload.opacity || 1,
+        background_color: payload.background_color || null,
+    })
+
+    const name = context.createRef<string>(`name`)
+    const visible = context.createRef<boolean>(`visible`)
+    const order = context.createRef<number>(`order`)
+    const opacity = context.createRef<number>(`opacity`)
+    const backgroundColor = context.createRef<ColorRGB>(`background_color`)
 
     function get<T = any>(key: string, defaultValue?: T): T {
         const value = context.get(key) || defaultValue
@@ -46,10 +71,33 @@ export function createLayer() {
         emitter.emit('set', { key, value })
     }
 
+    function serialize() {
+        const data = {
+            id,
+            name: name.value,
+            visible: visible.value,
+            order: order.value,
+            opacity: opacity.value,
+            background_color: backgroundColor.value,
+            data: context.get('data') || [],
+        }
+
+        return JSON.parse(JSON.stringify(data))
+    }
+
     return reactive({
         id,
         emitter,
+        context,
+
+        name,
+        visible,
+        order,
+        opacity,
+        backgroundColor,
+
         get,
         set,
+        serialize,
     })
 }

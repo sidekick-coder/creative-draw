@@ -108,7 +108,7 @@ const offsetOptions = defineProp<OffsetOptions>('offset', {
     default: 0,
 })
 
-const middleware = computed(() => [shift(), flip(), offset(offsetOptions.value)])
+const middleware = computed(() => [shift(), offset(offsetOptions.value)])
 
 const { floatingStyles: contentStyles, update } = useFloating(
     activatorRef as any,

@@ -9,7 +9,7 @@ const className = defineModel<string>('class', {
 
 const { set, classes } = useClassBuilder({ class: className })
 
-set('base', 'cursor-pointer relative')
+set('base', 'cursor-pointer relative flex items-center justify-center ')
 
 // color
 

@@ -8,8 +8,13 @@ export function createBoard() {
 
     // layers
     const layers = ref([] as Layer[])
+    const activeLayerId = context.createRef<string | null>('activeLayerId', null)
 
-    function addLayer(layer: Layer) {
+    function addLayer(layerOrRef: MaybeRef<Layer>) {
+        const layer = toValue(layerOrRef)
+
+        console.debug('[board] add layer', layer)
+
         layers.value.push(layer)
 
         emitter.emit('layer:add', layer)
@@ -24,6 +29,7 @@ export function createBoard() {
         context,
 
         layers,
+        activeLayerId,
 
         addLayer,
     })

@@ -9,7 +9,7 @@ const { set, classes } = useClassBuilder({
     class: className,
 })
 
-set('base', 'cd-range bg-body-800/50')
+set('base', 'cd-range bg-body-800')
 
 // model
 const model = defineModel({
@@ -73,7 +73,6 @@ const size = defineProp<number>('size', {
     -webkit-appearance: none;
     appearance: none;
     outline: none;
-    width: v-bind('size');
 
     &::-webkit-slider-thumb {
         -webkit-appearance: none;

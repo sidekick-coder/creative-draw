@@ -1,14 +1,14 @@
-export function createContext() {
-    const context = new Map<string, any>()
+export function createContext(initialContext: Record<string, any> = {}) {
+    const context = ref(new Map<string, any>(Object.entries(initialContext)))
 
     function get<T = any>(key: string, defaultValue?: T): T {
-        const value = context.get(key) || defaultValue
-
-        if (!value && defaultValue) {
+        if (!context.value.has(key) && defaultValue !== undefined) {
             return defaultValue as T
         }
 
-        if (!value) {
+        const value = context.value.get(key)
+
+        if (!context.value.has(key)) {
             throw new Error(`Context ${key} is not set`)
         }
 
@@ -16,11 +16,32 @@ export function createContext() {
     }
 
     function set<T = any>(key: string, value: T) {
-        context.set(key, value)
+        context.value.set(key, value)
+    }
+
+    function all(): Record<string, any> {
+        const data: Record<string, any> = {}
+
+        for (const [key, value] of context.value.entries()) {
+            data[key] = value
+        }
+
+        return data
+    }
+
+    function createRef<T>(name: string, defaultValue?: T): Ref<T> {
+        return computed({
+            get: () => get(name, defaultValue),
+            set: (value: T) => {
+                context.value.set(name, value)
+            },
+        })
     }
 
     return {
         get,
         set,
+        all,
+        createRef,
     }
 }

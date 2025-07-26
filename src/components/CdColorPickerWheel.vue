@@ -13,12 +13,12 @@ set('base', 'relative transition-colors duration-200 size-40 outline outline-bod
 
 // model
 const model = defineModel({
-    type: Object as PropType<ColorRGB>,
+    type: Object as PropType<ColorRGB | null>,
     default: { red: 0, green: 0, blue: 0 },
 })
 
 const hue = computed(() => {
-    const { h } = rgbToHsl(model.value.r, model.value.g, model.value.b)
+    const { h } = rgbToHsl(model.value?.r || 0, model.value?.g || 0, model.value?.b || 0)
 
     return h
 })
@@ -92,7 +92,7 @@ function setPosition() {
         const g = data[i + 1]
         const b = data[i + 2]
 
-        if (r === model.value.r && g === model.value.g && b === model.value.b) {
+        if (r === model.value?.r && g === model.value?.g && b === model.value?.b) {
             let pixelX = (i / 4) % canvas.value.width
             let pixelY = Math.floor(i / 4 / canvas.value.width)
 
