@@ -6,6 +6,10 @@ defineOptions({
 })
 
 defineProps({
+    id: {
+        type: String,
+        default: null,
+    },
     label: {
         type: String,
         default: null,
@@ -32,12 +36,17 @@ watchDebounced(
 <template>
     <cd-menu :close-on-content-click="false" :offset="{ mainAxis: 16, crossAxis: -16 }">
         <template #activator="{ attrs }">
-            <cd-input-label v-if="label" v-bind="attrs" class="flex items-center gap-x-2 w-full">
+            <cd-input-label
+                v-if="label"
+                v-bind="attrs"
+                :for="id"
+                class="flex items-center gap-x-2 w-full"
+            >
                 <div class="flex-1">
                     {{ label }}
                 </div>
 
-                <cd-btn size="sq-md" color="body-900" class="flex items-center justify-center">
+                <cd-btn :id size="sq-md" color="body-900" class="flex items-center justify-center">
                     <div
                         class="size-6 rounded-full border-2 border-body-500"
                         :style="{
@@ -48,6 +57,7 @@ watchDebounced(
             </cd-input-label>
             <cd-btn
                 v-else
+                :id
                 size="sq-md"
                 v-bind="attrs"
                 color="body-900"

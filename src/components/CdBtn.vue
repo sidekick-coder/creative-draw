@@ -120,7 +120,7 @@ watch([color, variant], setVariant, { immediate: true })
 const sizeOptions = {
     'none': '',
     'xs': 'px-2 py-1 text-xs',
-    'sm': 'px-4 py-1 text-xs',
+    'sm': 'px-4 py-2 text-sm',
     'md': 'px-5 py-2 text-base',
     'lg': 'px-6 py-3 text-lg',
     'sq-xs': 'size-6 text-xs',

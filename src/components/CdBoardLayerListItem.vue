@@ -56,8 +56,10 @@ const emit = defineEmits<{
                     </cd-btn>
                 </template>
                 <div class="py-2 px-4">
-                    <cd-card class="border-2 border-body-600 w-96">
-                        <cd-list-item class="border-b border-body-600">
+                    <cd-card
+                        class="border-2 border-body-600 w-96 [&>*]:h-16 [&>*]:border-b [&>*]:border-body-500 [&>*]:last:border-b-0"
+                    >
+                        <cd-list-item>
                             <cd-text-field v-model.lazy="layer.name" placeholder="Name" />
                         </cd-list-item>
                         <cd-list-item>
@@ -72,10 +74,24 @@ const emit = defineEmits<{
                             />
                         </cd-list-item>
 
-                        <cd-list-item class="gap-x-0">
+                        <cd-list-item class="gap-x-0 pr-2">
                             <cd-input-label for="layer-background-color" class="flex-1">
                                 Background Color
                             </cd-input-label>
+                            <cd-color-picker
+                                v-if="layer.backgroundColor"
+                                id="layer-background-color"
+                                v-model="layer.backgroundColor"
+                            />
+
+                            <cd-btn
+                                size="sq-md"
+                                :variant="layer.backgroundColor ? 'tonal' : 'text'"
+                                class="flex items-center justify-center"
+                                @click="layer.backgroundColor = { r: 0, g: 0, b: 0 }"
+                            >
+                                <cd-icon name="mdi:image-plus" />
+                            </cd-btn>
                             <cd-btn
                                 size="sq-md"
                                 :variant="!layer.backgroundColor ? 'tonal' : 'text'"
@@ -84,15 +100,12 @@ const emit = defineEmits<{
                             >
                                 <cd-icon name="mdi:image-off" />
                             </cd-btn>
-
-                            <cd-color-picker
-                                id="layer-background-color"
-                                v-model="layer.backgroundColor"
-                            />
                         </cd-list-item>
-                        <cd-list-item color="primary" @click="emit('delete', layer)">
-                            <cd-icon name="heroicons:trash-16-solid" />
-                            <span>Delete</span>
+                        <cd-list-item class="justify-end">
+                            <cd-btn color="danger" size="sm" @click="emit('delete', layer)">
+                                <cd-icon name="heroicons:trash-16-solid" class="mr-2" />
+                                <span>Delete</span>
+                            </cd-btn>
                         </cd-list-item>
                     </cd-card>
                 </div>
