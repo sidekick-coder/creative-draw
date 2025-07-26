@@ -7,6 +7,8 @@ const app = createApp(App)
 
 app.directive('visible', vVisible)
 
+import.meta.glob('./globals/*.ts', { eager: true })
+
 Object.values(import.meta.glob('./directives/*.ts', { eager: true }))
     .map((mod: any) => Object.entries(mod))
     .flat()

@@ -2,8 +2,24 @@
 import { groupBy } from 'lodash-es'
 
 const links = ref([
-    { label: 'Home', to: '/', icon: 'mdi:home', group: 'General' },
-    { label: 'Projects', to: '/projects', icon: 'mdi:folder', group: 'General' },
+    {
+        label: __('Home'),
+        to: '/',
+        icon: 'mdi:home',
+        group: __('General'),
+    },
+    {
+        label: __('Layers'),
+        to: '/projects',
+        icon: 'mdi:folder',
+        group: __('Projects'),
+    },
+    {
+        label: __('Threads'),
+        to: '/threads',
+        icon: 'mdi:message-text',
+        group: __('AI'),
+    },
 ])
 
 const groups = computed(() => groupBy(links.value, 'group'))
