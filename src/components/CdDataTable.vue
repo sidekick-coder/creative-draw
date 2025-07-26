@@ -3,9 +3,12 @@ export interface CdDataTableColumn {
     id: string
     label?: string
     field?: string | ((item: any) => string | number)
+    class?: string
 }
 </script>
 <script setup lang="ts" generic="T extends Record<string, any> = any">
+import { get } from 'lodash-es'
+
 defineProps({
     items: {
         type: Array as () => T[],
@@ -29,8 +32,20 @@ defineProps({
     },
 })
 
-function getItemKey(index: number, item: any): string {
+function findItemKey(index: number, item: any): string {
     return item.id || index
+}
+
+function findItemValue(index: number, item: any, col: CdDataTableColumn): string | number {
+    if (typeof col.field === 'function') {
+        return col.field(item)
+    }
+
+    if (typeof col.field === 'string') {
+        return get(item, col.field, '')
+    }
+
+    return item[col.id]
 }
 </script>
 <template>
@@ -41,28 +56,27 @@ function getItemKey(index: number, item: any): string {
                     <th
                         v-for="col in columns"
                         :key="col.id"
-                        class="px-4 py-3 text-left text-xs font-medium text-body-50 uppercase tracking-wider"
+                        :class="
+                            twMerge(
+                                'px-4 py-3 text-left text-sm font-bold text-body-50 tracking-wider',
+                                col.class
+                            )
+                        "
                     >
-                        {{ col.label || col.id }}
+                        {{ col.label }}
                     </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-body-600">
-                <tr v-for="(item, index) in items" :key="getItemKey(index, item)">
+                <tr v-for="(item, index) in items" :key="findItemKey(index, item)">
                     <td
                         v-for="col in columns"
                         :key="col.id"
-                        class="px-4 py-2 whitespace-nowrap text-sm"
+                        :class="twMerge('px-4 py-3 whitespace-nowrap text-sm', col.class)"
                     >
-                        <span v-if="typeof col.field === 'function'">
-                            {{ col.field(item) }}
-                        </span>
-                        <span v-if="typeof col.field === 'string'">
-                            {{ item[col.field] }}
-                        </span>
-                        <span v-if="!col.field">
-                            {{ item[col.id] }}
-                        </span>
+                        <slot :name="`item-${col.id}`" :item="item" :index="index" :col="col">
+                            {{ findItemValue(index, item, col) }}
+                        </slot>
                     </td>
                 </tr>
                 <tr v-if="!items.length">

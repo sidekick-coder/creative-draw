@@ -13,30 +13,21 @@ set('base', 'cursor-pointer relative flex items-center justify-center ')
 
 // color
 
-const colorOptions: Record<string, string | string[]> = {
-    'none': '',
-    'primary': `
-            bg-primary-300 text-body-0
-            hover:bg-primary-400 
-            data-[active=true]:text-primary-300
-        `,
-    'secondary': `bg-secondary-300 text-body-0 hover:bg-secondary-400`,
-    'danger': `bg-danger-300 text-body-0 hover:bg-danger-400`,
-    'body-700': [
-        `bg-body-700 text-body-0 hover:bg-body-700 `,
-        'data-[loading=true]:text-body-700/0 [&>*:is(.spinner)]:text-body-0',
-    ],
-    'body-900': [
-        `bg-body-900 text-body-0 hover:bg-body-900 `,
-        'data-[loading=true]:text-body-900/0 [&>*:is(.spinner)]:text-body-0',
-    ],
-}
+const colorOptions = ref({
+    'none': '' as string | string[],
+    'primary': '' as string | string[],
+    'secondary': '' as string | string[],
+    'danger': '' as string | string[],
+    'body-700': '' as string | string[],
+    'body-900': '' as string | string[],
+})
 
-const variant = defineModel<keyof typeof colorOptions>('variant', {
+const variant = defineModel('variant', {
+    type: String,
     default: 'default',
 })
 
-const color = defineModel<keyof typeof colorOptions>('color', {
+const color = defineModel<keyof typeof colorOptions.value>('color', {
     default: 'primary',
 })
 
@@ -46,56 +37,165 @@ const active = defineModel<boolean>('active', {
 })
 
 function setDefaultColor() {
-    const colorValue = colorOptions[color.value]
-
-    set('color', colorValue || '')
+    colorOptions.value = {
+        'none': '',
+        'primary': [
+            'bg-primary-300 text-body-0',
+            'hover:bg-primary-400 ',
+            'data-[active=true]:text-primary-300',
+            'data-[loading=true]:text-primary-300/0',
+            '[&>*:is(.spinner)]:text-body-0',
+        ],
+        'secondary': [
+            'bg-secondary-300 text-body-0',
+            'hover:bg-secondary-400',
+            'data-[active=true]:text-secondary-300',
+            'data-[loading=true]:text-secondary-300/0',
+            '[&>*:is(.spinner)]:text-body-0',
+        ],
+        'danger': [
+            'bg-danger-300 text-body-0',
+            'hover:bg-danger-400',
+            'data-[active=true]:text-danger-300',
+            'data-[loading=true]:text-danger-300/0',
+            '[&>*:is(.spinner)]:text-body-0',
+        ],
+        'body-700': [
+            'bg-body-700 text-body-0',
+            'hover:bg-body-700',
+            'data-[active=true]:text-body-700',
+            'data-[loading=true]:text-body-700/0',
+            '[&>*:is(.spinner)]:text-body-0',
+        ],
+        'body-900': [
+            'bg-body-900 text-body-0',
+            'hover:bg-body-900',
+            'data-[active=true]:text-body-900',
+            'data-[loading=true]:text-body-900/0',
+            '[&>*:is(.spinner)]:text-body-0',
+        ],
+    }
 }
 
 function setOutlinedColor() {
-    const options: Record<typeof color.value, string> = {
-        'none': 'border border-transparent',
-        'primary': 'border border-primary-100 text-primary-100 hover:bg-primary-500',
-        'secondary': 'border border-secondary-100 text-secondary-100 hover:bg-secondary-500',
-        'danger': 'border border-danger-100 text-danger-100 hover:bg-danger-500',
-        'body-700': 'border border-body-700 text-body-700 hover:bg-body-700',
+    colorOptions.value = {
+        'none': '',
+        'primary': [
+            'border-2 border-primary-300 text-primary-300',
+            'hover:bg-primary-300/25',
+            'data-[active=true]:text-primary-300',
+            'data-[loading=true]:text-primary-300/0',
+            '[&>*:is(.spinner)]:text-primary-300',
+        ],
+        'secondary': [
+            'border-2 border-secondary-300 text-secondary-300',
+            'hover:bg-secondary-300/25',
+            'data-[active=true]:text-secondary-300',
+            'data-[loading=true]:text-secondary-300/0',
+            '[&>*:is(.spinner)]:text-secondary-300',
+        ],
+        'danger': [
+            'border-2 border-danger-300 text-danger-300',
+            'hover:bg-danger-300/25',
+            'data-[active=true]:text-danger-300',
+            'data-[loading=true]:text-danger-300/0',
+            '[&>*:is(.spinner)]:text-danger-300',
+        ],
+        'body-700': [
+            'border-2 border-body-700 text-body-700',
+            'hover:bg-body-700/25',
+            'data-[active=true]:text-body-700',
+            'data-[loading=true]:text-body-700/0',
+            '[&>*:is(.spinner)]:text-body-700',
+        ],
+        'body-900': [
+            'border-2 border-body-900 text-body-900',
+            'hover:bg-body-900/25',
+            'data-[active=true]:text-body-900',
+            'data-[loading=true]:text-body-900/0',
+            '[&>*:is(.spinner)]:text-body-900',
+        ],
     }
-
-    const colorValue = options[color.value]
-
-    set('color', colorValue || '')
 }
 
 function setTextColor() {
-    const options: Record<typeof color.value, string> = {
+    colorOptions.value = {
         'none': '',
         'primary': `
             text-body-0
             hover:text-primary-100
             hover:bg-primary-300/25
             data-[active=true]:text-primary-300
+            data-[loading=true]:text-primary-300/0
+            [&>*:is(.spinner)]:text-primary-300
         `,
-        'secondary': 'text-body-0 hover:text-secondary-300',
-        'danger': 'text-body-0 hover:text-danger-300',
-        'body-700': 'text-body-0 hover:text-body-700',
+        'secondary': `
+            text-body-0
+            hover:text-secondary-100
+            hover:bg-secondary-300/25
+            data-[active=true]:text-secondary-300
+            data-[loading=true]:text-secondary-300/0
+            [&>*:is(.spinner)]:text-secondary-300
+        `,
+        'danger': `
+            text-body-0
+            hover:text-danger-100
+            hover:bg-danger-300/25
+            data-[active=true]:text-danger-300
+            data-[loading=true]:text-danger-300/0
+            [&>*:is(.spinner)]:text-danger-300
+        `,
+        'body-700': `
+            text-body-0
+            hover:text-body-700
+            data-[active=true]:text-body-700
+            data-[loading=true]:text-body-700/0
+            [&>*:is(.spinner)]:text-body-700
+        `,
+        'body-900': `
+            text-body-0
+            hover:text-body-900
+            data-[active=true]:text-body-900
+            data-[loading=true]:text-body-900/0
+            [&>*:is(.spinner)]:text-body-900
+        `,
     }
-
-    const colorValue = options[color.value]
-
-    set('color', colorValue || '')
 }
 
 function setTonalColor() {
-    const options: Record<typeof color.value, string> = {
+    colorOptions.value = {
         'none': '',
-        'primary': 'bg-primary-300/25 text-primary-100 hover:bg-primary-300/75 hover:text-body-0',
-        'secondary': 'bg-secondary-100 text-secondary-100 hover:bg-secondary-200',
-        'danger': 'bg-danger-100 text-danger-100 hover:bg-danger-200',
-        'body-700': 'bg-body-700/25 text-body-700 hover:bg-body-700/75',
+        'primary': [
+            'bg-primary-300/25 text-primary-100 hover:bg-primary-300/75 hover:text-body-0',
+            'data-[active=true]:text-primary-300',
+            'data-[loading=true]:text-primary-300/0',
+            '[&>*:is(.spinner)]:text-primary-300',
+        ],
+        'secondary': [
+            'bg-secondary-100 text-secondary-100 hover:bg-secondary-200',
+            'data-[active=true]:text-secondary-300',
+            'data-[loading=true]:text-secondary-300/0',
+            '[&>*:is(.spinner)]:text-secondary-300',
+        ],
+        'danger': [
+            'bg-danger-100 text-danger-100 hover:bg-danger-200',
+            'data-[active=true]:text-danger-300',
+            'data-[loading=true]:text-danger-300/0',
+            '[&>*:is(.spinner)]:text-danger-300',
+        ],
+        'body-700': [
+            'bg-body-700/25 text-body-700 hover:bg-body-700/75',
+            'data-[active=true]:text-body-700',
+            'data-[loading=true]:text-body-700/0',
+            '[&>*:is(.spinner)]:text-body-700',
+        ],
+        'body-900': [
+            'bg-body-900/25 text-body-900 hover:bg-body-900/75',
+            'data-[active=true]:text-body-900',
+            'data-[loading=true]:text-body-900/0',
+            '[&>*:is(.spinner)]:text-body-900',
+        ],
     }
-
-    const colorValue = options[color.value]
-
-    set('color', colorValue || '')
 }
 
 function setVariant() {
@@ -114,7 +214,14 @@ function setVariant() {
     }
 }
 
-watch([color, variant], setVariant, { immediate: true })
+function setColor() {
+    const value = colorOptions.value[color.value]
+
+    set('color', value || '')
+}
+
+watch(variant, setVariant, { immediate: true })
+watch([color, colorOptions], setColor, { immediate: true })
 
 // size
 const sizeOptions = {
@@ -161,29 +268,27 @@ function setDisabled() {
 watch(disabled, setDisabled, { immediate: true })
 
 // rounded
-const rounded = defineModel<'sm' | 'base' | 'md' | 'lg' | 'full'>('rounded', {
-    type: String,
+const roundedOptions = {
+    sm: 'rounded-sm',
+    base: 'rounded',
+    md: 'rounded-md',
+    lg: 'rounded-lg',
+    full: 'rounded-full',
+}
+
+const rounded = defineModel<keyof typeof roundedOptions>('rounded', {
     default: 'base',
 })
 
 function setRounded() {
-    const options: Record<typeof rounded.value, string> = {
-        sm: 'rounded-sm',
-        base: 'rounded',
-        md: 'rounded-md',
-        lg: 'rounded-lg',
-        full: 'rounded-full',
-    }
+    const value = roundedOptions[rounded.value]
 
-    const roundedValue = options[rounded.value]
-
-    set('rounded', roundedValue || '')
+    set('rounded', value || '')
 }
 
 watch(rounded, setRounded, { immediate: true })
 
 // others
-
 const loading = defineModel<boolean>('loading', {
     type: Boolean,
     default: false,

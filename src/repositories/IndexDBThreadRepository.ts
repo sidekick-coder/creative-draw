@@ -32,17 +32,21 @@ export default class IndexDbThreadRepository implements ThreadRepository {
     }
 
     async find(id: string): Promise<Thread | null> {
-        throw new Error('Method not implemented.') // Implementation for finding a thread by ID
+        const thread = await this.db.threads.get(id)
+
+        if (!thread) {
+            return null
+        }
+
+        return Thread.fromData(thread)
     }
 
     async create(data: any): Promise<Thread> {
-        const thread = new Thread(
-            data.id || createId(),
-            data.title,
-            data.content,
-            new Date(),
-            new Date()
-        )
+        const thread = Thread.fromData(data)
+
+        thread.id = createId()
+        thread.createdAt = new Date()
+        thread.updatedAt = new Date()
 
         await this.db.threads.put(thread)
 
@@ -50,12 +54,21 @@ export default class IndexDbThreadRepository implements ThreadRepository {
     }
 
     async update(id: string, data: any): Promise<Thread | null> {
-        // Implementation for updating a thread
-        throw new Error('Method not implemented.') // Implementation for listing threads
+        const thread = await this.db.threads.get(id)
+
+        if (!thread) {
+            throw new Error(`Thread with id ${id} not found`)
+        }
+
+        thread.title = data.title || thread.title
+        thread.updatedAt = new Date()
+
+        await this.db.threads.put(thread)
+
+        return thread
     }
 
     async destroy(id: string): Promise<void> {
-        // Implementation for deleting a thread
-        throw new Error('Method not implemented.') // Implementation for listing threads
+        await this.db.threads.delete(id)
     }
 }
