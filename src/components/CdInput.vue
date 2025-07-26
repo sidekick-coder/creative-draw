@@ -32,7 +32,7 @@ const label = defineProp<string>('label', {
 
 labelClassMap.value.set(
     'base',
-    'block font-bold text-sm text-body-100 cursor-pointer group-focus-within:text-primary-300 transition duration-200'
+    'block font-bold text-sm text-body-100 cursor-pointer group-focus-within:text-primary-300 transition-colors duration-200'
 )
 
 // input container
@@ -52,7 +52,7 @@ setContainer('base', [
     'border-body-200',
     'rounded',
     'group-focus-within:border-primary-300',
-    'transition duration-200',
+    'transition-colors duration-200',
 ])
 
 // icons

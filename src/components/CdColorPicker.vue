@@ -82,12 +82,12 @@ const hslString = computed({
         </cd-card-head>
 
         <cd-card-content class="flex flex-col gap-y-4">
-            <div class="flex justify-between gap-x-5">
+            <div class="flex justify-between gap-x-5 mb-4">
                 <cd-color-picker-wheel v-model="model" class="w-full" :main-color="mainColor" />
                 <cd-color-picker-slider v-model="hue" class="w-4" />
             </div>
 
-            <cd-text-field v-model.lazy="rgbString" label="RBG" />
+            <cd-text-field v-model.lazy="rgbString" label="RGB" />
 
             <cd-text-field v-model.lazy="hslString" label="HSL" />
         </cd-card-content>
