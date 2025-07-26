@@ -6,7 +6,6 @@ const layer = defineModel<Layer>('layer', {
 
 const activeId = defineModel('activeId', {
     type: String,
-    required: true,
 })
 
 const emit = defineEmits<{

@@ -78,23 +78,20 @@ export function createBrush(options?: CreateBrushOptions) {
 
     return defineBoardPlugin({
         install(board: Board) {
-            watch(
-                board.layers,
-                (layers) => {
-                    for (const layer of layers) {
-                        console.log('installing brush on layer', layer.id)
-                        layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
-                            start(layer, e.x, e.y)
-                        })
-                        layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
-                            move(layer, e.x, e.y, 0.5)
-                        })
-                        layer.emitter.on('mouseup', () => end(layer))
-                        layer.emitter.on('mouseout', () => end(layer))
-                    }
-                },
-                { immediate: true, deep: true }
-            )
+            board.emitter.on('layer:add', (layer: Layer) => {
+                console.log('[brush] installing on layer', layer.id)
+
+                layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
+                    start(layer, e.x, e.y)
+                })
+
+                layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
+                    move(layer, e.x, e.y, 0.5)
+                })
+
+                layer.emitter.on('mouseup', () => end(layer))
+                layer.emitter.on('mouseout', () => end(layer))
+            })
         },
     })
 }

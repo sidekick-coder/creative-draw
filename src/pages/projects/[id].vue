@@ -40,7 +40,7 @@ watch(projectId, setProject, { immediate: true })
 
 // layers
 const layers = ref<Layer[]>([])
-const activeLayerId = ref<string | null>(null)
+const activeLayerId = ref<string>()
 
 function loadLayers() {
     if (!project.value) return
@@ -68,7 +68,7 @@ function loadLayers() {
     }
 
     layers.value = projectLayers
-    activeLayerId.value = layers.value[0]?.id || null
+    activeLayerId.value = layers.value[0]?.id
 }
 
 function addLayer() {
@@ -100,7 +100,7 @@ function deleteLayer(layer: Layer) {
     layers.value.splice(index, 1)
 
     if (activeLayerId.value === layer.id) {
-        activeLayerId.value = layers.value[index - 1]?.id || null
+        activeLayerId.value = layers.value[index - 1]?.id
     }
 }
 

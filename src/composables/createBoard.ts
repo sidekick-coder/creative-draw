@@ -13,7 +13,7 @@ export function createBoard() {
     function addLayer(layerOrRef: MaybeRef<Layer>) {
         const layer = toValue(layerOrRef)
 
-        console.debug('[board] add layer', layer)
+        console.debug('[board] add layer', layer.id)
 
         layers.value.push(layer)
 
