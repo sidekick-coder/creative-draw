@@ -71,7 +71,8 @@ function onMouseEvent(e: MouseEvent) {
 <template>
     <div
         ref="container"
-        class="relative"
+        class="relative focus:outline-none"
+        tabindex="0"
         @mousedown="onMouseEvent"
         @mousemove="onMouseEvent"
         @mouseup="onMouseEvent"

@@ -1,9 +1,14 @@
 import type { Board } from './createBoard'
+import type { TransformPlugin } from './createTransform'
 
-export function createZoom() {
+interface Options {
+    scale?: MaybeRef<number>
+}
+
+export function createZoom(transformer: TransformPlugin, options: Options = {}) {
     let board: Board
 
-    const scale = ref(0.5)
+    const scale = toRef(options.scale ?? 1)
 
     function resize() {
         const container = board.context.get('container')
@@ -12,7 +17,7 @@ export function createZoom() {
             return
         }
 
-        container.style.transform = `scale(${scale.value})`
+        transformer.set('scale', scale.value)
     }
 
     return defineBoardPlugin(

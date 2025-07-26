@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { createTransform } from '@/composables/createTransform'
+
 // general
 const route = useRoute()
 
@@ -7,11 +9,11 @@ const board = useBoard()
 const boardWidth = ref(500)
 const boardHeight = ref(500)
 
-const history = createHistory({
-    debug: true,
-})
-const zoom = createZoom()
+const history = createHistory()
 const pan = createPan()
+const transform = createTransform()
+const zoom = createZoom(transform)
+const rotate = createRotate(transform)
 
 function setSizes() {
     boardWidth.value = window.innerWidth
@@ -67,6 +69,14 @@ function centralize() {
     canvasY.value = boardHeight.value / 2 - canvasHeight.value / 2
 }
 
+function focus() {
+    const container = board.context.get('container')
+
+    if (!container) return
+
+    container.focus()
+}
+
 function fit() {
     const paddingX = 80
     const paddingY = 80
@@ -83,6 +93,9 @@ function fit() {
     const newScale = Math.min(scaleWidth, scaleHeight)
 
     zoom.scale = newScale
+    rotate.angle = 0
+    centralize()
+    focus()
 }
 
 function setCanvasSizes() {
@@ -137,11 +150,11 @@ const brush = createBrush({
 })
 
 const minBrushSize = computed(() => {
-    return project.value.width * 0.001
+    return project.value?.width * 0.001
 })
 
 const maxBrushSize = computed(() => {
-    return project.value.width * 0.05
+    return project.value?.width * 0.05
 })
 
 watch(
@@ -267,7 +280,11 @@ watch(
             </cd-btn>
         </div>
 
-        <cd-board :width="boardWidth" :height="boardHeight" :plugins="[history, zoom, pan, brush]">
+        <cd-board
+            :width="boardWidth"
+            :height="boardHeight"
+            :plugins="[transform, zoom, pan, rotate, history, brush]"
+        >
             <cd-board-layer
                 v-for="layer in layers"
                 :key="layer.id"
