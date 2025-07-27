@@ -298,14 +298,27 @@ const type = defineModel<string>('type', {
     type: String,
     default: 'button',
 })
+
+const isToHttp = computed(() => {
+    return to.value && typeof to.value === 'string' && to.value.startsWith('http')
+})
+
+const is = computed(() => {
+    if (isToHttp.value) {
+        return 'a'
+    }
+
+    return to.value ? RouterLink : 'button'
+})
 </script>
 
 <template>
     <component
-        :is="to ? RouterLink : 'button'"
+        :is="is"
         :type="type"
         :class="classes"
-        :to="to"
+        :to="isToHttp ? undefined : to"
+        :href="isToHttp ? to : undefined"
         :data-active="active"
         :data-loading="loading"
     >
