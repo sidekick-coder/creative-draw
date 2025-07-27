@@ -5,6 +5,7 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vue-macros/macros-global"],
     "moduleResolution": "Bundler",
+    "strictPropertyInitialization": false,
     "paths": {
       "@/*": ["./src/*"]
     }

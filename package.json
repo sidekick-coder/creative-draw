@@ -22,6 +22,7 @@
     "@floating-ui/vue": "^1.1.6",
     "@iconify/vue": "^5.0.0",
     "@vueuse/core": "^13.2.0",
+    "date-fns": "^4.1.0",
     "dexie": "^4.0.11",
     "hotkeys-js": "^3.13.10",
     "lodash-es": "^4.17.21",

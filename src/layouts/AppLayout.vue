@@ -24,6 +24,7 @@ const links = ref([
         label: __('Adapters'),
         icon: 'mdi:plugin',
         group: __('AI'),
+        to: '/adapters',
     },
 ])
 

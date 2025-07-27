@@ -30,6 +30,14 @@ export default defineConfig([
                     args: 'after-used',
                 },
             ],
+            '@typescript-eslint/explicit-member-accessibility': [
+                'error',
+                {
+                    accessibility: 'explicit',
+                    ignoredMethodNames: ['constructor'],
+                },
+            ],
+
             'vue/multi-word-component-names': 'off',
             'vue/no-setup-props-destructure': 'off',
             'vue/one-component-per-file': 'off',
