@@ -26,6 +26,12 @@ const links = ref([
         group: __('AI'),
         to: '/adapters',
     },
+    {
+        label: __('Images'),
+        icon: 'mdi:image',
+        group: __('AI'),
+        to: '/images',
+    },
 ])
 
 const groups = computed(() => groupBy(links.value, 'group'))

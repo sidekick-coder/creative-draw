@@ -2,6 +2,7 @@ export default class Adapter {
     public id: string
     public name: string
     public description: string
+    public type: string
     public config: any
     public createdAt: Date = new Date()
     public updatedAt: Date = new Date()
