@@ -21,6 +21,15 @@ export default defineConfig([
             '@typescript-eslint/no-unsafe-function-type': 'off',
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-require-imports': 'off',
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    argsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    args: 'after-used',
+                },
+            ],
             'vue/multi-word-component-names': 'off',
             'vue/no-setup-props-destructure': 'off',
             'vue/one-component-per-file': 'off',
@@ -32,7 +41,9 @@ export default defineConfig([
             'vue/max-attributes-per-line': 'off',
             'vue/html-self-closing': 'off',
             'tailwindcss/no-custom-classname': 'off',
+
             'vue/singleline-html-element-content-newline': 'off',
+
             'linebreak-style': 'off',
             'prettier/prettier': [
                 'error',

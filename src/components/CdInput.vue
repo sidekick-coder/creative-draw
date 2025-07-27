@@ -1,6 +1,10 @@
+<script lang="ts">
+export interface InputMessage {
+    type: 'danger' | 'warning' | 'info' | 'success'
+    message: string
+}
+</script>
 <script lang="ts" setup>
-import type { Rule } from '~/composables/useRules'
-
 // general
 const className = defineProp<string>('class', {
     type: String,
@@ -9,31 +13,20 @@ const className = defineProp<string>('class', {
 
 const instance = getCurrentInstance()
 
-const { set, classes } = useClassBuilder({ class: className })
+const { set, classes } = useClassBuilder(className)
 
 set('base', 'relative group transition-colors duration-200 flex flex-col gap-y-2 w-full')
 
 // label
-const labelClassName = defineProp<string>('label-class', {
+const labelClass = defineProp<string>('label-class', {
     type: String,
     default: null,
 })
-
-const {
-    map: labelClassMap,
-    set: setLabel,
-    classes: labelClasses,
-} = useClassBuilder({ class: labelClassName })
 
 const label = defineProp<string>('label', {
     type: String,
     default: null,
 })
-
-labelClassMap.value.set(
-    'base',
-    'block font-bold text-sm text-body-100 cursor-pointer group-focus-within:text-primary-300 transition-colors duration-200'
-)
 
 // input container
 const inputContainerClassName = defineProp<string>('inputContainerClass', {
@@ -51,8 +44,9 @@ setContainer('base', [
     'border-2',
     'border-body-200',
     'rounded',
-    'group-focus-within:border-primary-300',
     'transition-colors duration-200',
+    'group-focus-within:border-primary-300',
+    'group-data-[error=true]:border-danger-300',
 ])
 
 // icons
@@ -114,63 +108,27 @@ watch(disabled, setDisabled, {
 })
 
 // messages
-interface Message {
-    type: 'danger' | 'warning' | 'info' | 'success'
-    message: string
-}
-
-const messages = ref<Message[]>([])
-
-// validation
-const validations = useValidation()
-
-const model = defineModel<any>()
-
-const rules = defineProp<Rule[]>('rules', {
+const messages = defineProp<InputMessage[]>('messages', {
     type: Array,
     default: () => [],
 })
 
-function validate() {
-    let error: string | boolean = true
-
-    setLabel('error', '')
-    setAppend('error', '')
-    setContainer('error', '')
-
-    for (const rule of rules.value) {
-        const result = rule(model.value)
-
-        if (typeof result === 'string') {
-            error = result
-            break
-        }
-    }
-
-    if (error === true) {
-        messages.value = []
-        return error
-    }
-
-    messages.value = [{ type: 'danger', message: error }]
-
-    setAppend('error', '!text-danger-300')
-    setLabel('error', '!text-danger-300')
-    setContainer('error', '!border-danger-300')
-
-    return false
-}
-
-watch(model, validate)
-
-onMounted(() => {
-    validations.value.push(validate)
+const hasError = defineProp<boolean>('hasError', {
+    type: Boolean,
+    default: false,
 })
 </script>
 
 <template>
-    <div :class="classes">
-        <label v-if="label" :for="internalId" :class="labelClasses">{{ label }}</label>
+    <div :class="classes" :data-error="hasError">
+        <cd-input-label
+            v-if="label"
+            :for="internalId"
+            :class="labelClass"
+            class="group-data-[error=true]:text-danger-300 group-focus-within:text-primary-300"
+        >
+            {{ label }}
+        </cd-input-label>
 
         <div :class="inputContainerClasses">
             <div v-if="$slots.prepend || iconLeft" class="pl-4">

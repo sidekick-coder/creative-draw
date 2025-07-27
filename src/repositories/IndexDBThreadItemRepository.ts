@@ -21,25 +21,25 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
     }
 
     async list(options: ListOptions = {}): Promise<ThreadItem[]> {
-        const query = this.db.thread_items
+        let collection = this.db.thread_items.toCollection()
+
+        collection = collection.filter((item) => {
+            if (options.filters?.deleted) {
+                return item.deletedAt !== null
+            }
+
+            return item.deletedAt === null
+        })
 
         if (options.filters?.id) {
-            query.where('id').equals(options.filters.id)
-        }
-
-        if (options.filters?.deleted) {
-            query.where('deletedAt').notEqual('')
-        }
-
-        if (!options.filters?.deleted) {
-            query.where('deletedAt').equals('')
+            collection = collection.filter((item) => item.id === options.filters!.id)
         }
 
         if (options.filters?.threadId) {
-            query.where('threadId').equals(options.filters.threadId)
+            collection = collection.filter((item) => item.threadId === options.filters!.threadId)
         }
 
-        const items = await query.toArray()
+        const items = await collection.toArray()
 
         return items.map((item) => ThreadItem.fromData(item))
     }
@@ -54,30 +54,30 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         return ThreadItem.fromData(item)
     }
 
-    async create(data: any): Promise<ThreadItem> {
-        const item = ThreadItem.fromData(data)
+    async create(payload: any): Promise<ThreadItem> {
+        const item = ThreadItem.fromData(payload)
 
         item.id = createId()
         item.createdAt = new Date()
         item.updatedAt = new Date()
+        item.deletedAt = null
 
-        await this.db.thread_items.put(item)
+        await this.db.thread_items.put(JSON.parse(JSON.stringify(item)))
 
         return item
     }
 
-    async update(id: string, data: any): Promise<ThreadItem | null> {
+    async update(id: string, payload: any): Promise<ThreadItem | null> {
         const item = await this.db.thread_items.get(id)
 
         if (!item) {
             throw new Error(`Thread with id ${id} not found`)
         }
 
-        item.data = merge({}, item.data, data)
-
+        item.data = payload.data
         item.updatedAt = new Date()
 
-        await this.db.thread_items.put(item)
+        await this.db.thread_items.put(JSON.parse(JSON.stringify(item)))
 
         return item
     }

@@ -14,9 +14,9 @@ set('base', [
     'overflow-hidden',
     'transition-colors duration-200',
     'border-2 border-body-600',
-    '[&>*:is(.card-content,.card-head)]:px-4',
-    '[&>*:is(.card-content,.card-head):first-child]:pt-4',
-    '[&>*:is(.card-content,.card-head)]:pb-4',
+    '[&>*:is(.card-content,.card-head,.card-footer)]:px-4',
+    '[&>*:is(.card-content,.card-head,.card-footer):first-child]:pt-4',
+    '[&>*:is(.card-content,.card-head,.card-footer)]:pb-4',
 ])
 
 // color

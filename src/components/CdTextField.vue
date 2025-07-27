@@ -3,30 +3,42 @@ import merge from 'lodash/merge'
 import { Mask, type MaskOptions } from 'maska'
 
 // general
+
+const props = defineProps({
+    label: {
+        type: String,
+        default: '',
+    },
+    rules: {
+        type: Array as () => ValidationRule[],
+        default: () => [],
+    },
+    placeholder: {
+        type: String,
+        default: '',
+    },
+    clearable: {
+        type: Boolean,
+        default: false,
+    },
+})
+
 const className = defineProp<string>('class', {
     type: String,
     default: null,
 })
 
-const classMap = ref(new Map<string, string>())
+const { classes, set } = useClassBuilder(className)
 
-const classes = computed(() => {
-    const all = Array.from(classMap.value.values()).join(' ')
-
-    return twMerge(all, className.value)
-})
-
-classMap.value.set(
-    'base',
-    `
-    w-full
-    flex-1
-    px-4 py-2
-    bg-transparent
-    outline-none
-    placeholder:text-body-300
-    `
-)
+set('base', [
+    'w-full',
+    'flex-1',
+    'px-4',
+    'py-2',
+    'bg-transparent',
+    'outline-none',
+    'placeholder:text-body-300',
+])
 
 // mask
 const mask = defineProp<string>('mask', {
@@ -60,8 +72,6 @@ const maskInstance = computed(() => {
 })
 
 // model
-const inputRef = ref<HTMLInputElement | null>(null)
-
 const [model, modifiers] = defineModel<string | number, 'lazy' | 'number' | 'masked'>({
     type: [String, Number],
     default: null,
@@ -111,6 +121,54 @@ function onChange(event: Event) {
     model.value = target.value
 }
 
+// validation
+const inputRef = ref<HTMLInputElement | null>(null)
+const form = useForm()
+const validation = useValidation(props.rules)
+const errorMessages = computed(() => {
+    return validation.value.messages.map((message) => {
+        return {
+            type: 'danger',
+            message,
+        }
+    })
+})
+
+function validateModel() {
+    return validation.value.validate(model.value)
+}
+
+function resetValidation() {
+    validation.value.reset()
+}
+
+function focus() {
+    if (inputRef.value) {
+        inputRef.value.focus()
+    }
+}
+
+watch(model, validateModel)
+
+if (form) {
+    form.inputs.value.push(validateModel)
+    form.resets.value.push(resetValidation)
+}
+
+onUnmounted(() => {
+    if (!form) {
+        return
+    }
+
+    form.inputs.value.splice(form.inputs.value.indexOf(validateModel), 1)
+
+    form.resets.value.splice(form.resets.value.indexOf(resetValidation), 1)
+})
+
+defineExpose({
+    focus,
+})
+
 // others
 const disabled = defineProp<boolean>('disabled', {
     type: Boolean,
@@ -124,7 +182,7 @@ const readonly = defineProp<boolean>('readonly', {
 </script>
 
 <template>
-    <cd-input v-bind="$props">
+    <cd-input v-bind="$props" :messages="[...errorMessages]" :has-error="errorMessages.length > 0">
         <template v-if="$slots.prepend" #prepend>
             <slot name="prepend" />
         </template>
