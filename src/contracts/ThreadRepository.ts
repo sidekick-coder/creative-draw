@@ -1,17 +1,18 @@
 import type Thread from '@/entities/Thread'
 
-export interface ThreadRepositoryFilters {
+export interface Filters {
     id?: string
+    deleted?: boolean
 }
 
-export interface ThreadRepositoryListOptions {
+export interface ListOptions {
     limit?: number
     offset?: number
-    filters?: ThreadRepositoryFilters
+    filters?: Filters
 }
 
 export default interface ThreadRepository {
-    list: (options?: ThreadRepositoryListOptions) => Promise<Thread[]>
+    list: (options?: ListOptions) => Promise<Thread[]>
     find: (id: string) => Promise<Thread | null>
     create: (data: Partial<Omit<Thread, 'id'>>) => Promise<Thread>
     update: (id: string, data: Partial<Omit<Thread, 'id'>>) => Promise<Thread | null>

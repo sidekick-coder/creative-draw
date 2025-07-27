@@ -1,4 +1,4 @@
-import type { ThreadRepositoryListOptions } from '@/contracts/ThreadRepository'
+import type { ListOptions } from '@/contracts/ThreadRepository'
 import type ThreadRepository from '@/contracts/ThreadRepository'
 import Thread from '@/entities/Thread'
 import { createId } from '@/utils/createId'
@@ -19,11 +19,17 @@ export default class IndexDbThreadRepository implements ThreadRepository {
         })
     }
 
-    async list(options: ThreadRepositoryListOptions = {}): Promise<Thread[]> {
+    async list(options: ListOptions = {}): Promise<Thread[]> {
         const query = this.db.threads
 
         if (options.filters?.id) {
             query.where('id').equals(options.filters.id)
+        }
+
+        if (options.filters?.deleted) {
+            query.where('deletedAt').notEqual('')
+        } else {
+            query.where('deletedAt').equals('')
         }
 
         const items = await query.toArray()
