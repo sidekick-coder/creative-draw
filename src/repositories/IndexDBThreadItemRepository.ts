@@ -3,7 +3,6 @@ import type { ListOptions } from '@/contracts/ThreadItemRepository'
 import ThreadItem from '@/entities/ThreadItem'
 import { createId } from '@/utils/createId'
 import Dexie from 'dexie'
-import { merge } from 'lodash-es'
 
 export default class IndexDbThreadItemRepository implements ThreadItemRepository {
     public db: Dexie & {
