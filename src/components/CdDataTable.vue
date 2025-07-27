@@ -74,7 +74,13 @@ function findItemValue(index: number, item: any, col: CdDataTableColumn): string
                         :key="col.id"
                         :class="twMerge('px-4 py-3 whitespace-nowrap text-sm', col.class)"
                     >
-                        <slot :name="`item-${col.id}`" :item="item" :index="index" :col="col">
+                        <slot
+                            :name="`item-${col.id}`"
+                            :item="item"
+                            :index="index"
+                            :col="col"
+                            :value="findItemValue(index, item, col)"
+                        >
                             {{ findItemValue(index, item, col) }}
                         </slot>
                     </td>
