@@ -19,7 +19,7 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         })
     }
 
-    async list(options: ListOptions = {}): Promise<ThreadItem[]> {
+    public async list(options: ListOptions = {}): Promise<ThreadItem[]> {
         let collection = this.db.thread_items.toCollection()
 
         collection = collection.filter((item) => {
@@ -38,12 +38,20 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
             collection = collection.filter((item) => item.threadId === options.filters!.threadId)
         }
 
-        const items = await collection.toArray()
+        if (options.limit) {
+            collection = collection.limit(options.limit)
+        }
+
+        if (options.offset) {
+            collection = collection.offset(options.offset)
+        }
+
+        const items = await collection.sortBy('createdAt')
 
         return items.map((item) => ThreadItem.fromData(item))
     }
 
-    async find(id: string): Promise<ThreadItem | null> {
+    public async find(id: string): Promise<ThreadItem | null> {
         const item = await this.db.thread_items.get(id)
 
         if (!item) {
@@ -53,7 +61,7 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         return ThreadItem.fromData(item)
     }
 
-    async create(payload: any): Promise<ThreadItem> {
+    public async create(payload: any): Promise<ThreadItem> {
         const item = ThreadItem.fromData(payload)
 
         item.id = createId()
@@ -66,7 +74,7 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         return item
     }
 
-    async update(id: string, payload: any): Promise<ThreadItem | null> {
+    public async update(id: string, payload: any): Promise<ThreadItem | null> {
         const item = await this.db.thread_items.get(id)
 
         if (!item) {
@@ -81,7 +89,7 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         return item
     }
 
-    async destroy(id: string): Promise<void> {
+    public async destroy(id: string): Promise<void> {
         await this.db.thread_items.delete(id)
     }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type ThreadItem from '@/entities/ThreadItem'
 import IndexDbThreadItemRepository from '@/repositories/IndexDBThreadItemRepository'
+import { truncate } from 'lodash-es'
 
 // general
 const repository = new IndexDbThreadItemRepository()
@@ -21,6 +22,15 @@ const columns = [
         id: 'type',
         label: __('Type'),
         field: 'type',
+    },
+    {
+        id: 'Content',
+        label: __('Content'),
+        field: (v: ThreadItem) =>
+            truncate(v.data.content, {
+                length: 50,
+                separator: ' ',
+            }),
     },
     {
         id: 'createdAt',
