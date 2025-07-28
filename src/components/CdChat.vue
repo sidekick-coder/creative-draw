@@ -96,7 +96,7 @@ defineExpose({
                 paddingBottom: '78px',
             }"
         >
-            <div class="flex flex-col justify-end min-h-full z-10">
+            <div class="flex flex-col justify-end min-h-full">
                 <div
                     v-for="(m, idx) in innerMessages"
                     :key="idx"
@@ -109,7 +109,7 @@ defineExpose({
                                 v-html="m.content"
                             ></pre>
                         </div>
-                        <div>
+                        <div class="self-start">
                             <cd-menu placement="bottom-end">
                                 <template #activator="{ attrs }">
                                     <cd-btn
@@ -131,7 +131,7 @@ defineExpose({
             </div>
         </div>
         <div
-            class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700 absolute bottom-0 left-0 right-0 z-20"
+            class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700 absolute bottom-0 left-0 right-0"
         >
             <cd-form class="flex gap-2 items-center" @submit="submit">
                 <textarea
