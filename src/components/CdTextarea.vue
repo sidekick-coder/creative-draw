@@ -50,6 +50,11 @@ const readonly = defineProp<boolean>('readonly', {
     type: Boolean,
     default: false,
 })
+
+const placeholder = defineProp<string>('placeholder', {
+    type: String,
+    default: '',
+})
 </script>
 
 <template>
@@ -66,6 +71,7 @@ const readonly = defineProp<boolean>('readonly', {
                 :value="model"
                 :disabled="disabled"
                 :readonly="readonly"
+                :placeholder="placeholder"
                 v-bind="$attrs"
                 @input="onInput"
                 @change="onChange"

@@ -195,6 +195,7 @@ const readonly = defineProp<boolean>('readonly', {
                 :value="model"
                 :disabled="disabled"
                 :readonly="readonly"
+                :placeholder="placeholder"
                 v-bind="$attrs"
                 @input="onInput"
                 @change="onChange"

@@ -41,7 +41,13 @@ async function load() {
 watch(src, load, { immediate: true })
 </script>
 <template>
-    <img v-if="innerSrc" :src="innerSrc" :alt="alt" class="w-full h-full object-cover rounded-md" />
+    <img
+        v-if="innerSrc"
+        :src="innerSrc"
+        :alt="alt"
+        class="w-full h-full object-cover rounded-md"
+        @click="dialog = true"
+    />
 
     <cd-dialog v-model="dialog">
         <img
