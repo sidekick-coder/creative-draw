@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CdChat from '@/components/CdChat.vue'
 import type ThreadItem from '@/entities/ThreadItem'
 import { $t } from '@/globals/lang'
 import IndexDbThreadItemRepository from '@/repositories/IndexDBThreadItemRepository'
@@ -42,6 +43,7 @@ onMounted(load)
 // actions
 const saving = ref(false)
 const content = ref('')
+const chat = ref<InstanceType<typeof CdChat> | null>(null)
 
 async function destroy(item: ThreadItem) {
     const [error] = await tryCatch(() => repository.destroy(item.id))
@@ -75,16 +77,19 @@ async function onSend() {
         return
     }
 
+    load()
+
     setTimeout(() => {
         saving.value = false
         content.value = ''
-        load()
+        nextTick(() => chat.value?.scrollToBottom())
     }, 1000)
 }
 </script>
 <template>
     <thread-layout>
         <cd-chat
+            ref="chat"
             v-model:content="content"
             :messages="items"
             :sending="saving"

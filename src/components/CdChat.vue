@@ -1,8 +1,8 @@
-<script setup lang="ts" generic="T">
+<script setup lang="ts">
 import { get } from 'lodash-es'
 const props = defineProps({
     messages: {
-        type: Array as () => T[],
+        type: Array as () => any[],
         required: true,
     },
     contentKey: {
@@ -67,7 +67,20 @@ function scrollToBottom() {
     }
 }
 
-watch(() => props.messages.length, scrollToBottom, { immediate: true })
+// textbox
+const textarea = ref<HTMLTextAreaElement | null>(null)
+const height = ref(26)
+
+watch(
+    content,
+    () => {
+        if (!content.value) {
+            height.value = 26
+            return
+        }
+    },
+    { immediate: true }
+)
 
 defineExpose({
     scrollToBottom,
@@ -75,53 +88,77 @@ defineExpose({
 </script>
 
 <template>
-    <div ref="scrollContainer" class="overflow-y-scroll scrollbar-invisible">
-        <div class="flex flex-col justify-end min-h-full">
-            <div v-for="(m, idx) in innerMessages" :key="idx" class="group/message">
-                <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
-                    <div class="flex-1">{{ m.content }}</div>
-                    <div>
-                        <cd-menu placement="bottom-end">
-                            <template #activator="{ attrs }">
-                                <cd-btn
-                                    size="sq-sm"
-                                    color="body-700"
-                                    v-bind="attrs"
-                                    class="opacity-0 group-hover/message:opacity-100 transition-opacity"
-                                >
-                                    <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
-                                </cd-btn>
-                            </template>
-                            <cd-card class="w-48">
-                                <slot name="message-actions" :message="m" />
-                            </cd-card>
-                        </cd-menu>
+    <div class="relative">
+        <div
+            ref="scrollContainer"
+            class="overflow-y-scroll scrollbar-invisible h-full"
+            :style="{
+                paddingBottom: '78px',
+            }"
+        >
+            <div class="flex flex-col justify-end min-h-full z-10">
+                <div
+                    v-for="(m, idx) in innerMessages"
+                    :key="idx"
+                    class="group/message border-b border-body-700 last:border-b-0"
+                >
+                    <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
+                        <div class="flex-1">
+                            <pre
+                                class="text-body-0 whitespace-pre-wrap break-words"
+                                v-html="m.content"
+                            ></pre>
+                        </div>
+                        <div>
+                            <cd-menu placement="bottom-end">
+                                <template #activator="{ attrs }">
+                                    <cd-btn
+                                        size="sq-sm"
+                                        color="body-700"
+                                        v-bind="attrs"
+                                        class="opacity-0 group-hover/message:opacity-100 transition-opacity"
+                                    >
+                                        <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
+                                    </cd-btn>
+                                </template>
+                                <cd-card class="w-48">
+                                    <slot name="message-actions" :message="m" />
+                                </cd-card>
+                            </cd-menu>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700">
-                <cd-form class="flex gap-2 items-center" @submit="submit">
-                    <textarea
-                        v-model="content"
-                        :placeholder="$t('Type a message')"
-                        autocomplete="off"
-                        :disabled="sending"
-                        class="flex-1 bg-transparent text-body-0 placeholder:text-body-100 focus:outline-none disabled:opacity-50"
-                    ></textarea>
-                    <cd-btn
-                        :disabled="sending"
-                        variant="tonal"
-                        type="button"
-                        class="size-11"
-                        size="none"
-                    >
-                        <cd-icon name="heroicons:paper-clip-solid" />
-                    </cd-btn>
-                    <cd-btn type="submit" :loading="sending" class="h-11">
-                        <cd-icon name="heroicons:paper-airplane-solid" />
-                    </cd-btn>
-                </cd-form>
-            </div>
+        </div>
+        <div
+            class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700 absolute bottom-0 left-0 right-0 z-20"
+        >
+            <cd-form class="flex gap-2 items-center" @submit="submit">
+                <textarea
+                    ref="textarea"
+                    v-model="content"
+                    :placeholder="$t('Type a message')"
+                    :readonly="sending"
+                    :style="{ height: `${height}px` }"
+                    autocomplete="off"
+                    class="flex-1 bg-transparent text-body-0 placeholder:text-body-100 focus:outline-none resize-none"
+                    :class="sending ? 'opacity-50' : ''"
+                    @keydown.exact.enter="submit"
+                    @keydown.shift.enter="height += 26"
+                ></textarea>
+                <cd-btn
+                    :disabled="sending"
+                    variant="tonal"
+                    type="button"
+                    class="size-11"
+                    size="none"
+                >
+                    <cd-icon name="heroicons:paper-clip-solid" />
+                </cd-btn>
+                <cd-btn type="submit" :loading="sending" class="h-11">
+                    <cd-icon name="heroicons:paper-airplane-solid" />
+                </cd-btn>
+            </cd-form>
         </div>
     </div>
 </template>
