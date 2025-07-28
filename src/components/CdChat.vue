@@ -133,7 +133,7 @@ defineExpose({
         <div
             class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700 absolute bottom-0 left-0 right-0"
         >
-            <cd-form class="flex gap-2 items-center" @submit="submit">
+            <cd-form class="flex items-center" @submit="submit">
                 <textarea
                     ref="textarea"
                     v-model="content"
@@ -146,18 +146,29 @@ defineExpose({
                     @keydown.exact.enter="submit"
                     @keydown.shift.enter="height += 26"
                 ></textarea>
-                <cd-btn
-                    :disabled="sending"
-                    variant="tonal"
-                    type="button"
-                    class="size-11"
-                    size="none"
-                >
-                    <cd-icon name="heroicons:paper-clip-solid" />
-                </cd-btn>
-                <cd-btn type="submit" :loading="sending" class="h-11">
-                    <cd-icon name="heroicons:paper-airplane-solid" />
-                </cd-btn>
+
+                <div class="flex gap-x-2">
+                    <cd-menu placement="top-end" :offset="6">
+                        <template #activator="{ attrs }">
+                            <cd-btn
+                                :disabled="sending"
+                                color="secondary"
+                                type="button"
+                                size="sq-md"
+                                v-bind="attrs"
+                            >
+                                <cd-icon name="heroicons:plus" />
+                            </cd-btn>
+                        </template>
+                        <cd-card class="w-52 bg-body-500 border-body-100">
+                            <slot name="textbox-actions" />
+                        </cd-card>
+                    </cd-menu>
+
+                    <cd-btn type="submit" :loading="sending" size="sq-md">
+                        <cd-icon name="heroicons:paper-airplane-solid" />
+                    </cd-btn>
+                </div>
             </cd-form>
         </div>
     </div>

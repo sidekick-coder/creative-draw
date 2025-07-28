@@ -13,11 +13,12 @@ const className = defineProp<string>('class', {
 const attrs = useAttrs()
 const { classes, set } = useClassBuilder({ class: className })
 
-set('base', 'flex items-center gap-x-5 px-4 py-3 transition-colors')
+set('base', 'flex items-center gap-x-2 px-4 py-3 transition-colors')
 
 const colorOptions = ref({
     'none': '',
     'primary': '' as string | string[],
+    'secondary': '' as string | string[],
     'danger': '' as string | string[],
     'body-800': '' as string | string[],
 })
@@ -45,6 +46,10 @@ function setFilledVariant() {
     colorOptions.value = {
         'none': '',
         'primary': ['bg-primary-100 hover:bg-primary-200', 'data-[active=true]:bg-primary-200'],
+        'secondary': [
+            'bg-secondary-300 hover:bg-secondary-100',
+            'data-[active=true]:bg-secondary-200',
+        ],
         'danger': ['bg-danger-300 hover:bg-danger-200', 'data-[active=true]:bg-danger-200'],
         'body-800': ['bg-body-800 hover:bg-body-700', 'data-[active=true]:bg-body-700'],
     }
@@ -54,6 +59,7 @@ function setTextVariant() {
     colorOptions.value = {
         'none': '',
         'primary': ['hover:bg-primary-300/25', 'data-[active=true]:bg-primary-300/25'],
+        'secondary': ['hover:bg-secondary-300/25', 'data-[active=true]:bg-secondary-300/25'],
         'danger': ['hover:bg-danger-300/25', 'data-[active=true]:bg-danger-300/25'],
         'body-800': ['hover:bg-body-700/25', 'data-[active=true]:bg-body-700/25'],
     }

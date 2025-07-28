@@ -87,7 +87,7 @@ async function onSend() {
 }
 </script>
 <template>
-    <thread-layout>
+    <app-layout>
         <cd-chat
             ref="chat"
             v-model:content="content"
@@ -98,15 +98,18 @@ async function onSend() {
             @send="onSend"
         >
             <template #message-actions="{ message }">
-                <cd-list-item size="sq-sm" color="primary" variant="text">
-                    <cd-icon name="mdi:pen" />
-                    <div>{{ $t('Edit') }}</div>
-                </cd-list-item>
                 <cd-list-item size="sq-sm" color="danger" @click="destroy(message.raw)">
                     <cd-icon name="mdi:delete" />
                     <div>{{ $t('Delete') }}</div>
                 </cd-list-item>
             </template>
+
+            <template #textbox-actions>
+                <cd-list-item color="secondary" variant="text">
+                    <cd-icon name="mdi:image" class="size-5" />
+                    <div>{{ $t('[ai] image') }}</div>
+                </cd-list-item>
+            </template>
         </cd-chat>
-    </thread-layout>
+    </app-layout>
 </template>
