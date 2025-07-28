@@ -77,13 +77,18 @@ defineExpose({
 <template>
     <div ref="scrollContainer" class="overflow-y-scroll scrollbar-invisible">
         <div class="flex flex-col justify-end min-h-full">
-            <div v-for="(m, idx) in innerMessages" :key="idx">
+            <div v-for="(m, idx) in innerMessages" :key="idx" class="group/message">
                 <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
                     <div class="flex-1">{{ m.content }}</div>
                     <div>
                         <cd-menu placement="bottom-end">
                             <template #activator="{ attrs }">
-                                <cd-btn variant="text" size="sq-sm" v-bind="attrs">
+                                <cd-btn
+                                    size="sq-sm"
+                                    color="body-700"
+                                    v-bind="attrs"
+                                    class="opacity-0 group-hover/message:opacity-100 transition-opacity"
+                                >
                                     <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
                                 </cd-btn>
                             </template>
@@ -96,14 +101,13 @@ defineExpose({
             </div>
             <div class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700">
                 <cd-form class="flex gap-2 items-center" @submit="submit">
-                    <input
+                    <textarea
                         v-model="content"
-                        type="text"
                         :placeholder="$t('Type a message')"
                         autocomplete="off"
                         :disabled="sending"
                         class="flex-1 bg-transparent text-body-0 placeholder:text-body-100 focus:outline-none disabled:opacity-50"
-                    />
+                    ></textarea>
                     <cd-btn
                         :disabled="sending"
                         variant="tonal"

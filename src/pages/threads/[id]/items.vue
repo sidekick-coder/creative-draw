@@ -90,17 +90,10 @@ async function onSend() {
             :sending="saving"
             class="h-dvh"
             content-key="data.content"
-            :title-key="() => $t('me')"
-            :subtitle-key="() => $t('user')"
             @send="onSend"
         >
             <template #message-actions="{ message }">
-                <cd-list-item
-                    size="sq-sm"
-                    color="primary"
-                    variant="text"
-                    @click="destroy(message.raw)"
-                >
+                <cd-list-item size="sq-sm" color="primary" variant="text">
                     <cd-icon name="mdi:pen" />
                     <div>{{ $t('Edit') }}</div>
                 </cd-list-item>
