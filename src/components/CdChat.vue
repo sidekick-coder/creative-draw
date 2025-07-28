@@ -24,7 +24,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-    (e: 'send', message: Partial<any>): void
+    (e: 'send'): void
 }>()
 
 function getKeyValue<T>(item: T, key: string | Function) {
@@ -44,15 +44,13 @@ const innerMessages = computed(() => {
     }))
 })
 
-const content = ref('')
+const content = defineModel<string>('content', {
+    type: String,
+    default: '',
+})
 
 function submit() {
-    emit('send', {
-        type: 'text',
-        content: content.value,
-    })
-
-    content.value = ''
+    emit('send')
 }
 
 // scroll
@@ -77,51 +75,48 @@ defineExpose({
 </script>
 
 <template>
-    <div ref="scrollContainer" class="overflow-y-scroll">
+    <div ref="scrollContainer" class="overflow-y-scroll scrollbar-invisible">
         <div class="flex flex-col justify-end min-h-full">
-            <div v-for="(m, idx) in innerMessages" :key="idx" class="px-5 py-2">
-                <cd-card class="bg-body-600">
-                    <cd-card-head class="border-b border-body-200 mb-2">
-                        <div class="flex-1 flex gap-x-3 items-center">
-                            <cd-avatar class="size-8">
-                                <cd-icon name="heroicons:user-solid" />
-                            </cd-avatar>
-                            <div class="flex flex-col">
-                                <cd-card-title class="text-sm">{{ m.title }}</cd-card-title>
-                                <cd-card-subtitle class="md:text-xs">
-                                    {{ m.subtitle }}
-                                </cd-card-subtitle>
-                            </div>
-                        </div>
-                        <slot name="message-actions" :message="m" />
-                    </cd-card-head>
-                    <cd-card-content>{{ m.content }}</cd-card-content>
-                </cd-card>
+            <div v-for="(m, idx) in innerMessages" :key="idx">
+                <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
+                    <div class="flex-1">{{ m.content }}</div>
+                    <div>
+                        <cd-menu placement="bottom-end">
+                            <template #activator="{ attrs }">
+                                <cd-btn variant="text" size="sq-sm" v-bind="attrs">
+                                    <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
+                                </cd-btn>
+                            </template>
+                            <cd-card class="w-48">
+                                <slot name="message-actions" :message="m" />
+                            </cd-card>
+                        </cd-menu>
+                    </div>
+                </div>
             </div>
-            <div class="px-5 py-5 shrink-0">
-                <cd-card class="px-4 py-5 border-0">
-                    <cd-form class="flex gap-2 items-center" @submit="submit">
-                        <cd-text-field
-                            v-model="content"
-                            type="text"
-                            :placeholder="sending ? $t('Sending...') : $t('Type a message')"
-                            autocomplete="off"
-                            :readonly="sending"
-                        />
-                        <cd-btn
-                            :disabled="sending"
-                            variant="tonal"
-                            type="button"
-                            class="size-11"
-                            size="none"
-                        >
-                            <cd-icon name="heroicons:paper-clip-solid" />
-                        </cd-btn>
-                        <cd-btn type="submit" :loading="sending" class="h-11">
-                            <cd-icon name="heroicons:paper-airplane-solid" />
-                        </cd-btn>
-                    </cd-form>
-                </cd-card>
+            <div class="px-5 py-4 shrink-0 border-t-2 border-body-600 bg-body-700">
+                <cd-form class="flex gap-2 items-center" @submit="submit">
+                    <input
+                        v-model="content"
+                        type="text"
+                        :placeholder="$t('Type a message')"
+                        autocomplete="off"
+                        :disabled="sending"
+                        class="flex-1 bg-transparent text-body-0 placeholder:text-body-100 focus:outline-none disabled:opacity-50"
+                    />
+                    <cd-btn
+                        :disabled="sending"
+                        variant="tonal"
+                        type="button"
+                        class="size-11"
+                        size="none"
+                    >
+                        <cd-icon name="heroicons:paper-clip-solid" />
+                    </cd-btn>
+                    <cd-btn type="submit" :loading="sending" class="h-11">
+                        <cd-icon name="heroicons:paper-airplane-solid" />
+                    </cd-btn>
+                </cd-form>
             </div>
         </div>
     </div>

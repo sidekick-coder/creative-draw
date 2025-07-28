@@ -5,7 +5,7 @@
                 <slot />
             </div>
 
-            <cd-card class="w-3/12"> sidebar </cd-card>
+            <cd-card class="w-3/12 rounded-none"> sidebar </cd-card>
         </div>
     </app-layout>
 </template>

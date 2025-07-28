@@ -41,6 +41,7 @@ onMounted(load)
 
 // actions
 const saving = ref(false)
+const content = ref('')
 
 async function destroy(item: ThreadItem) {
     const [error] = await tryCatch(() => repository.destroy(item.id))
@@ -53,14 +54,14 @@ async function destroy(item: ThreadItem) {
     await load()
 }
 
-async function onMesssageSend(message: Partial<Message>) {
+async function onSend() {
     saving.value = true
 
     const data = {
-        type: message.type,
+        type: 'test',
         threadId: id.value,
         data: {
-            content: message.content,
+            content: content.value,
             from: $t('me'),
             to: $t('user'),
         },
@@ -76,6 +77,7 @@ async function onMesssageSend(message: Partial<Message>) {
 
     setTimeout(() => {
         saving.value = false
+        content.value = ''
         load()
     }, 1000)
 }
@@ -83,18 +85,29 @@ async function onMesssageSend(message: Partial<Message>) {
 <template>
     <thread-layout>
         <cd-chat
+            v-model:content="content"
             :messages="items"
             :sending="saving"
             class="h-dvh"
             content-key="data.content"
             :title-key="() => $t('me')"
             :subtitle-key="() => $t('user')"
-            @send="onMesssageSend"
+            @send="onSend"
         >
             <template #message-actions="{ message }">
-                <cd-btn variant="text" size="sq-sm" color="danger" @click="destroy(message.raw)">
+                <cd-list-item
+                    size="sq-sm"
+                    color="primary"
+                    variant="text"
+                    @click="destroy(message.raw)"
+                >
+                    <cd-icon name="mdi:pen" />
+                    <div>{{ $t('Edit') }}</div>
+                </cd-list-item>
+                <cd-list-item size="sq-sm" color="danger" @click="destroy(message.raw)">
                     <cd-icon name="mdi:delete" />
-                </cd-btn>
+                    <div>{{ $t('Delete') }}</div>
+                </cd-list-item>
             </template>
         </cd-chat>
     </thread-layout>

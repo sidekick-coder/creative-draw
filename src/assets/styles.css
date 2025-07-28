@@ -95,3 +95,7 @@
     background-color: var(--color-body-100);
 }
 
+.scrollbar-invisible {
+    scrollbar-gutter: stable;
+    scrollbar-width: none;
+}
