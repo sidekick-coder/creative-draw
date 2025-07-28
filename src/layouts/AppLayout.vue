@@ -15,6 +15,12 @@ const links = ref([
         group: __('General'),
     },
     {
+        label: __('Files'),
+        to: '/files',
+        icon: 'mdi:file',
+        group: __('General'),
+    },
+    {
         label: __('Threads'),
         to: '/threads',
         icon: 'mdi:message-text',

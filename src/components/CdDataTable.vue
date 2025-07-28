@@ -30,6 +30,10 @@ defineProps({
         type: Number,
         default: 1,
     },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 function findItemKey(index: number, item: any): string {
@@ -66,8 +70,11 @@ function findItemValue(index: number, item: any, col: CdDataTableColumn): string
                         {{ col.label }}
                     </th>
                 </tr>
+                <tr v-if="loading">
+                    <th colspan="100%" class="h-1 bg-primary-500 animate-pulse"></th>
+                </tr>
             </thead>
-            <tbody class="divide-y divide-body-600">
+            <tbody class="divide-y divide-body-600" :class="loading ? 'opacity-50' : ''">
                 <tr v-for="(item, index) in items" :key="findItemKey(index, item)">
                     <td
                         v-for="col in columns"
