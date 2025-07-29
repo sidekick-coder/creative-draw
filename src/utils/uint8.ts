@@ -16,4 +16,7 @@ export const $uint8 = {
     toBlob: (uint8Array: Uint8Array, mimeType: string): Blob => {
         return new Blob([uint8Array], { type: mimeType })
     },
+    toFile: (uint8Array: Uint8Array, fileName: string, mimeType: string): File => {
+        return new File([uint8Array], fileName, { type: mimeType })
+    },
 }

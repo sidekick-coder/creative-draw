@@ -64,7 +64,7 @@ async function onSend() {
     saving.value = true
 
     const data = {
-        type: 'test',
+        type: 'text',
         threadId: id.value,
         data: {
             content: content.value,
@@ -123,6 +123,14 @@ async function generate() {
     const instructions: Instruction[] = []
 
     for (const item of items.value) {
+        if (item.type === 'image') {
+            instructions.push({
+                type: 'image',
+                data: item.data.file,
+            })
+            continue
+        }
+
         instructions.push({
             type: 'text',
             data: item.data.content,

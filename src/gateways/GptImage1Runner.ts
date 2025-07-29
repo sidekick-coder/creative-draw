@@ -14,6 +14,31 @@ export default class implements AdapterRunnerGateway {
         public adapter: Adapter
     ) {}
 
+    public createOpenaiFile = async (filename: string): Promise<string> => {
+        const file = await Drive.find(filename)
+
+        if (!file) {
+            throw new Error(`File ${filename} not found.`)
+        }
+
+        const uint8 = await Drive.read(filename)
+
+        if (!uint8) {
+            throw new Error(`Failed to read file ${filename}.`)
+        }
+
+        const openaiFile = await this.client.files.create({
+            file: $uint8.toFile(uint8, filename, file.mimetype),
+            purpose: 'vision',
+        })
+
+        if (!openaiFile.id) {
+            throw new Error(`Failed to upload file ${filename} to OpenAI.`)
+        }
+
+        return openaiFile.id
+    }
+
     public run: AdapterRunnerGateway['run'] = async (payload) => {
         // Implement the logic to interact with OpenAI's API
         // This is a placeholder implementation
@@ -27,6 +52,25 @@ export default class implements AdapterRunnerGateway {
                     type: 'input_text',
                     text: instruction.data,
                 })
+                continue
+            }
+
+            if (instruction.type === 'image') {
+                const uint8 = await Drive.read(instruction.data.filename)
+
+                if (!uint8) {
+                    throw new Error(`Image file ${instruction.data.filename} not found.`)
+                }
+
+                const fileId = await this.createOpenaiFile(instruction.data.filename)
+
+                content.push({
+                    type: 'input_image',
+                    file_id: fileId,
+                    detail: 'auto',
+                })
+
+                continue
             }
         }
 
