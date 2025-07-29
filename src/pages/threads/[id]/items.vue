@@ -49,6 +49,32 @@ const saving = ref(false)
 const content = ref('')
 const chat = ref<InstanceType<typeof CdChat> | null>(null)
 
+const itemTypes = [
+    {
+        value: 'text',
+        icon: 'heroicons:document-text-16-solid',
+        label: $t('Text'),
+        data: {
+            content: 'New text',
+        },
+    },
+    {
+        value: 'image',
+        icon: 'mdi:image',
+        label: $t('[ai] image'),
+    },
+]
+
+async function addItem(type: string, data: any = {}) {
+    const item = await ThreadItemRepository.create({
+        type,
+        threadId: id.value,
+        data,
+    })
+
+    items.value.push(item)
+}
+
 async function destroy(item: ThreadItem) {
     const [error] = await tryCatch(() => repository.destroy(item.id))
 
@@ -58,36 +84,6 @@ async function destroy(item: ThreadItem) {
     }
 
     await load()
-}
-
-async function onSend() {
-    saving.value = true
-
-    const data = {
-        type: 'text',
-        threadId: id.value,
-        data: {
-            content: content.value,
-            from: $t('me'),
-            to: $t('user'),
-        },
-    }
-
-    const [error] = await tryCatch(() => repository.create(data))
-
-    if (error) {
-        console.error('Failed to send message:', error)
-        saving.value = false
-        return
-    }
-
-    load()
-
-    setTimeout(() => {
-        saving.value = false
-        content.value = ''
-        nextTick(() => chat.value?.scrollToBottom())
-    }, 1000)
 }
 
 // generate image
@@ -188,23 +184,16 @@ onMounted(loadRunners)
         <div
             v-for="(i, index) in items"
             :key="i.id"
-            class="group/message flex hover:bg-body-600 px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
+            class="group/item flex px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
         >
-            <div>
-                <cd-btn size="sq-sm" color="body-700">
-                    {{ index + 1 }}
-                </cd-btn>
+            <div class="text-body-200 shrink-0 w-4 text-center self-start">
+                {{ index + 1 }}
             </div>
             <div class="flex-1">
                 <cd-thread-item-text v-if="i.type === 'text'" v-model="items[index]" />
 
-                <div v-else-if="i.type === 'image'" class="flex justify-start">
-                    <cd-img
-                        :src="`drive:${i.data.file.filename}`"
-                        class="w-auto h-40 object-contain"
-                        alt="Generated image"
-                    />
-                </div>
+                <cd-thread-item-image v-else-if="i.type === 'image'" v-model="items[index]">
+                </cd-thread-item-image>
             </div>
             <div class="self-start">
                 <cd-menu placement="bottom-end">
@@ -213,7 +202,7 @@ onMounted(loadRunners)
                             size="sq-sm"
                             color="body-700"
                             v-bind="attrs"
-                            class="opacity-0 group-hover/message:opacity-100 transition-opacity"
+                            class="opacity-0 group-hover/item:opacity-100 transition-opacity"
                         >
                             <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
                         </cd-btn>
@@ -240,9 +229,15 @@ onMounted(loadRunners)
                 </cd-btn>
             </template>
             <cd-card class="w-52 bg-body-700 border-body-100">
-                <cd-list-item color="secondary" variant="text" @click="dialog = true">
-                    <cd-icon name="mdi:image" class="size-5" />
-                    <div>{{ $t('[ai] image') }}</div>
+                <cd-list-item
+                    v-for="item in itemTypes"
+                    :key="item.value"
+                    color="secondary"
+                    variant="text"
+                    @click="addItem(item.value, item.data)"
+                >
+                    <cd-icon :name="item.icon" />
+                    <div>{{ item.label }}</div>
                 </cd-list-item>
             </cd-card>
         </cd-menu>

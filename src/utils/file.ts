@@ -1,3 +1,6 @@
+import FileEntity from '@/entities/File'
+import Drive from '@/facades/Drive'
+
 interface PickOptions {
     accept?: string
     multiple?: boolean
@@ -48,7 +51,21 @@ function toUint8Array(file: File): Promise<Uint8Array> {
     })
 }
 
+async function upload(file: File) {
+    const filename = `${createId()}.${FileEntity.extension(file.name)}`
+    const contents = await $file.toUint8Array(file)
+
+    const [error, entity] = await tryCatch(() => Drive.write(filename, contents))
+
+    if (error) {
+        throw new Error(`Failed to upload file: ${error.message}`)
+    }
+
+    return entity
+}
+
 export const $file = {
     pick,
+    upload,
     toUint8Array,
 }

@@ -23,7 +23,7 @@ export default class IndexDbDriveGateway implements DriveGateway {
     }
 
     public list: DriveGateway['list'] = async (options = {}) => {
-        let query = this.table.orderBy('createdAt')
+        let query = this.table.orderBy('createdAt').reverse()
 
         if (options.offset) {
             query = query.offset(options.offset)
