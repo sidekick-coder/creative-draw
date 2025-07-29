@@ -194,16 +194,15 @@ onMounted(loadRunners)
             content-key="data.content"
             @send="onSend"
         >
-            <template #message="{ message }">
+            <template #message="{ message, index }">
                 <div
                     class="group/message flex hover:bg-body-600 px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
                 >
                     <div class="flex-1">
-                        <pre
+                        <cd-thread-item-text
                             v-if="message.type === 'text'"
-                            class="text-body-0 whitespace-pre-wrap break-words"
-                            v-html="message.data.content"
-                        ></pre>
+                            v-model="items[index]"
+                        />
 
                         <div v-else-if="message.type === 'image'" class="flex justify-start">
                             <cd-img

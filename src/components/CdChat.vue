@@ -84,12 +84,12 @@ defineExpose({
             ref="scrollContainer"
             class="overflow-y-scroll scrollbar-invisible h-full"
             :style="{
-                paddingBottom: '78px',
+                paddingBottom: '74px',
             }"
         >
             <div class="flex flex-col justify-end min-h-full">
                 <template v-for="(m, idx) in messages" :key="idx">
-                    <slot name="message" :message="m">
+                    <slot name="message" :message="m" :index="idx">
                         <div>
                             <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
                                 <pre
