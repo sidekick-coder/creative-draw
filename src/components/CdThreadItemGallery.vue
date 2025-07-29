@@ -2,6 +2,7 @@
 import File from '@/entities/File'
 import ThreadItem from '@/entities/ThreadItem'
 import ThreadItemRepository from '@/facades/ThreadItemRepository'
+import { nextTick, computed, ref } from 'vue'
 
 const item = defineModel<ThreadItem>({
     required: true,
@@ -22,8 +23,13 @@ const images = computed(() => {
 const dragIndex = ref<number | null>(null)
 const dropIndex = ref<number | null>(null)
 
+const isDragging = computed(() => dragIndex.value !== null)
+
 function onDragStart(index: number) {
     dragIndex.value = index
+    nextTick(() => {
+        document.body.classList.add('dragging-image')
+    })
 }
 
 function onDragOver(index: number) {
@@ -34,6 +40,7 @@ async function onDrop() {
     if (dragIndex.value === null || dropIndex.value === null) {
         dragIndex.value = null
         dropIndex.value = null
+        document.body.classList.remove('dragging-image')
         return
     }
     const files = item.value.data.files
@@ -42,6 +49,7 @@ async function onDrop() {
     files.splice(dropIndex.value, 0, dragged)
     dragIndex.value = null
     dropIndex.value = null
+    document.body.classList.remove('dragging-image')
     await save()
 }
 
@@ -70,29 +78,36 @@ async function remove(file: File) {
 
 <template>
     <div class="flex gap-4 flex-wrap">
-        <div
-            v-for="(i, idx) in images"
-            :key="i.id"
-            class="relative size-40 cursor-pointer group/image"
-            draggable="true"
-            @dragstart="onDragStart(idx)"
-            @dragover.prevent="onDragOver(idx)"
-            @drop.prevent="onDrop"
-        >
-            <cd-img
-                :src="`drive:${i.filename}`"
-                alt="Generated image"
-                class="size-full border-2 border-body-600"
-            />
-            <cd-btn
-                class="absolute bottom-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity"
-                size="sq-sm"
-                color="danger"
-                @click="remove(i)"
+        <transition-group name="image-move" tag="div" class="flex gap-4 flex-wrap">
+            <div
+                v-for="(i, idx) in images"
+                :key="i.id"
+                class="relative size-40 cursor-pointer group/image border-2 border-body-600 rounded-lg overflow-hidden"
+                :class="{
+                    'border-primary-300 z-10': dragIndex === idx && isDragging,
+                    '': dropIndex === idx && isDragging && dragIndex !== dropIndex,
+                    'opacity-60': dragIndex === idx && isDragging,
+                }"
+                draggable="true"
+                @dragstart="onDragStart(idx)"
+                @dragover.prevent="onDragOver(idx)"
+                @drop.prevent="onDrop"
             >
-                <cd-icon name="heroicons:trash" />
-            </cd-btn>
-        </div>
+                <cd-img :src="`drive:${i.filename}`" alt="Generated image" class="size-full" />
+                <cd-btn
+                    class="absolute bottom-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity"
+                    size="sq-sm"
+                    color="danger"
+                    @click="remove(i)"
+                >
+                    <cd-icon name="heroicons:trash" />
+                </cd-btn>
+                <div
+                    v-if="dropIndex === idx && isDragging && dragIndex !== dropIndex"
+                    class="absolute inset-0 pointer-events-none border-4 border-dashed border-body-100 rounded-lg"
+                ></div>
+            </div>
+        </transition-group>
         <cd-uploader accept="image/*" multiple @result="add">
             <template #activator="{ attrs }">
                 <cd-btn
@@ -112,3 +127,9 @@ async function remove(file: File) {
         </cd-uploader>
     </div>
 </template>
+<style>
+/* Smooth transition for image reordering */
+.image-move-move {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>
