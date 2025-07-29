@@ -185,67 +185,67 @@ onMounted(loadRunners)
 </script>
 <template>
     <app-layout>
-        <cd-chat
-            ref="chat"
-            v-model:content="content"
-            :messages="items"
-            :sending="saving"
-            class="h-dvh"
-            content-key="data.content"
-            @send="onSend"
+        <div
+            v-for="(i, index) in items"
+            :key="i.id"
+            class="group/message flex hover:bg-body-600 px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
         >
-            <template #message="{ message, index }">
-                <div
-                    class="group/message flex hover:bg-body-600 px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
-                >
-                    <div class="flex-1">
-                        <cd-thread-item-text
-                            v-if="message.type === 'text'"
-                            v-model="items[index]"
-                        />
+            <div>
+                <cd-btn size="sq-sm" color="body-700">
+                    {{ index + 1 }}
+                </cd-btn>
+            </div>
+            <div class="flex-1">
+                <cd-thread-item-text v-if="i.type === 'text'" v-model="items[index]" />
 
-                        <div v-else-if="message.type === 'image'" class="flex justify-start">
-                            <cd-img
-                                :src="`drive:${message.data.file.filename}`"
-                                class="w-auto h-40 object-contain"
-                                alt="Generated image"
-                            />
-                        </div>
-                    </div>
-                    <div class="self-start">
-                        <cd-menu placement="bottom-end">
-                            <template #activator="{ attrs }">
-                                <cd-btn
-                                    size="sq-sm"
-                                    color="body-700"
-                                    v-bind="attrs"
-                                    class="opacity-0 group-hover/message:opacity-100 transition-opacity"
-                                >
-                                    <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
-                                </cd-btn>
-                            </template>
-                            <cd-card class="w-48">
-                                <cd-list-item
-                                    size="sq-sm"
-                                    color="danger"
-                                    @click="destroy(message.raw)"
-                                >
-                                    <cd-icon name="mdi:delete" />
-                                    <div>{{ $t('Delete') }}</div>
-                                </cd-list-item>
-                            </cd-card>
-                        </cd-menu>
-                    </div>
+                <div v-else-if="i.type === 'image'" class="flex justify-start">
+                    <cd-img
+                        :src="`drive:${i.data.file.filename}`"
+                        class="w-auto h-40 object-contain"
+                        alt="Generated image"
+                    />
                 </div>
-            </template>
+            </div>
+            <div class="self-start">
+                <cd-menu placement="bottom-end">
+                    <template #activator="{ attrs }">
+                        <cd-btn
+                            size="sq-sm"
+                            color="body-700"
+                            v-bind="attrs"
+                            class="opacity-0 group-hover/message:opacity-100 transition-opacity"
+                        >
+                            <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
+                        </cd-btn>
+                    </template>
+                    <cd-card class="w-48">
+                        <cd-list-item size="sq-sm" color="danger" @click="destroy(i)">
+                            <cd-icon name="mdi:delete" />
+                            <div>{{ $t('Delete') }}</div>
+                        </cd-list-item>
+                    </cd-card>
+                </cd-menu>
+            </div>
+        </div>
 
-            <template #textbox-actions>
+        <cd-menu placement="top-end" :offset="6">
+            <template #activator="{ attrs }">
+                <cd-btn
+                    size="sq-lg"
+                    color="body-700"
+                    v-bind="attrs"
+                    class="fixed bottom-4 right-4 z-10"
+                >
+                    <cd-icon name="heroicons:plus" />
+                </cd-btn>
+            </template>
+            <cd-card class="w-52 bg-body-700 border-body-100">
                 <cd-list-item color="secondary" variant="text" @click="dialog = true">
                     <cd-icon name="mdi:image" class="size-5" />
                     <div>{{ $t('[ai] image') }}</div>
                 </cd-list-item>
-            </template>
-        </cd-chat>
+            </cd-card>
+        </cd-menu>
 
         <cd-dialog v-model="dialog">
             <cd-form @submit="generate">
