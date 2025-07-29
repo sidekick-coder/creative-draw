@@ -43,7 +43,7 @@ const links = ref([
 const groups = computed(() => groupBy(links.value, 'group'))
 </script>
 <template>
-    <div class="flex h-dvh w-dvw">
+    <div class="flex min-h-dvh">
         <aside class="w-72 bg-body-900 border-r-2 border-body-600">
             <nav class="px-4">
                 <cd-list-item to="/" class="py-6 flex items-center">
