@@ -45,7 +45,6 @@ async function load() {
 onMounted(load)
 
 // actions
-const saving = ref(false)
 const content = ref('')
 const chat = ref<InstanceType<typeof CdChat> | null>(null)
 
@@ -60,8 +59,13 @@ const itemTypes = [
     },
     {
         value: 'image',
-        icon: 'mdi:image',
-        label: $t('[ai] image'),
+        icon: 'heroicons:photo',
+        label: $t('Image'),
+    },
+    {
+        label: $t('Gallery'),
+        value: 'gallery',
+        icon: 'mdi:image-multiple',
     },
 ]
 
@@ -192,8 +196,13 @@ onMounted(loadRunners)
             <div class="flex-1">
                 <cd-thread-item-text v-if="i.type === 'text'" v-model="items[index]" />
 
-                <cd-thread-item-image v-else-if="i.type === 'image'" v-model="items[index]">
-                </cd-thread-item-image>
+                <cd-thread-item-image v-else-if="i.type === 'image'" v-model="items[index]" />
+
+                <cd-thread-item-gallery v-else-if="i.type === 'gallery'" v-model="items[index]" />
+
+                <div v-else class="text-danger-500">
+                    {{ $t('Unknown item type') }}: {{ i.type }}
+                </div>
             </div>
             <div class="self-start">
                 <cd-menu placement="bottom-end">

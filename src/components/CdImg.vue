@@ -11,7 +11,7 @@ const className = defineProp<string>('class', {
     default: '',
 })
 
-const { set, classes } = useClassBuilder({ class: className })
+const { set, classes } = useClassBuilder(className)
 
 set('base', ['w-full h-full object-cover rounded-md'])
 
