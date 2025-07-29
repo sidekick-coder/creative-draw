@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import File from '@/entities/File'
-import IndexDbDriveGateway from '@/gateways/IndexDbDriveGateway'
+import Drive from '@/facades/Drive'
+
+defineOptions({
+    inheritAttrs: false,
+})
+
+const className = defineProp<string>('class', {
+    type: String,
+    default: '',
+})
+
+const { set, classes } = useClassBuilder({ class: className })
+
+set('base', ['w-full h-full object-cover rounded-md'])
 
 const dialog = defineModel('dialog', {
     type: Boolean,
@@ -17,19 +30,17 @@ const alt = defineProp<string>('alt', {
     default: '',
 })
 
-const drive = new IndexDbDriveGateway()
-
 const innerSrc = ref<string>()
 
 async function load() {
     if (src.value.startsWith('drive:')) {
         const filename = src.value.replace('drive:', '')
 
-        const uint8 = await drive.read(filename)
+        const uint8 = await Drive.read(filename)
 
         if (uint8) {
-            const base64 = await $uint8.toBase64(uint8)
-            innerSrc.value = `data:${File.mime(filename)};base64,${base64}`
+            const blob = $uint8.toBlob(uint8, File.mime(filename))
+            innerSrc.value = URL.createObjectURL(blob)
         }
 
         return
@@ -41,20 +52,14 @@ async function load() {
 watch(src, load, { immediate: true })
 </script>
 <template>
-    <img
-        v-if="innerSrc"
-        :src="innerSrc"
-        :alt="alt"
-        class="w-full h-full object-cover rounded-md"
-        @click="dialog = true"
-    />
+    <img v-if="innerSrc" :src="innerSrc" :alt="alt" :class="classes" @click="dialog = true" />
 
     <cd-dialog v-model="dialog">
         <img
             v-if="innerSrc"
             :src="innerSrc"
             :alt="alt"
-            class="w-full h-full object-cover rounded-md"
+            class="w-full h-full max-h-[80dvh] object-cover rounded-md"
         />
     </cd-dialog>
 </template>

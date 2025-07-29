@@ -155,12 +155,14 @@ watch(
                     color="none"
                     class="py-3 w-full hover:bg-transparent min-h-[44px]"
                 >
-                    <slot name="selection">
-                        <div>
-                            {{ findLabel(selectedObject) || placeholder }}
-                        </div>
+                    <slot v-if="selectedObject" name="selection" :option="selectedObject">
+                        <div>{{ findLabel(selectedObject) }}</div>
                     </slot>
+
+                    <div v-else>{{ placeholder }}</div>
+
                     <div class="flex-1" />
+
                     <cd-icon
                         v-if="clearable && model"
                         name="times"
@@ -174,7 +176,7 @@ watch(
 
         <template #default="{ activatorRects }">
             <cd-card
-                class="border-2 border-body-600 rounded w-64 max-w-md max-h-[500px] overflow-y-auto"
+                class="rounded w-64 max-w-md max-h-[500px] overflow-y-auto bg-body-600 border-body-100"
                 :style="{
                     minWidth: `${activatorRects?.width}px`,
                 }"
@@ -185,7 +187,7 @@ watch(
                 <cd-list-item
                     v-for="(option, index) in options"
                     :key="index"
-                    color="primary"
+                    color="body-700"
                     class="cursor-pointer"
                     @mousedown="select(option)"
                 >

@@ -35,15 +35,6 @@ function getKeyValue<T>(item: T, key: string | Function) {
     return get(item, key, '')
 }
 
-const innerMessages = computed(() => {
-    return props.messages.map((message) => ({
-        raw: message,
-        title: getKeyValue(message, props.titleKey),
-        subtitle: getKeyValue(message, props.subtitleKey),
-        content: getKeyValue(message, props.contentKey),
-    }))
-})
-
 const content = defineModel<string>('content', {
     type: String,
     default: '',
@@ -97,37 +88,18 @@ defineExpose({
             }"
         >
             <div class="flex flex-col justify-end min-h-full">
-                <div
-                    v-for="(m, idx) in innerMessages"
-                    :key="idx"
-                    class="group/message border-b border-body-700 last:border-b-0"
-                >
-                    <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
-                        <div class="flex-1">
-                            <pre
-                                class="text-body-0 whitespace-pre-wrap break-words"
-                                v-html="m.content"
-                            ></pre>
+                <template v-for="(m, idx) in messages" :key="idx">
+                    <slot name="message" :message="m">
+                        <div>
+                            <div class="flex hover:bg-body-600 px-4 py-4 items-center gap-x-4">
+                                <pre
+                                    class="text-body-0 whitespace-pre-wrap break-words"
+                                    v-text="getKeyValue(m, contentKey)"
+                                ></pre>
+                            </div>
                         </div>
-                        <div class="self-start">
-                            <cd-menu placement="bottom-end">
-                                <template #activator="{ attrs }">
-                                    <cd-btn
-                                        size="sq-sm"
-                                        color="body-700"
-                                        v-bind="attrs"
-                                        class="opacity-0 group-hover/message:opacity-100 transition-opacity"
-                                    >
-                                        <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
-                                    </cd-btn>
-                                </template>
-                                <cd-card class="w-48">
-                                    <slot name="message-actions" :message="m" />
-                                </cd-card>
-                            </cd-menu>
-                        </div>
-                    </div>
-                </div>
+                    </slot>
+                </template>
             </div>
         </div>
         <div
