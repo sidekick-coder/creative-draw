@@ -99,3 +99,7 @@
     scrollbar-gutter: stable;
     scrollbar-width: none;
 }
+
+button {
+    @apply cursor-pointer;
+}

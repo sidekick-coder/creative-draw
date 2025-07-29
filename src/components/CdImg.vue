@@ -6,9 +6,18 @@ defineOptions({
     inheritAttrs: false,
 })
 
+const emit = defineEmits<{
+    (event: 'click', e: MouseEvent): void
+}>()
+
 const className = defineProp<string>('class', {
     type: String,
     default: '',
+})
+
+const noDialog = defineProp<boolean>('noDialog', {
+    type: Boolean,
+    default: false,
 })
 
 const { set, classes } = useClassBuilder(className)
@@ -49,10 +58,19 @@ async function load() {
     innerSrc.value = src.value
 }
 
+function onClick(e: MouseEvent) {
+    if (noDialog.value) {
+        emit('click', e)
+        return
+    }
+
+    dialog.value = true
+}
+
 watch(src, load, { immediate: true })
 </script>
 <template>
-    <img v-if="innerSrc" :src="innerSrc" :alt="alt" :class="classes" @click="dialog = true" />
+    <img v-if="innerSrc" :src="innerSrc" :alt="alt" :class="classes" @click="onClick" />
 
     <cd-dialog v-model="dialog">
         <img

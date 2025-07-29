@@ -19,6 +19,10 @@ export default class File {
         }
     }
 
+    public get src(): string {
+        return `drive:${this.filename}`
+    }
+
     public static fromData(data: any): File {
         return new File(data)
     }

@@ -11,6 +11,10 @@ import {
 import type { ComponentPublicInstance, TransitionProps } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
+defineOptions({
+    inheritAttrs: false,
+})
+
 // general
 const className = defineProp<string>('class', {
     type: String,

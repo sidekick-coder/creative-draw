@@ -61,7 +61,7 @@ async function remove(file: File) {
             </cd-btn>
         </div>
 
-        <cd-uploader accept="image/*" multiple @uploaded="add">
+        <cd-uploader accept="image/*" multiple @result="add">
             <template #activator="{ attrs }">
                 <cd-btn
                     color="none"
