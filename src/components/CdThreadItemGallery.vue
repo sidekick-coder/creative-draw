@@ -19,6 +19,32 @@ const images = computed(() => {
     return item.value.data.files.map((data) => new File(data))
 })
 
+const dragIndex = ref<number | null>(null)
+const dropIndex = ref<number | null>(null)
+
+function onDragStart(index: number) {
+    dragIndex.value = index
+}
+
+function onDragOver(index: number) {
+    dropIndex.value = index
+}
+
+async function onDrop() {
+    if (dragIndex.value === null || dropIndex.value === null) {
+        dragIndex.value = null
+        dropIndex.value = null
+        return
+    }
+    const files = item.value.data.files
+    const dragged = files[dragIndex.value]
+    files.splice(dragIndex.value, 1)
+    files.splice(dropIndex.value, 0, dragged)
+    dragIndex.value = null
+    dropIndex.value = null
+    await save()
+}
+
 async function save() {
     await ThreadItemRepository.update(item.value.id, {
         data: { files: item.value.data.files || [] },
@@ -36,7 +62,7 @@ async function add(files: File[]) {
 }
 
 async function remove(file: File) {
-    item.value.data.files = item.value.data.files.filter((f) => f.id !== file.id)
+    item.value.data.files = item.value.data.files.filter((f: File) => f.id !== file.id)
 
     await save()
 }
@@ -44,15 +70,22 @@ async function remove(file: File) {
 
 <template>
     <div class="flex gap-4 flex-wrap">
-        <div v-for="i in images" :key="i.id" class="relative size-40">
+        <div
+            v-for="(i, idx) in images"
+            :key="i.id"
+            class="relative size-40 cursor-pointer group/image"
+            draggable="true"
+            @dragstart="onDragStart(idx)"
+            @dragover.prevent="onDragOver(idx)"
+            @drop.prevent="onDrop"
+        >
             <cd-img
                 :src="`drive:${i.filename}`"
                 alt="Generated image"
                 class="size-full border-2 border-body-600"
             />
-
             <cd-btn
-                class="absolute bottom-2 right-2 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                class="absolute bottom-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity"
                 size="sq-sm"
                 color="danger"
                 @click="remove(i)"
@@ -60,7 +93,6 @@ async function remove(file: File) {
                 <cd-icon name="heroicons:trash" />
             </cd-btn>
         </div>
-
         <cd-uploader accept="image/*" multiple @result="add">
             <template #activator="{ attrs }">
                 <cd-btn
