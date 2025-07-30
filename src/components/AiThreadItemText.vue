@@ -19,5 +19,5 @@ watchDebounced(() => item.value.data.content, save, { debounce: 1000 })
 </script>
 
 <template>
-    <cd-textarea-resizable v-model="item.data.content"></cd-textarea-resizable>
+    <cd-tip-tap v-model="item.data.content" />
 </template>
