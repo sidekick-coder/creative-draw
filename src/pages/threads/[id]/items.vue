@@ -2,8 +2,10 @@
 import CdChat from '@/components/CdChat.vue'
 import type { Instruction } from '@/contracts/AdapterRunnerGateway'
 import type AdapterRunnerGateway from '@/contracts/AdapterRunnerGateway'
+import type Thread from '@/entities/Thread'
 import type ThreadItem from '@/entities/ThreadItem'
 import ThreadItemRepository from '@/facades/ThreadItemRepository'
+import ThreadRepository from '@/facades/ThreadRepository'
 import { $t } from '@/globals/lang'
 import IndexDbThreadItemRepository from '@/repositories/IndexDBThreadItemRepository'
 import AdapterRunnerService from '@/services/AdapterRunnerService'
@@ -13,6 +15,22 @@ const repository = new IndexDbThreadItemRepository()
 const route = useRoute('/threads/[id]/items')
 
 const id = computed(() => route.params.id)
+
+// thread
+const thread = ref<Thread>()
+
+async function loadThread() {
+    const [error, response] = await tryCatch(() => ThreadRepository.find(id.value))
+
+    if (error || !response) {
+        console.error('Failed to load thread:', error)
+        return
+    }
+
+    thread.value = response
+}
+
+watch(id, loadThread, { immediate: true })
 
 // items
 const loading = ref(false)
@@ -184,47 +202,54 @@ async function generate() {
 onMounted(loadRunners)
 </script>
 <template>
-    <app-layout>
-        <div
-            v-for="(i, index) in items"
-            :key="i.id"
-            class="group/item flex px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
-        >
-            <div class="text-body-200 shrink-0 w-4 text-center self-start">
-                {{ index + 1 }}
-            </div>
-            <div class="flex-1">
-                <cd-thread-item-text v-if="i.type === 'text'" v-model="items[index]" />
+    <app-layout v-if="thread">
+        <div class="overflow-y-scroll h-[calc(100vh-56px)]">
+            <div
+                v-for="(i, index) in items"
+                :key="i.id"
+                class="group/item flex px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
+            >
+                <div class="text-body-200 shrink-0 w-4 text-center self-start">
+                    {{ index + 1 }}
+                </div>
+                <div class="flex-1">
+                    <ai-thread-item-text v-if="i.type === 'text'" v-model="items[index]" />
 
-                <cd-thread-item-image v-else-if="i.type === 'image'" v-model="items[index]" />
+                    <ai-thread-item-image v-else-if="i.type === 'image'" v-model="items[index]" />
 
-                <cd-thread-item-gallery v-else-if="i.type === 'gallery'" v-model="items[index]" />
+                    <ai-thread-item-gallery
+                        v-else-if="i.type === 'gallery'"
+                        v-model="items[index]"
+                    />
 
-                <div v-else class="text-danger-500">
-                    {{ $t('Unknown item type') }}: {{ i.type }}
+                    <div v-else class="text-danger-500">
+                        {{ $t('Unknown item type') }}: {{ i.type }}
+                    </div>
+                </div>
+                <div class="self-start">
+                    <cd-menu placement="bottom-end">
+                        <template #activator="{ attrs }">
+                            <cd-btn
+                                size="sq-sm"
+                                color="body-700"
+                                v-bind="attrs"
+                                class="opacity-0 group-hover/item:opacity-100 transition-opacity"
+                            >
+                                <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
+                            </cd-btn>
+                        </template>
+                        <cd-card class="w-48">
+                            <cd-list-item size="sq-sm" color="danger" @click="destroy(i)">
+                                <cd-icon name="mdi:delete" />
+                                <div>{{ $t('Delete') }}</div>
+                            </cd-list-item>
+                        </cd-card>
+                    </cd-menu>
                 </div>
             </div>
-            <div class="self-start">
-                <cd-menu placement="bottom-end">
-                    <template #activator="{ attrs }">
-                        <cd-btn
-                            size="sq-sm"
-                            color="body-700"
-                            v-bind="attrs"
-                            class="opacity-0 group-hover/item:opacity-100 transition-opacity"
-                        >
-                            <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
-                        </cd-btn>
-                    </template>
-                    <cd-card class="w-48">
-                        <cd-list-item size="sq-sm" color="danger" @click="destroy(i)">
-                            <cd-icon name="mdi:delete" />
-                            <div>{{ $t('Delete') }}</div>
-                        </cd-list-item>
-                    </cd-card>
-                </cd-menu>
-            </div>
         </div>
+
+        <ai-thread-textarea v-model:items="items" v-model:thread="thread" />
 
         <cd-menu placement="top-end" :offset="6">
             <template #activator="{ attrs }">
@@ -232,12 +257,17 @@ onMounted(loadRunners)
                     size="sq-lg"
                     color="body-700"
                     v-bind="attrs"
-                    class="fixed bottom-4 right-4 z-10"
+                    class="fixed bottom-4 right-4 z-10 hidden"
                 >
                     <cd-icon name="heroicons:plus" />
                 </cd-btn>
             </template>
             <cd-card class="w-52 bg-body-700 border-body-100">
+                <cd-list-item color="secondary" variant="text" @click="dialog = true">
+                    <cd-icon name="heroicons:photo" />
+                    <div>{{ $t('AI Image') }}</div>
+                </cd-list-item>
+
                 <cd-list-item
                     v-for="item in itemTypes"
                     :key="item.value"
