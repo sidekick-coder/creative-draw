@@ -259,6 +259,15 @@ watch(
         </div>
 
         <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
+            <cd-btn
+                size="sq-md"
+                color="body-900"
+                :class="pan.active ? 'bg-primary-300' : ''"
+                @click="pan.toggle"
+            >
+                <cd-icon name="mdi:hand-back-left" />
+            </cd-btn>
+
             <cd-menu :close-on-content-click="false">
                 <template #activator="{ attrs }">
                     <cd-btn v-bind="attrs" size="sq-md" color="body-900">
@@ -266,7 +275,7 @@ watch(
                     </cd-btn>
                 </template>
                 <div class="py-2 px-4">
-                    <cd-card class="border-2 border-body-600">
+                    <cd-card class="border-2 border-body-600 w-64">
                         <cd-card-head class="border-b border-body-600">
                             <cd-card-title class="mr-auto text-base">Layers</cd-card-title>
                             <cd-btn variant="text" size="sq-md" @click="addLayer">
