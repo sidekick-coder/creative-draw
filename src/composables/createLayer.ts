@@ -34,7 +34,7 @@ interface Payload {
 }
 
 export function createLayer(payload: Partial<Payload> = {}) {
-    const id = payload.id || crypto.randomUUID()
+    const id = payload.id || createId()
     const emitter = createEmitter()
     const context = createContext({
         data: payload.data || [],

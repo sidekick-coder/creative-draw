@@ -21,7 +21,7 @@ export function createProjectRepositoryIdb(db: Dexie & Instance) {
             return (await db.projects.get(id)) || null
         },
         create: async (payload) => {
-            const id = crypto.randomUUID()
+            const id = createId()
 
             const project = {
                 name: payload.name,
