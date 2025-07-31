@@ -120,25 +120,32 @@ async function executeTool(toolId: string, prompt: string) {
         return
     }
 
+    const newItems = [] as ThreadItem[]
+
     for await (const item of result) {
         if (item.type === 'file') {
-            await ThreadItemRepository.create({
+            const created = await ThreadItemRepository.create({
                 type: 'image',
                 threadId: thread.value.id,
                 data: {
                     file: item.data,
                 },
             })
+
+            newItems.push(created)
+
             continue
         }
 
-        await ThreadItemRepository.create({
+        const created = await ThreadItemRepository.create({
             type: 'text',
             threadId: thread.value.id,
             data: {
                 content: item.data,
             },
         })
+
+        newItems.push(created)
     }
 }
 
