@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { useEditor, EditorContent, Editor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Extension } from '@tiptap/core'
 import type { KeyboardShortcutCommand } from '@tiptap/core'
+import { until } from '@vueuse/core'
+
+defineOptions({
+    inheritAttrs: false,
+})
 
 const props = defineProps({
     shortcuts: {
@@ -22,18 +27,12 @@ const model = defineModel({
     default: '',
 })
 
-const editor = useEditor({
-    content: model.value,
-    extensions: [StarterKit, DisableEnter],
-    editorProps: {
-        attributes: {
-            class: 'focus:outline-0 min-h-full',
-        },
-    },
-    onUpdate: ({ editor }) => {
-        model.value = editor.getHTML()
-    },
-})
+// editor
+const extensions = ref([StarterKit, DisableEnter])
+const editor = shallowRef<Editor>()
+
+provide('extensions', extensions)
+provide('editor', editor)
 
 function onModelChange(value: string) {
     if (!editor.value) {
@@ -46,15 +45,37 @@ function onModelChange(value: string) {
     editor.value.commands.setContent(value)
 }
 
+function load() {
+    editor.value = new Editor({
+        content: model.value,
+        extensions: extensions.value,
+        editorProps: {
+            attributes: {
+                class: 'focus:outline-0 min-h-full',
+            },
+        },
+        onUpdate: ({ editor }) => {
+            model.value = editor.getHTML()
+        },
+    })
+}
+
 watch(model, onModelChange, { immediate: true })
+
+onMounted(() => {
+    load()
+})
 
 onBeforeUnmount(() => {
     if (editor.value) {
         editor.value.destroy()
     }
 })
+
+// extensions
 </script>
 
 <template>
-    <editor-content :editor="editor" class="focus:outline-0" />
+    <editor-content :editor="editor" v-bind="$attrs" />
+    <slot />
 </template>

@@ -2,6 +2,8 @@
 import type Thread from '@/entities/Thread'
 import ThreadItem from '@/entities/ThreadItem'
 import ThreadItemRepository from '@/facades/ThreadItemRepository'
+import type AdapterRunnerGateway from '@/contracts/AdapterRunnerGateway'
+import AdapterRunnerService from '@/services/AdapterRunnerService'
 
 const thread = defineModel<Thread>('thread', {
     required: true,
@@ -21,6 +23,22 @@ const loading = defineModel<boolean>('loading', {
     type: Boolean,
     default: false,
 })
+
+// generate image
+const runners = ref<AdapterRunnerGateway[]>([])
+
+async function loadRunners() {
+    const [error, response] = await tryCatch(() => AdapterRunnerService.list())
+
+    if (error) {
+        console.error('Failed to load runners:', error)
+        return
+    }
+
+    runners.value = response
+}
+
+onMounted(loadRunners)
 
 async function addItem(type: string, data: any = {}) {
     const item = await ThreadItemRepository.create({
@@ -62,7 +80,21 @@ async function submit() {
                     return true
                 },
             }"
-        />
+        >
+            <cd-tip-tap-mention-extension
+                trigger="@"
+                :items="runners"
+                value-key="id"
+                label-key="name"
+            >
+                <template #item="{ item }">
+                    <div class="flex flex-col gap-x-2">
+                        <span> @{{ item.name }}</span>
+                        <span class="text-sm text-body-100">{{ item.adapter.name }}</span>
+                    </div>
+                </template>
+            </cd-tip-tap-mention-extension>
+        </cd-tip-tap>
 
         <div class="flex gap-x-2 items-center">
             <cd-menu placement="top-end" :offset="6">
