@@ -42,4 +42,7 @@ export default defineConfig({
             '@': resolve(import.meta.dirname, './src'),
         },
     },
+    server: {
+        allowedHosts: ['localhost', process.env.VITE_ALLOWED_HOST || ''],
+    },
 })
