@@ -31,6 +31,7 @@ export interface BrushPath {
     opacity: number
     pressure: number
     color: ColorRGB
+    erase?: boolean
 }
 
 export interface BrushDefinition {

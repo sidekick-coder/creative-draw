@@ -2,7 +2,7 @@
 import { createTransform } from '@/composables/createTransform'
 
 // general
-const route = useRoute()
+const route = useRoute('/projects/[id]')
 
 // board
 const board = useBoard()
@@ -27,7 +27,7 @@ onMounted(() => {
 })
 
 // project
-const projectId = computed(() => route.params.id as string)
+const projectId = computed(() => route.params.id)
 const project = ref<any>(null)
 
 async function setProject() {
@@ -185,18 +185,7 @@ async function save() {
 }
 
 // brush
-const brushSize = ref(1)
-const brushOpacity = ref(1)
-const brushColor = ref({
-    r: 0,
-    g: 0,
-    b: 0,
-})
-const brush = createBrush({
-    size: brushSize,
-    opacity: brushOpacity,
-    color: brushColor,
-})
+const brush = createBrush()
 
 const minBrushSize = computed(() => {
     return project.value?.width * 0.001
@@ -210,8 +199,8 @@ watch(
     project,
     (value) => {
         if (!value) return
-        brushSize.value = value.width * 0.01
-        brushOpacity.value = 1
+        brush.size = value.width * 0.01
+        brush.opacity = 1
     },
     { immediate: true }
 )
@@ -262,6 +251,14 @@ watch(
             <cd-btn
                 size="sq-md"
                 color="body-900"
+                :class="brush.erase ? 'bg-primary-300' : ''"
+                @click="brush.erase = !brush.erase"
+            >
+                <cd-icon name="mdi:eraser" />
+            </cd-btn>
+            <cd-btn
+                size="sq-md"
+                color="body-900"
                 :class="pan.active ? 'bg-primary-300' : ''"
                 @click="pan.toggle"
             >
@@ -297,13 +294,13 @@ watch(
                 </div>
             </cd-menu>
 
-            <cd-color-picker v-model="brushColor" />
+            <cd-color-picker v-model="brush.color" />
         </div>
 
         <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">
             <div class="bg-body-900 p-2 flex flex-col gap-y-4">
                 <cd-range
-                    v-model="brushSize"
+                    v-model="brush.size"
                     :min="minBrushSize"
                     :max="maxBrushSize"
                     step="1"
@@ -311,7 +308,7 @@ watch(
                     class="h-56 w-4"
                 />
                 <cd-range
-                    v-model="brushOpacity"
+                    v-model="brush.opacity"
                     min="0"
                     max="1"
                     step="0.01"

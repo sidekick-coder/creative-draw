@@ -195,6 +195,18 @@ function drawPaths(paths: BrushPath[]) {
 
         const opacity = p.opacity || 1
 
+        if (p.erase) {
+            ctx.globalCompositeOperation = 'destination-out'
+            ctx.globalAlpha = opacity
+            ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
+            ctx.beginPath()
+            ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.closePath()
+            ctx.globalCompositeOperation = 'source-over'
+            return
+        }
+
         ctx.globalCompositeOperation = 'source-over'
         ctx.globalAlpha = opacity
         ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
