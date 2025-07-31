@@ -16,6 +16,7 @@ export function createBrush(options?: CreateBrushOptions) {
     const color = toRef(options?.color ?? { r: 0, g: 0, b: 0 })
 
     let drawing = false
+    let device = 'mouse' // Default to mouse, can be changed based on input type
     let lastX = 0
     let lastY = 0
     let lastPressure = 0
@@ -42,7 +43,7 @@ export function createBrush(options?: CreateBrushOptions) {
         layer.emitter.emit('paths:draw', paths)
     }
 
-    function move(layer: Layer, x: number, y: number, pressure: number) {
+    function move(layer: Layer, x: number, y: number, pressure = 0.5) {
         if (!drawing) return
 
         const payload = {
@@ -86,11 +87,59 @@ export function createBrush(options?: CreateBrushOptions) {
                 })
 
                 layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
-                    move(layer, e.x, e.y, 0.5)
+                    move(layer, e.x, e.y)
                 })
 
                 layer.emitter.on('mouseup', () => end(layer))
                 layer.emitter.on('mouseout', () => end(layer))
+
+                // pointer events / pen events
+                layer.emitter.on('pointerdown', (e: LayerPointEvent) => {
+                    if (e.event.pointerType !== 'pen') return
+
+                    device = 'pointer'
+                    start(layer, e.x, e.y)
+                })
+
+                layer.emitter.on('pointermove', (e: LayerPointEvent) => {
+                    if (device !== 'pointer') return
+                    move(layer, e.x, e.y, e.pressure)
+                })
+
+                layer.emitter.on('pointerup', () => {
+                    if (device !== 'pointer') return
+
+                    end(layer)
+                })
+
+                layer.emitter.on('pointerout', () => {
+                    if (device !== 'pointer') return
+
+                    end(layer)
+                })
+
+                // touch events
+                layer.emitter.on('touchstart', (e: LayerTouchEvent) => {
+                    e.event.preventDefault()
+
+                    if (e.event.touches.length !== 1) return
+                    device = 'touch'
+
+                    start(layer, e.x, e.y)
+                })
+
+                layer.emitter.on('touchmove', (e: LayerTouchEvent) => {
+                    if (device !== 'touch') return
+                    if (e.event.touches.length !== 1) return
+
+                    move(layer, e.x, e.y)
+                })
+
+                layer.emitter.on('touchend', (e: LayerTouchEvent) => {
+                    if (device !== 'touch') return
+
+                    end(layer)
+                })
             })
         },
     })
