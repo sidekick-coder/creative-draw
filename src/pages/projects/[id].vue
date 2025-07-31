@@ -218,7 +218,7 @@ watch(
 </script>
 <template>
     <div
-        class="relative w-screen h-screen overflow-hidden"
+        class="relative w-dvw h-dvh overflow-hidden"
         :style="{
             'background-size': `${boardWidth * 0.02}px ${boardWidth * 0.02}px`,
             'background-image': `
