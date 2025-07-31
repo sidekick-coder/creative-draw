@@ -1,3 +1,5 @@
+import type { Instruction } from '@/contracts/AdapterRunnerGateway'
+
 export default class ThreadItem {
     constructor(
         public id: string,
@@ -9,7 +11,7 @@ export default class ThreadItem {
         public deletedAt: Date | null = null
     ) {}
 
-    static fromData(data: Partial<ThreadItem>): ThreadItem {
+    public static fromData(data: Partial<ThreadItem>): ThreadItem {
         return new ThreadItem(
             data.id || '',
             data.threadId || '',
@@ -19,5 +21,34 @@ export default class ThreadItem {
             new Date(data.updatedAt || Date.now()),
             data.deletedAt ? new Date(data.deletedAt) : null
         )
+    }
+
+    public toInstruction(): Instruction[] {
+        const instructions: Instruction[] = []
+
+        if (this.type === 'text') {
+            instructions.push({
+                type: 'text',
+                data: this.data.text || '',
+            })
+        }
+
+        if (this.type === 'image') {
+            instructions.push({
+                type: 'image',
+                data: this.data.file,
+            })
+        }
+
+        if (this.type === 'gallery') {
+            this.data.files.forEach((file: any) => {
+                instructions.push({
+                    type: 'image',
+                    data: file,
+                })
+            })
+        }
+
+        return instructions
     }
 }

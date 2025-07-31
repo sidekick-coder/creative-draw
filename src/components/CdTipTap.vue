@@ -60,6 +60,14 @@ function load() {
     })
 }
 
+function toJSON() {
+    if (!editor.value) {
+        return null
+    }
+
+    return editor.value.getJSON()
+}
+
 watch(model, onModelChange, { immediate: true })
 
 onMounted(() => {
@@ -72,7 +80,10 @@ onBeforeUnmount(() => {
     }
 })
 
-// extensions
+defineExpose({
+    editor,
+    toJSON,
+})
 </script>
 
 <template>

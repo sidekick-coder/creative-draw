@@ -64,6 +64,10 @@ async function add(files: File[]) {
         item.value.data.files = []
     }
 
+    const existingIds = new Set(item.value.data.files.map((f: File) => f.id))
+
+    files = files.filter((file: File) => !existingIds.has(file.id))
+
     item.value.data.files.push(...files)
 
     await save()
@@ -78,11 +82,11 @@ async function remove(file: File) {
 
 <template>
     <div class="flex gap-4 flex-wrap">
-        <transition-group name="image-move" tag="div" class="flex gap-4 flex-wrap">
+        <transition-group name="image-move" tag="div" class="flex gap-4 flex-wrap items-start">
             <div
                 v-for="(i, idx) in images"
                 :key="i.id"
-                class="relative size-40 cursor-pointer group/image border-2 border-body-600 rounded-lg overflow-hidden"
+                class="relative max-w-60 cursor-pointer group/image border-2 border-body-600 rounded-lg overflow-hidden h-auto"
                 :class="{
                     'border-primary-300 z-10': dragIndex === idx && isDragging,
                     '': dropIndex === idx && isDragging && dragIndex !== dropIndex,
@@ -93,7 +97,11 @@ async function remove(file: File) {
                 @dragover.prevent="onDragOver(idx)"
                 @drop.prevent="onDrop"
             >
-                <cd-img :src="`drive:${i.filename}`" alt="Generated image" class="size-full" />
+                <cd-img
+                    :src="`drive:${i.filename}`"
+                    alt="Generated image"
+                    class="object-contain w-full"
+                />
                 <cd-btn
                     class="absolute bottom-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity"
                     size="sq-sm"
@@ -114,7 +122,7 @@ async function remove(file: File) {
                     color="none"
                     size="none"
                     v-bind="attrs"
-                    class="flex flex-col border-2 border-body-100 border-dashed size-40"
+                    class="flex flex-col border-2 border-body-100 border-dashed w-60 py-5"
                     variant="outlined"
                 >
                     <cd-icon
