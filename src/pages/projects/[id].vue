@@ -343,6 +343,9 @@ watch(
             :width="boardWidth"
             :height="boardHeight"
             :plugins="[transform, zoom, pan, rotate, history, brush]"
+            :style="{
+                'will-change': 'transform',
+            }"
         >
             <cd-board-layer
                 v-for="(layer, index) in layers"
