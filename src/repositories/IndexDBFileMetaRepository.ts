@@ -1,5 +1,4 @@
 import type FileMetaRepository from '@/contracts/FileMetaRepository'
-import type { FileMetaListOptions } from '@/contracts/FileMetaRepository'
 import FileMeta from '@/entities/FileMeta'
 import Dexie from 'dexie'
 
@@ -18,7 +17,7 @@ export default class IndexDBFileMetaRepository implements FileMetaRepository {
         })
     }
 
-    public async list(options: FileMetaListOptions = {}): Promise<FileMeta[]> {
+    public list: FileMetaRepository['list'] = async (options = {}) => {
         let collection = this.db.file_metas.toCollection()
 
         if (options.filters?.fileId) {
@@ -27,6 +26,14 @@ export default class IndexDBFileMetaRepository implements FileMetaRepository {
 
         if (options.filters?.name) {
             collection = collection.filter((item) => item.name === options.filters!.name)
+        }
+
+        if (options.limit) {
+            collection = collection.limit(options.limit)
+        }
+
+        if (options.offset) {
+            collection = collection.offset(options.offset)
         }
 
         const items = await collection.toArray()
@@ -42,6 +49,15 @@ export default class IndexDBFileMetaRepository implements FileMetaRepository {
         }
 
         return FileMeta.fromData(fileMeta)
+    }
+
+    public findOne: FileMetaRepository['findOne'] = async (filters = {}) => {
+        const results = await this.list({
+            filters,
+            limit: 1,
+        })
+
+        return results.length > 0 ? results[0] : null
     }
 
     public async create(data: any): Promise<FileMeta> {

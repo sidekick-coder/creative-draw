@@ -2,6 +2,7 @@ import type { RunResponseItem } from '@/contracts/AdapterRunnerGateway'
 import type AdapterRunnerGateway from '@/contracts/AdapterRunnerGateway'
 import type Adapter from '@/entities/Adapter'
 import Drive from '@/facades/Drive'
+import FileMetaRepository from '@/facades/FileMetaRepository'
 import OpenAI from 'openai'
 
 export default class implements AdapterRunnerGateway {
@@ -14,11 +15,22 @@ export default class implements AdapterRunnerGateway {
         public adapter: Adapter
     ) {}
 
-    public createOpenaiFile = async (filename: string): Promise<string> => {
+    public findOrUploadFile = async (filename: string): Promise<string> => {
         const file = await Drive.find(filename)
 
         if (!file) {
             throw new Error(`File ${filename} not found.`)
+        }
+
+        const key = `openai:${this.adapter.id}:file-id`
+
+        const meta = await FileMetaRepository.findOne({
+            fileId: file.id,
+            name: key,
+        })
+
+        if (meta) {
+            return meta.value as string
         }
 
         const uint8 = await Drive.read(filename)
@@ -35,6 +47,12 @@ export default class implements AdapterRunnerGateway {
         if (!openaiFile.id) {
             throw new Error(`Failed to upload file ${filename} to OpenAI.`)
         }
+
+        await FileMetaRepository.create({
+            fileId: file.id,
+            name: key,
+            value: openaiFile.id,
+        })
 
         return openaiFile.id
     }
@@ -62,7 +80,7 @@ export default class implements AdapterRunnerGateway {
                     throw new Error(`Image file ${instruction.data.filename} not found.`)
                 }
 
-                const fileId = await this.createOpenaiFile(instruction.data.filename)
+                const fileId = await this.findOrUploadFile(instruction.data.filename)
 
                 content.push({
                     type: 'input_image',
