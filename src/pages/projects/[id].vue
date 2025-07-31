@@ -234,7 +234,7 @@ watch(
             >
                 <cd-icon name="mdi:content-save" />
             </cd-btn>
-            <cd-btn
+            <!-- <cd-btn
                 color="body-900"
                 size="sq-sm"
                 class="flex items-center justify-center"
@@ -249,7 +249,7 @@ watch(
                 @click="history.redo"
             >
                 <cd-icon name="heroicons:arrow-uturn-right" />
-            </cd-btn>
+            </cd-btn> -->
         </div>
 
         <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
@@ -277,7 +277,7 @@ watch(
                     </cd-btn>
                 </template>
                 <div class="py-2 px-4">
-                    <cd-card class="border-2 border-body-600 w-64">
+                    <cd-card class="border-2 border-body-600 min-w-64">
                         <cd-card-head class="border-b border-body-600">
                             <cd-card-title class="mr-auto text-base">Layers</cd-card-title>
                             <cd-btn variant="text" size="sq-md" @click="addLayer">
@@ -353,7 +353,7 @@ watch(
         <cd-board
             :width="boardWidth"
             :height="boardHeight"
-            :plugins="[transform, zoom, pan, rotate, history, brush]"
+            :plugins="[transform, zoom, pan, rotate, brush]"
             :style="{
                 'will-change': 'transform',
             }"
