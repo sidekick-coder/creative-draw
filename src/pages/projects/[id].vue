@@ -217,7 +217,12 @@ watch(
         }"
     >
         <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
-            <cd-btn color="body-900" to="/" size="sq-sm" class="flex items-center justify-center">
+            <cd-btn
+                color="body-900"
+                to="/projects"
+                size="sq-sm"
+                class="flex items-center justify-center"
+            >
                 <cd-icon name="home" />
             </cd-btn>
             <cd-btn
