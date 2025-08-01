@@ -5,22 +5,10 @@ import { createId } from '@/utils/createId'
 import Dexie from 'dexie'
 
 export default class IndexDBAdapterRepository implements AdapterRepository {
-    public db: Dexie & {
-        adapters: Dexie.Table<Adapter, string>
-    }
-
-    constructor(dbName = 'default') {
-        this.db = new Dexie(dbName) as Dexie & {
-            adapters: Dexie.Table<Adapter, string>
-        }
-
-        this.db.version(1).stores({
-            adapters: 'id',
-        })
-    }
+    constructor(public table: Dexie.Table<Adapter, string>) {}
 
     public async list(options: ListOptions = {}): Promise<Adapter[]> {
-        let collection = this.db.adapters.toCollection()
+        let collection = this.table.toCollection()
 
         collection = collection.filter((item) => {
             if (options.filters?.deleted) {
@@ -40,7 +28,7 @@ export default class IndexDBAdapterRepository implements AdapterRepository {
     }
 
     public async find(id: string): Promise<Adapter | null> {
-        const adapter = await this.db.adapters.get(id)
+        const adapter = await this.table.get(id)
 
         if (!adapter) {
             return null
@@ -56,13 +44,13 @@ export default class IndexDBAdapterRepository implements AdapterRepository {
         adapter.createdAt = new Date()
         adapter.updatedAt = new Date()
 
-        await this.db.adapters.put(JSON.parse(JSON.stringify(adapter)))
+        await this.table.put(JSON.parse(JSON.stringify(adapter)))
 
         return adapter
     }
 
     public async update(id: string, data: any): Promise<Adapter | null> {
-        const adapter = await this.db.adapters.get(id)
+        const adapter = await this.table.get(id)
 
         if (!adapter) {
             throw new Error(`Adapter with id ${id} not found`)
@@ -73,13 +61,13 @@ export default class IndexDBAdapterRepository implements AdapterRepository {
         adapter.config = data.config || adapter.config
         adapter.updatedAt = new Date()
 
-        await this.db.adapters.put(JSON.parse(JSON.stringify(adapter)))
+        await this.table.put(JSON.parse(JSON.stringify(adapter)))
 
         return adapter
     }
 
     public async destroy(id: string): Promise<void> {
-        const adapter = await this.db.adapters.get(id)
+        const adapter = await this.table.get(id)
 
         if (!adapter) {
             throw new Error(`Adapter with id ${id} not found`)
@@ -87,6 +75,6 @@ export default class IndexDBAdapterRepository implements AdapterRepository {
 
         adapter.deletedAt = new Date()
 
-        await this.db.adapters.put(JSON.parse(JSON.stringify(adapter)))
+        await this.table.put(JSON.parse(JSON.stringify(adapter)))
     }
 }

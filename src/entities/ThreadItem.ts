@@ -4,7 +4,7 @@ export default class ThreadItem {
     public id: string
     public threadId: string
     public type: 'text' | 'image' | 'gallery'
-    public data: Record<string, any>
+    public data: Record<string, any> = {}
     public createdAt: Date
     public updatedAt: Date
     public deletedAt: Date | null = null

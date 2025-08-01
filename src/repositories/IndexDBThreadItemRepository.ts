@@ -5,22 +5,10 @@ import { createId } from '@/utils/createId'
 import Dexie from 'dexie'
 
 export default class IndexDbThreadItemRepository implements ThreadItemRepository {
-    public db: Dexie & {
-        thread_items: Dexie.Table<ThreadItem, string>
-    }
-
-    constructor(dbName = 'default') {
-        this.db = new Dexie(dbName) as Dexie & {
-            thread_items: Dexie.Table<ThreadItem, string>
-        }
-
-        this.db.version(1).stores({
-            thread_items: 'id',
-        })
-    }
+    constructor(public table: Dexie.Table<ThreadItem, string>) {}
 
     public async list(options: ListOptions = {}): Promise<ThreadItem[]> {
-        let collection = this.db.thread_items.toCollection()
+        let collection = this.table.toCollection()
 
         collection = collection.filter((item) => {
             if (options.filters?.deleted) {
@@ -52,7 +40,7 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
     }
 
     public async find(id: string): Promise<ThreadItem | null> {
-        const item = await this.db.thread_items.get(id)
+        const item = await this.table.get(id)
 
         if (!item) {
             return null
@@ -69,13 +57,13 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         item.updatedAt = new Date()
         item.deletedAt = null
 
-        await this.db.thread_items.put(JSON.parse(JSON.stringify(item)))
+        await this.table.put(JSON.parse(JSON.stringify(item)))
 
         return item
     }
 
     public async update(id: string, payload: any): Promise<ThreadItem | null> {
-        const item = await this.db.thread_items.get(id)
+        const item = await this.table.get(id)
 
         if (!item) {
             throw new Error(`Thread with id ${id} not found`)
@@ -84,12 +72,12 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         item.data = payload.data
         item.updatedAt = new Date()
 
-        await this.db.thread_items.put(JSON.parse(JSON.stringify(item)))
+        await this.table.put(JSON.parse(JSON.stringify(item)))
 
         return item
     }
 
     public async destroy(id: string): Promise<void> {
-        await this.db.thread_items.delete(id)
+        await this.table.delete(id)
     }
 }

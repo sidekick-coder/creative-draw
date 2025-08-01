@@ -3,24 +3,12 @@ import Dexie from 'dexie'
 import File from '@/entities/File'
 import mime from 'mime'
 
-interface DBFile extends File {
+export interface IndexDbFile extends File {
     contents: ArrayBuffer
 }
 
 export default class IndexDbDriveGateway implements DriveGateway {
-    public table: Dexie.Table<DBFile, string>
-
-    constructor(dbName = 'default') {
-        const db = new Dexie(dbName) as Dexie & {
-            files: Dexie.Table<DBFile, string>
-        }
-
-        db.version(1).stores({
-            files: 'id,filename,createdAt',
-        })
-
-        this.table = db.files
-    }
+    constructor(public table: Dexie.Table<IndexDbFile, string>) {}
 
     public list: DriveGateway['list'] = async (options = {}) => {
         let query = this.table.orderBy('createdAt').reverse()

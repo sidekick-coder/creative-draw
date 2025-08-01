@@ -39,15 +39,24 @@ function onDragStart(index: number, event: DragEvent) {
     event.dataTransfer?.setDragImage(event.target as HTMLElement, 0, 0)
 }
 
-function onDrop(targetIndex: number, _event: DragEvent) {
+async function onDrop(targetIndex: number, _event: DragEvent) {
     const fromIndex = dragIndex.value
     if (fromIndex === null) return
     if (fromIndex === targetIndex) return
     const updated = [...items.value]
     const [moved] = updated.splice(fromIndex, 1)
     updated.splice(targetIndex, 0, moved)
+    // Update order property for each item
+    updated.forEach((item, idx) => {
+        item.order = idx
+    })
     items.value = updated
     dragIndex.value = null
+
+    // Persist the new order
+    for (const item of updated) {
+        await ThreadItemRepository.update(item.id, { order: item.order })
+    }
 }
 
 function onDragEnd() {
@@ -70,6 +79,10 @@ async function load() {
         loading.value = false
         return
     }
+
+    response.sort((a, b) => a.order - b.order)
+
+    console.log('Loaded items:', response)
 
     items.value = response
 

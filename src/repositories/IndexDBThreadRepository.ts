@@ -5,40 +5,30 @@ import { createId } from '@/utils/createId'
 import Dexie from 'dexie'
 
 export default class IndexDbThreadRepository implements ThreadRepository {
-    public db: Dexie & {
-        threads: Dexie.Table<Thread, string>
-    }
+    constructor(public table: Dexie.Table<Thread, string>) {}
 
-    constructor(dbName = 'default') {
-        this.db = new Dexie(dbName) as Dexie & {
-            threads: Dexie.Table<Thread, string>
-        }
-
-        this.db.version(1).stores({
-            threads: 'id',
-        })
-    }
-
-    async list(options: ListOptions = {}): Promise<Thread[]> {
-        const query = this.db.threads
+    public async list(options: ListOptions = {}): Promise<Thread[]> {
+        let collection = this.table.toCollection()
 
         if (options.filters?.id) {
-            query.where('id').equals(options.filters.id)
+            collection = collection.filter((item) => item.id === options.filters!.id)
         }
 
         if (options.filters?.deleted) {
-            query.where('deletedAt').notEqual('')
-        } else {
-            query.where('deletedAt').equals('')
+            collection = collection.filter((item) => item.deletedAt !== null)
         }
 
-        const items = await query.toArray()
+        if (!options.filters?.deleted) {
+            collection = collection.filter((item) => !item.deletedAt)
+        }
+
+        const items = await collection.toArray()
 
         return items.map((item) => Thread.fromData(item))
     }
 
-    async find(id: string): Promise<Thread | null> {
-        const thread = await this.db.threads.get(id)
+    public async find(id: string): Promise<Thread | null> {
+        const thread = await this.table.get(id)
 
         if (!thread) {
             return null
@@ -47,20 +37,20 @@ export default class IndexDbThreadRepository implements ThreadRepository {
         return Thread.fromData(thread)
     }
 
-    async create(data: any): Promise<Thread> {
+    public async create(data: any): Promise<Thread> {
         const thread = Thread.fromData(data)
 
         thread.id = createId()
         thread.createdAt = new Date()
         thread.updatedAt = new Date()
 
-        await this.db.threads.put(thread)
+        await this.table.put(thread)
 
         return thread
     }
 
-    async update(id: string, data: any): Promise<Thread | null> {
-        const thread = await this.db.threads.get(id)
+    public async update(id: string, data: any): Promise<Thread | null> {
+        const thread = await this.table.get(id)
 
         if (!thread) {
             throw new Error(`Thread with id ${id} not found`)
@@ -69,12 +59,12 @@ export default class IndexDbThreadRepository implements ThreadRepository {
         thread.title = data.title || thread.title
         thread.updatedAt = new Date()
 
-        await this.db.threads.put(thread)
+        await this.table.put(thread)
 
         return thread
     }
 
-    async destroy(id: string): Promise<void> {
-        await this.db.threads.delete(id)
+    public async destroy(id: string): Promise<void> {
+        await this.table.delete(id)
     }
 }

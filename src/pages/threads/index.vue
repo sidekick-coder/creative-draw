@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type Thread from '@/entities/Thread'
-import IndexDbThreadRepository from '@/repositories/IndexDBThreadRepository'
-
-// general
-const repository = new IndexDbThreadRepository()
+import ThreadRepository from '@/facades/ThreadRepository'
 
 // table
 const loading = ref(false)
@@ -37,7 +34,7 @@ const columns = [
 async function load() {
     loading.value = true
 
-    const [error, response] = await tryCatch(() => repository.list())
+    const [error, response] = await tryCatch(() => ThreadRepository.list())
 
     if (error) {
         console.error('Failed to load threads:', error)
@@ -67,10 +64,10 @@ async function submit() {
 
     const [error] = await tryCatch(() => {
         if (editedId.value) {
-            return repository.update(editedId.value, payload.value)
+            return ThreadRepository.update(editedId.value, payload.value)
         }
 
-        return repository.create(payload.value)
+        return ThreadRepository.create(payload.value)
     })
 
     if (error) {
@@ -93,7 +90,7 @@ function editItem(item: Thread) {
 }
 
 async function deleteItem(item: Thread) {
-    const [error] = await tryCatch(() => repository.destroy(item.id))
+    const [error] = await tryCatch(() => ThreadRepository.destroy(item.id))
 
     if (error) {
         console.error('Failed to delete thread:', error)
