@@ -69,7 +69,7 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
             throw new Error(`Thread with id ${id} not found`)
         }
 
-        item.data = payload.data
+        item.data = payload.data || item.data
         item.updatedAt = new Date()
 
         await this.table.put(JSON.parse(JSON.stringify(item)))

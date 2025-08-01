@@ -36,6 +36,8 @@ async function onClick() {
     }
 
     emit('result', entities)
+
+    menu.value = false
 }
 
 const tab = ref('upload')
