@@ -227,24 +227,14 @@ onMounted(loadRunners)
                     </div>
                 </div>
                 <div class="self-start">
-                    <cd-menu placement="bottom-end">
-                        <template #activator="{ attrs }">
-                            <cd-btn
-                                size="sq-sm"
-                                color="body-700"
-                                v-bind="attrs"
-                                class="opacity-0 group-hover/item:opacity-100 transition-opacity"
-                            >
-                                <cd-icon name="heroicons:ellipsis-vertical-16-solid" />
-                            </cd-btn>
-                        </template>
-                        <cd-card class="w-48">
-                            <cd-list-item size="sq-sm" color="danger" @click="destroy(i)">
-                                <cd-icon name="mdi:delete" />
-                                <div>{{ $t('Delete') }}</div>
-                            </cd-list-item>
-                        </cd-card>
-                    </cd-menu>
+                    <cd-btn
+                        size="sq-sm"
+                        color="danger"
+                        class="opacity-0 group-hover/item:opacity-100 transition-opacity"
+                        @click="destroy(i)"
+                    >
+                        <cd-icon name="heroicons:trash-16-solid" />
+                    </cd-btn>
                 </div>
             </div>
         </div>

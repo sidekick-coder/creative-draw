@@ -213,6 +213,14 @@ async function submit() {
         </cd-tip-tap>
 
         <div class="flex gap-x-2 items-center">
+            <cd-btn
+                :loading="loading"
+                size="sq-md"
+                variant="tonal"
+                @click="() => addItem('gallery')"
+            >
+                <cd-icon name="heroicons:photo-solid" />
+            </cd-btn>
             <cd-btn :loading="loading" size="sq-md" @click="submit">
                 <cd-icon name="heroicons:paper-airplane-solid" />
             </cd-btn>
