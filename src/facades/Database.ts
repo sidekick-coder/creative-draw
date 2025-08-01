@@ -14,11 +14,11 @@ const db = new Dexie('default') as Dexie & {
 }
 
 db.version(1).stores({
-    adapters: 'id,name,createdAt,updatedAt',
-    files: 'filename,mimetype,createdAt,updatedAt',
-    file_metas: 'id,filename,createdAt,updatedAt',
-    threads: 'id,title,createdAt,updatedAt,deletedAt',
-    thread_items: 'id,threadId,type,data,createdAt,updatedAt,deletedAt,order',
+    adapters: 'id',
+    files: 'id,filename',
+    file_metas: 'fileId,name',
+    threads: 'id',
+    thread_items: 'id',
 })
 
 export default db

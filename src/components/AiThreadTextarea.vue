@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import type { DocumentType } from '@tiptap/core'
 import CdTipTap from '@/components/CdTipTap.vue'
 import type Thread from '@/entities/Thread'
 import ThreadItem from '@/entities/ThreadItem'
 import ThreadItemRepository from '@/facades/ThreadItemRepository'
 import type AdapterRunnerGateway from '@/contracts/AdapterRunnerGateway'
 import AdapterRunnerService from '@/services/AdapterRunnerService'
+
+const emit = defineEmits<{
+    (e: 'new-items', items: ThreadItem[]): void
+}>()
 
 const tiptapRef = ref<InstanceType<typeof CdTipTap>>()
 
@@ -52,6 +55,8 @@ async function addItem(type: string, data: any = {}) {
     })
 
     items.value.push(item)
+
+    emit('new-items', [item])
 }
 
 function findTool(doc: any): { id: string; label: string; trigger: string } | null {
@@ -147,6 +152,10 @@ async function executeTool(toolId: string, prompt: string) {
 
         newItems.push(created)
     }
+
+    items.value.push(...newItems)
+
+    emit('new-items', newItems)
 }
 
 async function submit() {
@@ -214,7 +223,7 @@ async function submit() {
 
         <div class="flex gap-x-2 items-center">
             <cd-btn
-                :loading="loading"
+                :disabled="loading"
                 size="sq-md"
                 variant="tonal"
                 @click="() => addItem('gallery')"

@@ -5,10 +5,10 @@ export default class ThreadItem {
     public threadId: string
     public type: 'text' | 'image' | 'gallery'
     public data: Record<string, any> = {}
+    public order: number = 999
     public createdAt: Date
     public updatedAt: Date
     public deletedAt: Date | null = null
-    public order: number = 999
 
     constructor(data?: Partial<ThreadItem>) {
         Object.assign(this, data)

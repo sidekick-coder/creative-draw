@@ -69,7 +69,7 @@ export default class IndexDbDriveGateway implements DriveGateway {
             contents: contents.buffer,
         }
 
-        await this.table.put(fileToSave as any)
+        await this.table.put(fileToSave as any, fileToSave.id)
 
         return File.fromData(fileToSave)
     }

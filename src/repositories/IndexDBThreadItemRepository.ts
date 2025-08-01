@@ -70,6 +70,8 @@ export default class IndexDbThreadItemRepository implements ThreadItemRepository
         }
 
         item.data = payload.data || item.data
+        item.order = payload.order || item.order
+        item.type = payload.type || item.type
         item.updatedAt = new Date()
 
         await this.table.put(JSON.parse(JSON.stringify(item)))
