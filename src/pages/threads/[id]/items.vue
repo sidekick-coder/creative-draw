@@ -30,6 +30,30 @@ watch(id, loadThread, { immediate: true })
 const loading = ref(false)
 const items = ref<ThreadItem[]>([])
 
+// Drag and drop state
+const dragIndex = ref<number | null>(null)
+
+function onDragStart(index: number, event: DragEvent) {
+    dragIndex.value = index
+    event.dataTransfer?.setData('text/plain', index.toString())
+    event.dataTransfer?.setDragImage(event.target as HTMLElement, 0, 0)
+}
+
+function onDrop(targetIndex: number, _event: DragEvent) {
+    const fromIndex = dragIndex.value
+    if (fromIndex === null) return
+    if (fromIndex === targetIndex) return
+    const updated = [...items.value]
+    const [moved] = updated.splice(fromIndex, 1)
+    updated.splice(targetIndex, 0, moved)
+    items.value = updated
+    dragIndex.value = null
+}
+
+function onDragEnd() {
+    dragIndex.value = null
+}
+
 async function load() {
     loading.value = true
 
@@ -74,9 +98,17 @@ async function destroy(item: ThreadItem) {
                 v-for="(i, index) in items"
                 :key="i.id"
                 class="group/item flex px-4 py-4 items-center gap-x-4 border-b border-body-700 last:border-b-0"
+                :class="{ 'bg-body-800': dragIndex === index }"
+                @dragover.prevent="dragIndex !== null && dragIndex !== index"
+                @drop="onDrop(index, $event)"
             >
-                <div class="text-body-200 shrink-0 w-4 text-center self-start dragger">
-                    {{ index + 1 }}
+                <div
+                    class="text-body-200 shrink-0 w-4 text-center self-start dragger cursor-move"
+                    draggable="true"
+                    @dragstart="onDragStart(index, $event)"
+                    @dragend="onDragEnd"
+                >
+                    <cd-icon name="heroicons:bars-3" class="inline-block align-middle mr-1" />
                 </div>
                 <div class="flex-1">
                     <ai-thread-item-text v-if="i.type === 'text'" v-model="items[index]" />
