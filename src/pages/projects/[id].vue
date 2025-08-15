@@ -220,14 +220,14 @@ watch(
             <cd-btn
                 color="body-900"
                 to="/projects"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
             >
                 <cd-icon name="home" />
             </cd-btn>
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 :loading="saving"
                 @click="save"
@@ -236,7 +236,7 @@ watch(
             </cd-btn>
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 :disabled="!history.undoStack.length"
                 @click="history.undo"
@@ -245,7 +245,7 @@ watch(
             </cd-btn>
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 :disabled="!history.redoStack.length"
                 @click="history.redo"
@@ -254,7 +254,7 @@ watch(
             </cd-btn>
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 @click="board.emitter.emit('redraw')"
             >
@@ -319,16 +319,18 @@ watch(
                     :min="minBrushSize"
                     :max="maxBrushSize"
                     step="1"
+                    size="1.2rem"
                     orientation="vertical"
-                    class="h-56 w-4"
+                    class="h-72 w-6"
                 />
                 <cd-range
                     v-model="brush.opacity"
                     min="0"
                     max="1"
                     step="0.01"
+                    size="1.2rem"
                     orientation="vertical"
-                    class="h-56 w-4"
+                    class="h-72 w-6"
                 />
             </div>
         </div>
@@ -336,7 +338,7 @@ watch(
         <div class="fixed bottom-0 right-0 flex flex-wrap gap-2 z-20 p-4">
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 @click="zoom.scale -= 0.1"
             >
@@ -344,7 +346,7 @@ watch(
             </cd-btn>
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 @click="fit"
             >
@@ -352,7 +354,7 @@ watch(
             </cd-btn>
             <cd-btn
                 color="body-900"
-                size="sq-sm"
+                size="sq-md"
                 class="flex items-center justify-center"
                 @click="zoom.scale += 0.1"
             >
