@@ -113,10 +113,12 @@ async function executeTool(toolId: string, prompt: string) {
 
     const instructions = items.value.map((i) => i.toInstruction()).flat()
 
-    instructions.push({
-        type: 'text',
-        data: prompt,
-    })
+    if (prompt.trim() !== '') {
+        instructions.push({
+            type: 'text',
+            data: prompt,
+        })
+    }
 
     const [error, result] = await tryCatch(() => runner.run({ instructions }))
 

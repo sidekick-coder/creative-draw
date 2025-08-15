@@ -1,5 +1,11 @@
 import type { Instruction } from '@/contracts/AdapterRunnerGateway'
 
+function stripHtml(html: string): string {
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+
+    return doc.body.textContent || ''
+}
+
 export default class ThreadItem {
     public id: string
     public threadId: string
@@ -28,7 +34,7 @@ export default class ThreadItem {
         if (this.type === 'text') {
             instructions.push({
                 type: 'text',
-                data: this.data.text || '',
+                data: stripHtml(this.data.content),
             })
         }
 
