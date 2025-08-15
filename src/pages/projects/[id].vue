@@ -321,7 +321,7 @@ watch(
                     step="1"
                     size="1.2rem"
                     orientation="vertical"
-                    class="h-72 w-6"
+                    class="h-[30dvh] w-6"
                 />
                 <cd-range
                     v-model="brush.opacity"
@@ -330,7 +330,7 @@ watch(
                     step="0.01"
                     size="1.2rem"
                     orientation="vertical"
-                    class="h-72 w-6"
+                    class="h-[30dvh] w-6"
                 />
             </div>
         </div>
