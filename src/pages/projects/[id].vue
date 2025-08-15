@@ -234,10 +234,11 @@ watch(
             >
                 <cd-icon name="mdi:content-save" />
             </cd-btn>
-            <!-- <cd-btn
+            <cd-btn
                 color="body-900"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                :disabled="!history.undoStack.length"
                 @click="history.undo"
             >
                 <cd-icon name="heroicons:arrow-uturn-left" />
@@ -246,10 +247,19 @@ watch(
                 color="body-900"
                 size="sq-sm"
                 class="flex items-center justify-center"
+                :disabled="!history.redoStack.length"
                 @click="history.redo"
             >
                 <cd-icon name="heroicons:arrow-uturn-right" />
-            </cd-btn> -->
+            </cd-btn>
+            <cd-btn
+                color="body-900"
+                size="sq-sm"
+                class="flex items-center justify-center"
+                @click="board.emitter.emit('redraw')"
+            >
+                <cd-icon name="heroicons:arrow-path" />
+            </cd-btn>
         </div>
 
         <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
@@ -353,7 +363,7 @@ watch(
         <cd-board
             :width="boardWidth"
             :height="boardHeight"
-            :plugins="[transform, zoom, pan, rotate, brush]"
+            :plugins="[transform, zoom, pan, rotate, brush, history]"
             :style="{
                 'will-change': 'transform',
             }"

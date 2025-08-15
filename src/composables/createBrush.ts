@@ -80,13 +80,15 @@ export function createBrush(options?: CreateBrushOptions) {
 
     function end(layer: Layer) {
         drawing = false
-        const items = layer.get<any[]>('data', [])
-        items.push({
-            type: 'brush',
+
+        layer.add({
+            id: createId(),
+            type: 'stroke',
             paths,
         })
-        layer.set('data', items)
+
         paths = []
+
         layer.emitter.emit('paths:end')
     }
 

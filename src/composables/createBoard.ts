@@ -2,6 +2,12 @@ import type { Layer } from './useLayer'
 
 export type Board = ReturnType<typeof createBoard>
 
+export interface BoardLayerSetEvent<T = any> {
+    key: string
+    value: T
+    layer: Layer
+}
+
 export function createBoard() {
     const emitter = createEmitter()
     const context = createContext()
@@ -23,6 +29,10 @@ export function createBoard() {
             emitter.emit(`layer:set:${key}`, { key, value, layer })
         })
     }
+
+    emitter.on('redraw', () => {
+        layers.value.forEach((layer) => layer.emitter.emit('redraw'))
+    })
 
     return reactive({
         emitter,

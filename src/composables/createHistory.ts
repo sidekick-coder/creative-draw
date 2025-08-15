@@ -1,9 +1,9 @@
-import type { Board } from './createBoard'
+import type { Board, BoardLayerSetEvent } from './createBoard'
+import type { LayerObject } from './createLayer'
 
-interface Snapshot {
-    timestamp: number
-    label?: string
-    data: Map<string, any[]>
+interface Stack {
+    do: () => void
+    undo: () => void
 }
 
 interface Options {
@@ -12,102 +12,67 @@ interface Options {
 
 export function createHistory(options: Options = {}) {
     let board: Board
-    let appling = false
-    const undoStack = [] as Snapshot[]
-    const redoStack = [] as Snapshot[]
-
-    function snapshot() {
-        const data = new Map<string, any[]>()
-        const timestamp = Date.now()
-
-        if (options.debug) {
-            console.debug('[history] snapshot', {
-                timestamp,
-                layers: board.layers.map((layer) => ({
-                    id: layer.id,
-                })),
-            })
-        }
-
-        board?.layers.forEach((layer) => {
-            data.set(layer.id, JSON.parse(JSON.stringify(layer.get('data', []))))
-        })
-
-        return {
-            timestamp,
-            data,
-            label: '',
-        }
-    }
-
-    function commit(label?: string) {
-        if (appling) return
-
-        const current = snapshot()
-
-        if (label) {
-            current.label = label
-        }
-
-        undoStack.push(current)
-
-        if (undoStack.length > 10) {
-            undoStack.shift()
-        }
-
-        redoStack.length = 0
-    }
-
-    function apply(snapshot: Snapshot) {
-        appling = true
-
-        const layers = Array.from(snapshot.data.entries())
-
-        for (const [id, data] of layers) {
-            const layer = board.layers.find((layer) => layer.id === id)
-
-            if (!layer) continue
-
-            layer.set('data', data)
-
-            layer.emitter.emit('render')
-        }
-
-        appling = false
-    }
+    const undoStack = ref([] as Stack[])
+    const redoStack = ref([] as Stack[])
+    let executing = false
 
     function undo() {
-        if (undoStack.length <= 1) return
-
-        const current = undoStack.pop()
-
-        redoStack.push(current!)
-
-        const previous = undoStack[undoStack.length - 1]
-
-        apply(previous)
+        const command = undoStack.value.pop()
+        if (!command) return
+        command.undo()
+        redoStack.value.push(command)
     }
 
     function redo() {
-        const next = redoStack.pop()
-
-        if (!next) return
-
-        undoStack.push(next)
-
-        apply(next)
+        const command = redoStack.value.pop()
+        if (!command) return
+        command.do()
+        undoStack.value.push(command)
     }
 
     return defineBoardPlugin({
         undo,
         redo,
-        commit,
-        undoStack,
         redoStack,
+        undoStack,
         install(_board) {
             board = _board
 
-            board.emitter.on('layer:set:data', commit)
+            board.emitter.on(
+                'layer:set:data',
+                ({ value, layer }: BoardLayerSetEvent<LayerObject[]>) => {
+                    if (executing) return
+
+                    if (!value.length) return
+                    const current = JSON.parse(JSON.stringify(value.at(-1)))
+
+                    console.log('Current layer:', current)
+
+                    const stack: Stack = {
+                        do: () => {
+                            executing = true
+
+                            layer.add(current)
+
+                            layer.redraw()
+
+                            executing = false
+                        },
+                        undo: () => {
+                            executing = true
+
+                            layer.remove(current.id)
+
+                            layer.redraw()
+
+                            executing = false
+                        },
+                    }
+
+                    undoStack.value.push(stack)
+                    redoStack.value.length = 0 // Clear redo stack on new action
+                }
+            )
 
             board.emitter.on('history:undo', undo)
 

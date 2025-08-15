@@ -1,7 +1,7 @@
 import eruda from 'eruda'
 
-export default definePlugin(({ app }) => {
-    if (import.meta.env.PROD) {
+export default definePlugin(() => {
+    if (import.meta.env.PROD || !import.meta.env.ERUDA) {
         return
     }
 

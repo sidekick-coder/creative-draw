@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LayerObject } from '@/composables/createLayer'
 import type { ColorRGB } from '@/utils/colors'
 
 // general
@@ -168,12 +169,6 @@ const board = useBoard()
 
 board.addLayer(layer)
 
-// draw
-function clear() {
-    const ctx = getContext()
-    ctx.clearRect(0, 0, width.value, height.value)
-}
-
 // paths
 const map = new Set<string>()
 
@@ -227,11 +222,19 @@ layer.value.emitter.on('paths:end', () => {
     map.clear()
 })
 
+function clear() {
+    const ctx = getContext()
+    ctx.clearRect(0, 0, width.value, height.value)
+    map.clear()
+}
+
 function draw() {
-    const items = layer.value.get<any[]>('data', [])
+    const items = layer.value.get<LayerObject[]>('data', [])
+
+    console.log('draw', items.length)
 
     items.forEach((item) => {
-        if (item.type === 'brush') {
+        if (item.type === 'stroke') {
             drawPaths(item.paths)
         }
     })
@@ -243,12 +246,12 @@ function redraw() {
 }
 
 layer.value.emitter.on('clear', clear)
+layer.value.emitter.on('redraw', redraw)
 layer.value.emitter.on('render', redraw)
-
 layer.value.emitter.on('draw', draw)
 
 // data
-onMounted(redraw)
+onMounted(draw)
 </script>
 <template>
     <canvas

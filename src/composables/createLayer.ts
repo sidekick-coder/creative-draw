@@ -23,6 +23,11 @@ export interface LayerMouseEvent {
     ctx: OffscreenCanvasRenderingContext2D
 }
 
+export interface LayerObject {
+    id: string
+    [key: string]: any
+}
+
 interface Payload {
     id: string
     name: string
@@ -30,7 +35,7 @@ interface Payload {
     order: number
     opacity: number
     background_color?: ColorRGB
-    data: any[]
+    data: LayerObject[]
 }
 
 export function createLayer(payload: Partial<Payload> = {}) {
@@ -71,6 +76,29 @@ export function createLayer(payload: Partial<Payload> = {}) {
         emitter.emit('set', { key, value })
     }
 
+    function add(object: LayerObject) {
+        const data = context.get('data') || []
+        data.push(object)
+
+        set('data', data)
+    }
+
+    function remove(id: LayerObject['id']) {
+        const data = context.get<LayerObject[]>('data', [])
+
+        const index = data.findIndex((i) => i.id === id)
+
+        if (index !== -1) {
+            data.splice(index, 1)
+
+            set('data', data)
+        }
+    }
+
+    function redraw() {
+        emitter.emit('redraw')
+    }
+
     function serialize() {
         const data = {
             id,
@@ -99,5 +127,8 @@ export function createLayer(payload: Partial<Payload> = {}) {
         get,
         set,
         serialize,
+        add,
+        remove,
+        redraw,
     })
 }
