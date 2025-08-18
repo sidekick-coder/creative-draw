@@ -3,12 +3,6 @@ import { groupBy } from 'lodash-es'
 
 const links = ref([
     {
-        label: __('Home'),
-        to: '/',
-        icon: 'mdi:home',
-        group: __('General'),
-    },
-    {
         label: __('Projects'),
         to: '/projects',
         icon: 'mdi:folder',
