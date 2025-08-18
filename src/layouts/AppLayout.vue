@@ -33,7 +33,7 @@ const groups = computed(() => groupBy(links.value, 'group'))
 <template>
     <div class="flex min-h-dvh">
         <aside class="w-72 bg-body-900 border-r-2 border-body-600">
-            <nav class="px-4">
+            <nav class="px-4 flex flex-col h-dvh overflow-auto">
                 <cd-list-item to="/" class="py-6 flex items-center">
                     <cd-logo class="size-8 text-primary-300" />
                     <span class="font-bold text-body-300">Creative draw</span>
@@ -54,9 +54,13 @@ const groups = computed(() => groupBy(links.value, 'group'))
                         </cd-list-item>
                     </template>
                 </template>
+
+                <cd-list-item to="/lp" class="py-6 flex items-center mt-auto">
+                    <span class="font-bold text-body-300">Landing page</span>
+                </cd-list-item>
             </nav>
         </aside>
-        <main class="flex-1">
+        <main class="flex-1 h-dvh overflow-auto">
             <slot />
         </main>
     </div>

@@ -10,6 +10,11 @@ routes.push({
     },
 })
 
+routes.push({
+    path: '/',
+    redirect: '/projects',
+})
+
 const router = createRouter({
     history: createWebHistory(),
     routes,
