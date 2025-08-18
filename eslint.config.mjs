@@ -8,6 +8,9 @@ import prettier from 'eslint-plugin-prettier/recommended'
 export default defineConfig([
     { files: ['**/*.{js,mjs,cjs,ts,mts,cts,vue}'], plugins: { js }, extends: ['js/recommended'] },
     { files: ['**/*.{js,mjs,cjs,ts,mts,cts,vue}'], languageOptions: { globals: globals.browser } },
+    {
+        ignores: ['node_modules/**', 'dist/**'],
+    },
     tseslint.configs.recommended,
     pluginVue.configs['flat/essential'],
     pluginVue.configs['flat/recommended'],

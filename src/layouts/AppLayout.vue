@@ -14,18 +14,18 @@ const links = ref([
         icon: 'mdi:file',
         group: __('General'),
     },
-    {
-        label: __('Threads'),
-        to: '/threads',
-        icon: 'mdi:message-text',
-        group: __('AI'),
-    },
-    {
-        label: __('Adapters'),
-        icon: 'mdi:plugin',
-        group: __('AI'),
-        to: '/adapters',
-    },
+    // {
+    //     label: __('Threads'),
+    //     to: '/threads',
+    //     icon: 'mdi:message-text',
+    //     group: __('AI'),
+    // },
+    // {
+    //     label: __('Adapters'),
+    //     icon: 'mdi:plugin',
+    //     group: __('AI'),
+    //     to: '/adapters',
+    // },
 ])
 
 const groups = computed(() => groupBy(links.value, 'group'))

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { useEditor, EditorContent, Editor } from '@tiptap/vue-3'
+import { EditorContent, Editor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Extension } from '@tiptap/core'
 import type { KeyboardShortcutCommand } from '@tiptap/core'
-import { until } from '@vueuse/core'
 
 defineOptions({
     inheritAttrs: false,

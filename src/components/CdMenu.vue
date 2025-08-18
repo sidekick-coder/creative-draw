@@ -1,12 +1,5 @@
 <script lang="ts" setup>
-import {
-    useFloating,
-    flip,
-    offset,
-    type Placement,
-    type OffsetOptions,
-    shift,
-} from '@floating-ui/vue'
+import { useFloating, offset, type Placement, type OffsetOptions, shift } from '@floating-ui/vue'
 
 import type { ComponentPublicInstance, TransitionProps } from 'vue'
 import { onClickOutside } from '@vueuse/core'

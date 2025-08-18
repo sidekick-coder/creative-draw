@@ -50,19 +50,19 @@ onMounted(() => {
 })
 
 // events
-function onPointerEvent(e: PointerEvent) {
+function onPointerEvent(_e: PointerEvent) {
     // instance.emit(`container:${e.type}`, {
     //     event: e,
     // })
 }
 
-function onTouchEvent(e: TouchEvent) {
+function onTouchEvent(_e: TouchEvent) {
     // instance.emit(`container:${e.type}`, {
     //     event: e,
     // })
 }
 
-function onMouseEvent(e: MouseEvent) {
+function onMouseEvent(_e: MouseEvent) {
     // instance.emit(`container:${e.type}`, {
     //     event: e,
     // })

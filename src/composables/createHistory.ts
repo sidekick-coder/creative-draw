@@ -10,7 +10,7 @@ interface Options {
     debug?: boolean
 }
 
-export function createHistory(options: Options = {}) {
+export function createHistory(_options: Options = {}) {
     let board: Board
     const undoStack = ref([] as Stack[])
     const redoStack = ref([] as Stack[])

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { refDebounced, syncRef, watchDebounced } from '@vueuse/core'
+import { watchDebounced } from '@vueuse/core'
 
 defineOptions({
     inheritAttrs: false,

@@ -7,7 +7,7 @@ export default class Thread {
         public deletedAt: Date | null = null
     ) {}
 
-    static fromData(data: any): Thread {
+    public static fromData(data: any): Thread {
         return new Thread(data.id, data.title, new Date(data.createdAt), new Date(data.updatedAt))
     }
 }

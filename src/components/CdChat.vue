@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { get } from 'lodash-es'
-const props = defineProps({
+defineProps({
     messages: {
         type: Array as () => any[],
         required: true,

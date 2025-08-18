@@ -155,7 +155,7 @@ export function createBrush(options?: CreateBrushOptions) {
                         move(layer, e.x, e.y)
                     })
 
-                    layer.emitter.on('touchend', (e: LayerTouchEvent) => {
+                    layer.emitter.on('touchend', (_e: LayerTouchEvent) => {
                         if (device !== 'touch') return
 
                         end(layer)
