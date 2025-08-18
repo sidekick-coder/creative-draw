@@ -228,6 +228,78 @@
             </div>
         </section>
 
+        <!-- Development Status Section -->
+        <section class="bg-body-600 px-4 py-16 flex items-center">
+            <div class="mx-auto max-w-4xl">
+                <div class="mb-8 text-center">
+                    <h2 class="text-3xl font-bold mb-4">Constantly Evolving</h2>
+                    <p class="text-body-100 text-lg max-w-2xl mx-auto">
+                        Creative Draw is actively developed with new features and improvements added
+                        regularly. Your feedback shapes the future of the app.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-y-8 mb-8">
+                    <div class="bg-body-700 rounded-lg p-6 w-full">
+                        <h3 class="text-xl font-semibold mb-3">Feature Requests Welcome</h3>
+                        <p class="text-body-100 mb-4">
+                            Missing a feature you need? We're always looking to add new tools and
+                            capabilities based on user feedback.
+                        </p>
+                        <a
+                            href="https://github.com/sidekick-coder/creative-draw/issues"
+                            target="_blank"
+                            class="text-success-300 hover:text-success-200 transition-colors inline-flex items-center gap-x-2"
+                        >
+                            <cd-icon name="mdi:github" />
+                            <span>Request a Feature</span>
+                        </a>
+                    </div>
+
+                    <div class="bg-body-700 rounded-lg p-6 w-full">
+                        <h3 class="text-xl font-semibold mb-3">Regular Updates</h3>
+                        <p class="text-body-100 mb-4">
+                            New features, bug fixes, and improvements are released frequently. The
+                            app gets better with each update.
+                        </p>
+                        <a
+                            href="https://github.com/sidekick-coder/creative-draw/releases"
+                            target="_blank"
+                            class="text-info-300 hover:text-info-200 transition-colors inline-flex items-center gap-x-2"
+                        >
+                            <cd-icon name="mdi:history" />
+                            <span>View Updates</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-body-700 rounded-lg p-6">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="flex-shrink-0">
+                            <cd-icon name="mdi:github" class="text-4xl text-body-200" />
+                        </div>
+                        <div class="text-center md:text-left">
+                            <h3 class="text-xl font-semibold mb-2">Open Source Development</h3>
+                            <p class="text-body-100">
+                                Join our community of contributors! Help shape Creative Draw by
+                                reporting bugs, suggesting features, or contributing code.
+                            </p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <cd-btn
+                                to="https://github.com/sidekick-coder/creative-draw"
+                                variant="outline"
+                                target="_blank"
+                                class="text-body-100 border-body-300 hover:bg-body-500"
+                            >
+                                Contribute
+                            </cd-btn>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA Section -->
         <section class="bg-primary-300 px-4 py-16">
             <div class="mx-auto max-w-4xl text-center">
