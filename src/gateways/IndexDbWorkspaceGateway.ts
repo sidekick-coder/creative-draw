@@ -5,7 +5,7 @@ import type Project from '@/entities/Project'
 import type ProjectRepository from '@/contracts/ProjectRepository'
 import IndexDbProjectRepository from '@/repositories/IndexDbProjectRepository'
 
-export default class IndexDbWorkspaceGaeway implements WorkspaceGateway {
+export default class IndexDbWorkspaceGateway implements WorkspaceGateway {
     public projects: ProjectRepository
 
     constructor(workspace: Workspace) {
@@ -18,5 +18,10 @@ export default class IndexDbWorkspaceGaeway implements WorkspaceGateway {
         })
 
         this.projects = new IndexDbProjectRepository(db.projects)
+    }
+
+    public load: WorkspaceGateway['load'] = async () => {
+        // no need load
+        return true
     }
 }

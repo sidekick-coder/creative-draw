@@ -3,7 +3,7 @@
   "include": ["src/vite-env.d.ts", "src/**/**/*.ts", "src/**/**/*.vue", ".output/*"],
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "types": ["vue-macros/macros-global"],
+    "types": ["vue-macros/macros-global", "@types/wicg-file-system-access"],
     "moduleResolution": "Bundler",
     "strictPropertyInitialization": false,
     "paths": {

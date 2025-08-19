@@ -22,7 +22,7 @@ async function pickFolder() {
     try {
         // Check if File System Access API is supported
         if ('showDirectoryPicker' in window) {
-            const dirHandle = await (window as any).showDirectoryPicker({
+            const dirHandle = await window.showDirectoryPicker({
                 mode: 'readwrite',
             })
             newWorkspace.value.directoryHandle = dirHandle
@@ -49,7 +49,7 @@ async function loadWorkspaces() {
         return
     }
 
-    workspaces.value = items.filter((w) => !w.deletedAt)
+    workspaces.value = items
 
     loading.value = false
 }
