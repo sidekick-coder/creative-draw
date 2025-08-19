@@ -12,7 +12,7 @@ routes.push({
 
 routes.push({
     path: '/',
-    redirect: '/projects',
+    redirect: '/workspaces',
 })
 
 const router = createRouter({

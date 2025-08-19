@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import Project from '@/entities/Project'
 import { useLocalStorage } from '@vueuse/core'
 
 // general
 const router = useRouter()
+const route = useRoute('/workspaces/[workspaceId]/projects/')
+const workspace = useWorkspace()
 
 // sizes
 const dialog = ref(false)
@@ -33,11 +36,14 @@ const sizes = [
 
 // projects
 const loading = ref(false)
+const projects = ref<Project[]>([])
 
 async function setProjects() {
     loading.value = true
 
-    await $project.load()
+    projects.value = await workspace.projects.list()
+
+    console.log(projects.value)
 
     setTimeout(() => {
         loading.value = false
@@ -51,7 +57,7 @@ onMounted(() => {
 // delete
 const deletingId = ref<string>()
 
-async function deleteItem(project: DBProject) {
+async function deleteItem(project: Project) {
     const db = $database.selected
 
     deletingId.value = project.id
@@ -62,9 +68,7 @@ async function deleteItem(project: DBProject) {
 }
 // create
 async function create(width: number, height: number) {
-    const db = $database.selected
-
-    const project = await db.projects.create({
+    const project = await workspace.projects.create({
         name: 'New Project',
         width: Number(width),
         height: Number(height),
@@ -94,7 +98,7 @@ async function create(width: number, height: number) {
         })
     }
 
-    router.push(`/projects/${project.id}`)
+    router.push(`/workspaces/${route.params.workspaceId}/projects/${project.id}`)
 }
 </script>
 
@@ -103,38 +107,23 @@ async function create(width: number, height: number) {
         <div class="w-full flex h-full flex-col lg:flex-row">
             <div class="flex-1 overflow-y-auto">
                 <div class="flex w-full flex-col md:flex-row px-5 py-4 items-center">
-                    <cd-menu>
-                        <template #activator="{ attrs }">
-                            <cd-btn v-bind="attrs" color="body-700" class="gap-x-2">
-                                <cd-icon name="heroicons:circle-stack" />
-                                <div>{{ $database.selected?.name }}</div>
-                            </cd-btn>
-                        </template>
-
-                        <div class="p-2">
-                            <cd-card class="w-80">
-                                <cd-list-item
-                                    v-for="db in $database.items"
-                                    :key="db.id"
-                                    @click="$database.select(db.id)"
-                                >
-                                    <div>{{ db.name }}</div>
-                                </cd-list-item>
-                            </cd-card>
-                        </div>
-                    </cd-menu>
-
+                    <cd-card-title>{{ $t('Projects') }}</cd-card-title>
                     <div class="flex-1" />
 
                     <div class="flex gap-x-2">
-                        <cd-btn color="body-700" :loading="loading" @click="setProjects">
+                        <cd-btn
+                            variant="tonal"
+                            size="sq-md"
+                            :loading="loading"
+                            @click="setProjects"
+                        >
                             <cd-icon name="heroicons:arrow-path-20-solid" />
                         </cd-btn>
 
                         <cd-menu>
                             <template #activator="{ attrs }">
-                                <cd-btn v-bind="attrs" color="body-700">
-                                    {{ $t('create') }}
+                                <cd-btn v-bind="attrs">
+                                    {{ $t('Create') }}
                                 </cd-btn>
                             </template>
 
@@ -187,8 +176,13 @@ async function create(width: number, height: number) {
                                         </cd-list-item>
                                     </template>
 
-                                    <cd-list-item @click="dialog = true">
-                                        {{ $t('custom') }}
+                                    <cd-list-item
+                                        class="justify-center border-t-2 border-body-500"
+                                        color="secondary"
+                                        @click="dialog = true"
+                                    >
+                                        <cd-icon name="heroicons:plus-20-solid" />
+                                        {{ $t('Custom') }}
                                     </cd-list-item>
                                 </cd-card>
                             </div>
@@ -225,24 +219,20 @@ async function create(width: number, height: number) {
 
                 <div class="flex flex-wrap items-start gap-y-4 [&>*]:px-2 relative px-2">
                     <div
-                        v-if="loading && !$project.items.length"
+                        v-if="loading && !projects.length"
                         class="absolute inset-0 flex items-center justify-center"
                     >
                         <cd-spinner class="text-2xl" />
                     </div>
 
-                    <div v-else-if="!$project.items.length" color="none" class="text-body-500">
+                    <div v-else-if="!projects.length" color="none" class="text-body-500">
                         <cd-card-content> No projects yet </cd-card-content>
                     </div>
 
-                    <div
-                        v-for="project in $project.items"
-                        :key="project.id"
-                        class="w-full md:w-3/12"
-                    >
+                    <div v-for="project in projects" :key="project.id" class="w-full md:w-3/12">
                         <cd-card
                             class="relative h-0 w-full pb-[75%]"
-                            :to="`/projects/${project.id}`"
+                            :to="`/workspaces/${route.params.workspaceId}/projects/${project.id}`"
                         >
                             <project-thumbnail
                                 :project="project"

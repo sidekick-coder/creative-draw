@@ -231,8 +231,6 @@ function clear() {
 function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
 
-    console.log('draw', items.length)
-
     items.forEach((item) => {
         if (item.type === 'stroke') {
             drawPaths(item.paths)

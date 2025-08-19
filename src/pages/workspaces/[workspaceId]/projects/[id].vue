@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
+import type Project from '@/entities/Project'
 
 // general
-const route = useRoute('/projects/[id]')
+const route = useRoute('/workspaces/[workspaceId]/projects/[id]')
+const router = useRouter()
+const workspace = useWorkspace()
 
 // board
 const board = useBoard()
@@ -28,12 +31,18 @@ onMounted(() => {
 
 // project
 const projectId = computed(() => route.params.id)
-const project = ref<any>(null)
+const project = ref<Project>()
 
 async function setProject() {
-    const db = $database.selected!
+    const response = await workspace.projects.find(route.params.id)
 
-    project.value = await db.projects.get(projectId.value)
+    if (!response) {
+        return router.push(`/workspaces/${route.params.workspaceId}/projects`)
+    }
+
+    console.log(response)
+
+    project.value = response
 }
 
 watch(projectId, setProject, { immediate: true })
@@ -167,15 +176,13 @@ const saving = ref(false)
 async function save() {
     if (saving.value || !project.value) return
 
-    const db = $database.selected!
-
     saving.value = true
 
     const projectLayers = layers.value.map((layer) => layer.serialize())
 
     console.debug('[save]', projectLayers)
 
-    await db.projects.update(project.value.id, {
+    await workspace.projects.update(project.value.id, {
         layers: projectLayers,
     })
 
@@ -219,7 +226,7 @@ watch(
         <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
             <cd-btn
                 color="body-900"
-                to="/projects"
+                :to="`/workspaces/${route.params.workspaceId}/projects`"
                 size="sq-md"
                 class="flex items-center justify-center"
             >

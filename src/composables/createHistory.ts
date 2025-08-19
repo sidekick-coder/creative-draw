@@ -46,8 +46,6 @@ export function createHistory(_options: Options = {}) {
                     if (!value.length) return
                     const current = JSON.parse(JSON.stringify(value.at(-1)))
 
-                    console.log('Current layer:', current)
-
                     const stack: Stack = {
                         do: () => {
                             executing = true
