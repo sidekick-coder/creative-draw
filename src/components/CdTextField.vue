@@ -201,5 +201,9 @@ const readonly = defineProp<boolean>('readonly', {
                 @change="onChange"
             />
         </template>
+
+        <template v-if="$slots.append" #append>
+            <slot name="append" />
+        </template>
     </cd-input>
 </template>

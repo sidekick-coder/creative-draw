@@ -14,7 +14,29 @@ const newWorkspace = ref({
     name: '',
     description: '',
     type: 'index-db' as 'index-db' | 'filesystem',
+    directoryHandle: null as any,
 })
+
+// Folder picker for filesystem type
+async function pickFolder() {
+    try {
+        // Check if File System Access API is supported
+        if ('showDirectoryPicker' in window) {
+            const dirHandle = await (window as any).showDirectoryPicker({
+                mode: 'readwrite',
+            })
+            newWorkspace.value.directoryHandle = dirHandle
+        } else {
+            // Fallback: show a message for unsupported browsers
+            alert(
+                'File System Access API is not supported in this browser. Please use a modern browser like Chrome, Edge, or Safari.'
+            )
+        }
+    } catch (_error) {
+        // User cancelled the picker
+        console.log('Folder selection cancelled')
+    }
+}
 
 // Load workspaces
 async function loadWorkspaces() {
@@ -43,6 +65,11 @@ async function createWorkspace() {
             name: newWorkspace.value.name.trim(),
             description: newWorkspace.value.description.trim(),
             type: newWorkspace.value.type,
+            config: {
+                ...(newWorkspace.value.type === 'filesystem' && {
+                    handle: newWorkspace.value.directoryHandle,
+                }),
+            },
         })
     )
 
@@ -55,6 +82,7 @@ async function createWorkspace() {
         name: '',
         description: '',
         type: 'index-db',
+        directoryHandle: null,
     }
 
     showCreateDialog.value = false
@@ -139,6 +167,15 @@ onMounted(() => {
                         <p class="text-body-300 text-sm mb-4">
                             {{ workspace.description || $t('No description available') }}
                         </p>
+
+                        <!-- Show folder name for filesystem workspaces -->
+                        <div
+                            v-if="workspace.type === 'filesystem' && workspace.config?.handle"
+                            class="text-xs text-body-400 flex items-center mt-2"
+                        >
+                            <CdIcon name="folder" class="w-3 h-3 mr-1" />
+                            {{ workspace.config.handle.name }}
+                        </div>
                     </CdCardContent>
 
                     <cd-card-footer class="mt-auto">
@@ -185,6 +222,29 @@ onMounted(() => {
                             value-key="value"
                         />
 
+                        <!-- Folder Picker (only for filesystem type) -->
+                        <cd-text-field
+                            v-if="newWorkspace.type === 'filesystem'"
+                            :label="$t('Folder')"
+                            :model-value="
+                                newWorkspace.directoryHandle
+                                    ? newWorkspace.directoryHandle.name
+                                    : ''
+                            "
+                            readonly
+                            :placeholder="$t('Select a folder to store workspace files')"
+                            class="cursor-pointer"
+                            @click="pickFolder"
+                        >
+                            <template #append>
+                                <cd-icon name="folder" class="w-4 h-4 text-body-400" />
+                            </template>
+                        </cd-text-field>
+
+                        <p class="text-xs text-body-400">
+                            {{ $t('Choose the folder where workspace files will be stored') }}
+                        </p>
+
                         <CdTextarea
                             v-model="newWorkspace.description"
                             label="Description (Optional)"
@@ -200,7 +260,11 @@ onMounted(() => {
                         <CdBtn
                             color="primary"
                             class="flex-1"
-                            :disabled="!newWorkspace.name.trim()"
+                            :disabled="
+                                !newWorkspace.name.trim() ||
+                                (newWorkspace.type === 'filesystem' &&
+                                    !newWorkspace.directoryHandle)
+                            "
                             @click="createWorkspace"
                         >
                             Create

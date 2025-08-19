@@ -36,7 +36,7 @@ export default class WorkspaceRepository {
         workspace.createdAt = new Date()
         workspace.updatedAt = new Date()
 
-        await db.workspaces.put(JSON.parse(JSON.stringify(workspace)))
+        await db.workspaces.put(workspace)
 
         return workspace
     }
@@ -53,7 +53,7 @@ export default class WorkspaceRepository {
         workspace.config = data.config || workspace.config
         workspace.updatedAt = new Date()
 
-        await db.workspaces.put(JSON.parse(JSON.stringify(workspace)))
+        await db.workspaces.put(workspace)
 
         return workspace
     }
@@ -65,8 +65,6 @@ export default class WorkspaceRepository {
             throw new Error(`Workspace with id ${id} not found`)
         }
 
-        workspace.deletedAt = new Date()
-
-        await db.workspaces.put(JSON.parse(JSON.stringify(workspace)))
+        await db.workspaces.delete(id)
     }
 }

@@ -6,7 +6,6 @@ export default class Workspace {
     public config: Record<string, any> = {}
     public createdAt: Date = new Date()
     public updatedAt: Date = new Date()
-    public deletedAt: Date | null = null
 
     constructor(data?: Partial<Workspace>) {
         Object.assign(this, data)
