@@ -53,10 +53,11 @@ export default class IndexDbProjectRepository implements ProjectRepository {
 
     public async destroy(id: string): Promise<void> {
         const project = await this.table.get(id)
+
         if (!project) {
             throw new Error(`Project with id ${id} not found`)
         }
-        project.deletedAt = new Date()
-        await this.table.put(JSON.parse(JSON.stringify(project)))
+
+        await this.table.delete(id)
     }
 }

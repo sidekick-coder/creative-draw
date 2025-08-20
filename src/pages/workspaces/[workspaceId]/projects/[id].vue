@@ -51,16 +51,25 @@ watch(projectId, setProject, { immediate: true })
 const layers = ref<Layer[]>([])
 const activeLayerId = ref<string>()
 
-function loadLayers() {
+async function loadLayers() {
     if (!project.value) return
 
     const projectLayers = [] as Layer[]
 
-    project.value.layers?.forEach((layerData: any) => {
+    const response = await workspace.layers.list({
+        projectId: project.value.id,
+    })
+
+    for (const layerData of response) {
         const layer = createLayer(layerData)
 
+        // set the active layer if not set
+        if (!activeLayerId.value) {
+            activeLayerId.value = layer.id
+        }
+
         projectLayers.push(layer)
-    })
+    }
 
     if (!projectLayers.length) {
         projectLayers.push(
@@ -178,13 +187,22 @@ async function save() {
 
     saving.value = true
 
-    const projectLayers = layers.value.map((layer) => layer.serialize())
+    for (const layer of layers.value) {
+        const payload = layer.serialize()
 
-    console.debug('[save]', projectLayers)
+        if (!(await workspace.layers.find(layer.id))) {
+            await workspace.layers.create({
+                ...payload,
+                project_id: project.value.id,
+            })
+            continue
+        }
 
-    await workspace.projects.update(project.value.id, {
-        layers: projectLayers,
-    })
+        await workspace.layers.update(layer.id, {
+            ...payload,
+            project_id: project.value.id,
+        })
+    }
 
     setTimeout(() => {
         saving.value = false
