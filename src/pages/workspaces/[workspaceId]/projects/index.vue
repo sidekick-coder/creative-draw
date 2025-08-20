@@ -103,7 +103,7 @@ async function create(width: number, height: number) {
 </script>
 
 <template>
-    <app-layout>
+    <workspace-layout>
         <div class="w-full flex h-full flex-col lg:flex-row">
             <div class="flex-1 overflow-y-auto">
                 <div class="flex w-full flex-col md:flex-row px-5 py-4 items-center">
@@ -276,5 +276,5 @@ async function create(width: number, height: number) {
                 </div>
             </div>
         </div>
-    </app-layout>
+    </workspace-layout>
 </template>

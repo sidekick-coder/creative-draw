@@ -1,32 +1,18 @@
+<script lang="ts">
+export interface Link {
+    label: string
+    to: string
+    icon: string
+    group: string
+}
+</script>
 <script setup lang="ts">
 import { groupBy } from 'lodash-es'
 
-const links = ref([
-    {
-        label: __('Projects'),
-        to: '/projects',
-        icon: 'mdi:folder',
-        group: __('General'),
-    },
-    // {
-    //     label: __('Files'),
-    //     to: '/files',
-    //     icon: 'mdi:file',
-    //     group: __('General'),
-    // },
-    // {
-    //     label: __('Threads'),
-    //     to: '/threads',
-    //     icon: 'mdi:message-text',
-    //     group: __('AI'),
-    // },
-    // {
-    //     label: __('Adapters'),
-    //     icon: 'mdi:plugin',
-    //     group: __('AI'),
-    //     to: '/adapters',
-    // },
-])
+const links = defineModel('links', {
+    type: Array as PropType<Link[]>,
+    default: () => [],
+})
 
 const groups = computed(() => groupBy(links.value, 'group'))
 </script>
@@ -47,7 +33,7 @@ const groups = computed(() => groupBy(links.value, 'group'))
                         <cd-list-item
                             :to="link.to"
                             class="py-3 flex items-center gap-x-3 hover:bg-body-700 rounded-md"
-                            active-class="bg-body-800 text-body-50"
+                            exact-active-class="bg-body-800 text-body-50"
                         >
                             <cd-icon :name="link.icon" />
                             <span>{{ link.label }}</span>
