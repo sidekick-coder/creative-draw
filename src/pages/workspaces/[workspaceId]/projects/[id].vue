@@ -188,7 +188,15 @@ async function save() {
     saving.value = true
 
     for (const layer of layers.value) {
-        const payload = layer.serialize()
+        const payload = {
+            id: layer.id,
+            name: layer.name,
+            visible: layer.visible,
+            order: layer.order,
+            opacity: layer.opacity,
+            background_color: layer.backgroundColor,
+            data: layer.get('data') || [],
+        }
 
         if (!(await workspace.layers.find(layer.id))) {
             await workspace.layers.create({
@@ -229,6 +237,48 @@ watch(
     },
     { immediate: true }
 )
+
+// export
+const exporting = ref(false)
+
+async function exportTo(format: 'PNG' | 'JPEG') {
+    exporting.value = true
+
+    const canvas = new OffscreenCanvas(canvasWidth.value, canvasHeight.value)
+    const context = canvas.getContext('2d')
+
+    if (!context) {
+        exporting.value = false
+        return
+    }
+
+    for (const layer of layers.value.toReversed()) {
+        const layerCanvas = layer.get('canvas')
+        const color = layer.backgroundColor
+
+        if (color) {
+            context.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
+            context.fillRect(0, 0, canvasWidth.value, canvasHeight.value)
+        }
+
+        context.drawImage(layerCanvas, 0, 0, canvasWidth.value, canvasHeight.value)
+    }
+
+    const mime = format === 'JPEG' ? 'image/jpeg' : 'image/png'
+    const options = mime === 'image/jpeg' ? { quality: 0.92, type: mime } : { type: mime }
+    const ext = format === 'JPEG' ? 'jpg' : 'png'
+
+    const data = await canvas.convertToBlob(options)
+
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(data)
+    link.download = `project-${project.value?.id}.${ext}`
+    link.click()
+
+    setTimeout(() => {
+        exporting.value = false
+    }, 1000)
+}
 </script>
 <template>
     <div
@@ -241,6 +291,13 @@ watch(
             `,
         }"
     >
+        <div
+            v-if="exporting"
+            class="fixed inset-0 bg-body-900/50 flex items-center justify-center z-50"
+        >
+            <cd-spinner class="size-16" />
+        </div>
+
         <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
             <cd-btn
                 color="body-900"
@@ -250,6 +307,23 @@ watch(
             >
                 <cd-icon name="home" />
             </cd-btn>
+            <cd-menu placement="bottom-start">
+                <template #activator="{ attrs }">
+                    <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                        <cd-icon name="heroicons:cog-8-tooth" />
+                    </cd-btn>
+                </template>
+                <div class="py-2 px-4">
+                    <cd-card class="border-2 border-body-600 min-w-64">
+                        <cd-list-item @click="exportTo('PNG')">
+                            {{ $t('Export {0}', ['PNG']) }}
+                        </cd-list-item>
+                        <cd-list-item @click="exportTo('JPEG')">
+                            {{ $t('Export {0}', ['JPEG']) }}
+                        </cd-list-item>
+                    </cd-card>
+                </div>
+            </cd-menu>
             <cd-btn
                 color="body-900"
                 size="sq-md"

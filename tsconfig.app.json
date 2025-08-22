@@ -1,13 +1,29 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["src/vite-env.d.ts", "src/**/**/*.ts", "src/**/**/*.vue", ".output/*"],
+  "include": [
+    "src/vite-env.d.ts",
+    "src/**/**/*.ts",
+    "src/**/**/*.vue",
+    ".output/*"
+  ],
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "types": ["vue-macros/macros-global", "@types/wicg-file-system-access"],
+    "types": [
+      "vue-macros/macros-global",
+      "@types/wicg-file-system-access"
+    ],
     "moduleResolution": "Bundler",
     "strictPropertyInitialization": false,
+    "lib": [
+      "es2023",
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   }
 }

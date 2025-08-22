@@ -33,7 +33,7 @@ export const translator: Translator = {
  * and replaces placeholders in the message with the provided arguments.
  * If the key is not found, it returns the key itself.
  */
-export const $t = (key: string, ...args: string[]): string => {
+export const $t = (key: string, ...args: any[]): string => {
     const messages = get(translator.messages, translator.locale, {})
     const message = get(messages, key, key)
 
