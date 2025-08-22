@@ -29,6 +29,10 @@ export default defineConfig({
                     from: 'tailwind-merge',
                     imports: ['twMerge'],
                 },
+                {
+                    from: '@unhead/vue',
+                    imports: ['useHead', 'useSeoMeta', 'useLink', 'useMeta', 'useScript'],
+                },
             ],
         }),
         macros({

@@ -104,8 +104,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen flex items-center justify-center p-6">
-        <cd-card class="w-full max-w-6xl border-none" color="none">
+    <div class="flex items-center justify-center">
+        <cd-card
+            class="border-none h-[calc(100dvh-72px)] w-full overflow-auto p-6 flex flex-col items-center justify-center"
+            color="none"
+        >
             <!-- Header -->
             <cd-card-head class="text-center flex-col">
                 <div class="flex-1">
@@ -132,9 +135,13 @@ onMounted(() => {
             <!-- Workspaces Grid -->
             <cd-card-content
                 v-else
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px]"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px] w-full max-w-6xl"
             >
-                <CdCard v-for="workspace in workspaces" :key="workspace.id" class="flex flex-col">
+                <CdCard
+                    v-for="workspace in workspaces"
+                    :key="workspace.id"
+                    class="flex flex-col h-[200px]"
+                >
                     <cd-card-head>
                         <div class="flex-1 min-w-0">
                             <h3 class="text-lg font-semibold truncate mb-1">
@@ -178,14 +185,14 @@ onMounted(() => {
                         </div>
                     </CdCardContent>
 
-                    <cd-card-footer class="mt-auto">
+                    <cd-card-footer class="mt-auto pb-5">
                         <CdBtn class="w-full" :to="`/workspaces/${workspace.id}`">
                             {{ $t('Open Workspace') }}
                         </CdBtn>
                     </cd-card-footer>
                 </CdCard>
                 <CdCard
-                    class="flex items-center justify-center cursor-pointer"
+                    class="flex items-center justify-center cursor-pointer h-[200px]"
                     @click="showCreateDialog = true"
                 >
                     <div class="flex flex-col gap-2 items-center">
@@ -199,7 +206,7 @@ onMounted(() => {
 
             <!-- Create Workspace Dialog -->
             <CdDialog v-model="showCreateDialog">
-                <CdCard class="w-md">
+                <CdCard class="md:w-md w-full">
                     <cd-card-head>
                         <cd-card-title>{{ $t('Create') }}</cd-card-title>
                     </cd-card-head>
@@ -273,6 +280,14 @@ onMounted(() => {
                 </CdCard>
             </CdDialog>
         </cd-card>
+        <div class="flex items-center py-4 text-xs fixed left-0 bottom-0 justify-center w-full">
+            <cd-list-item to="/legal/privacy-policy" class="flex items-center mt-auto">
+                <span class="font-bold text-body-300">Privacy Policy</span>
+            </cd-list-item>
+            <cd-list-item to="/lp" class="flex items-center py-2 text-xs">
+                <span class="font-bold text-body-300">Landing page</span>
+            </cd-list-item>
+        </div>
     </div>
 </template>
 
