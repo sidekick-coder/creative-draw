@@ -43,8 +43,6 @@ async function setProjects() {
 
     projects.value = await workspace.projects.list()
 
-    console.log(projects.value)
-
     setTimeout(() => {
         loading.value = false
     }, 500)

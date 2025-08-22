@@ -40,8 +40,6 @@ async function setProject() {
         return router.push(`/workspaces/${route.params.workspaceId}/projects`)
     }
 
-    console.log(response)
-
     project.value = response
 }
 
@@ -188,15 +186,7 @@ async function save() {
     saving.value = true
 
     for (const layer of layers.value) {
-        const payload = {
-            id: layer.id,
-            name: layer.name,
-            visible: layer.visible,
-            order: layer.order,
-            opacity: layer.opacity,
-            background_color: layer.backgroundColor,
-            data: layer.get('data') || [],
-        }
+        const payload = layer.serialize()
 
         if (!(await workspace.layers.find(layer.id))) {
             await workspace.layers.create({
