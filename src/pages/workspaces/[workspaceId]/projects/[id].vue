@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import pen from '@/brushes/pen'
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
+import { useLocalStorage } from '@vueuse/core'
 
 // general
 const route = useRoute('/workspaces/[workspaceId]/projects/[id]')
@@ -208,7 +210,16 @@ async function save() {
 }
 
 // brush
-const brush = createBrush()
+const brushSelected = useLocalStorage('cd-brush-selected', 'pen')
+const brushes = useBrushes()
+
+const definition = computed(() => {
+    return brushes.find((b) => b.id === brushSelected.value) || pen
+})
+
+const brush = createBrush({
+    definition,
+})
 
 const minBrushSize = computed(() => {
     return project.value?.width * 0.001
@@ -360,6 +371,16 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             >
                 <cd-icon name="mdi:eraser" />
             </cd-btn>
+            <cd-menu :close-on-content-click="false">
+                <template #activator="{ attrs }">
+                    <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                        <cd-icon name="heroicons:paint-brush-solid" />
+                    </cd-btn>
+                </template>
+                <div class="py-2 px-4">
+                    <cd-brush-list v-model="brushSelected" />
+                </div>
+            </cd-menu>
             <cd-btn
                 size="sq-md"
                 color="body-900"

@@ -1,6 +1,5 @@
 export default defineBrush({
-    id: 'pen',
-    name: 'Pen',
+    id: 'pen2',
     draw(options) {
         const paths: BrushPath[] = []
         const startX = options.lastX || options.x
@@ -39,7 +38,7 @@ export default defineBrush({
             let opacity = options.opacity || 1
             opacity = opacity * p1.pressure
 
-            const color = options.color || { r: 0, g: 0, b: 0 }
+            const color = { r: 295, g: 95, b: 255, a: 1 }
 
             const x = p1.x
             const y = p1.y

@@ -3,12 +3,14 @@ import type { Board } from './createBoard'
 import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
 import type { ColorRGB } from '@/utils/colors'
+import type { BrushDefinition } from './defineBrush'
 
 export interface CreateBrushOptions {
     size?: MaybeRef<number>
     opacity?: MaybeRef<number>
     color?: MaybeRef<ColorRGB>
     erase?: MaybeRef<boolean>
+    definition?: MaybeRef<BrushDefinition>
 }
 
 export function createBrush(options?: CreateBrushOptions) {
@@ -16,6 +18,7 @@ export function createBrush(options?: CreateBrushOptions) {
     const opacity = toRef(options?.opacity ?? 1)
     const color = toRef(options?.color ?? { r: 0, g: 0, b: 0 })
     const erase = toRef(options?.erase ?? false)
+    const definition = toRef(options?.definition ?? pen)
 
     let drawing = false
     let device = 'mouse' // Default to mouse, can be changed based on input type
@@ -29,7 +32,7 @@ export function createBrush(options?: CreateBrushOptions) {
         lastX = x
         lastY = y
         paths = []
-        const drawPath = pen.draw({
+        const drawPath = definition.value.draw({
             x: x + 1,
             y: y + 1,
             lastX,
@@ -65,7 +68,7 @@ export function createBrush(options?: CreateBrushOptions) {
             color: color.value,
         }
 
-        pen.draw(payload).forEach((path) => {
+        definition.value.draw(payload).forEach((path) => {
             paths.push({
                 ...path,
                 erase: erase.value,

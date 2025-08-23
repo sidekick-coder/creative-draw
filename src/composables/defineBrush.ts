@@ -35,7 +35,8 @@ export interface BrushPath {
 }
 
 export interface BrushDefinition {
-    name: string
+    id: string
+    name?: string
     draw: (options: BrushDrawOptions) => BrushPath[]
 }
 

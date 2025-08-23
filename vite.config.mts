@@ -31,7 +31,7 @@ export default defineConfig({
                 },
                 {
                     from: '@unhead/vue',
-                    imports: ['useHead', 'useSeoMeta', 'useLink', 'useMeta', 'useScript'],
+                    imports: ['useHead'],
                 },
             ],
         }),

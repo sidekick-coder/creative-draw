@@ -1,6 +1,5 @@
 export default defineBrush({
-    id: 'pen',
-    name: 'Pen',
+    id: 'pen3',
     draw(options) {
         const paths: BrushPath[] = []
         const startX = options.lastX || options.x
