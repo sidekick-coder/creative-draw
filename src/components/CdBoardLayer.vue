@@ -193,7 +193,6 @@ function drawPaths(paths: BrushPath[]) {
 
         if (p.erase) {
             ctx.globalCompositeOperation = 'destination-out'
-            // ctx.globalAlpha = opacity
             ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
             ctx.beginPath()
             ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
@@ -204,7 +203,6 @@ function drawPaths(paths: BrushPath[]) {
         }
 
         ctx.globalCompositeOperation = 'source-over'
-        // ctx.globalAlpha = opacity
         ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
