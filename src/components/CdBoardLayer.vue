@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { LayerObject } from '@/composables/createLayer'
+import type { BrushPath } from '@/composables/defineBrush'
 import type { ColorRGB } from '@/utils/colors'
 
 // general
@@ -172,15 +173,15 @@ board.addLayer(layer)
 // paths
 const map = new Set<string>()
 
-function createPathKey(x: number, y: number, pressure: number, size: number, color: ColorRGB) {
-    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
+function createPathKey(p: BrushPath) {
+    return `${p.x}-${p.y}-${p.opacity.toFixed(2)}-${p.size.toFixed(2)}-${p.color.r}-${p.color.g}-${p.color.b}`
 }
 
 function drawPaths(paths: BrushPath[]) {
     const ctx = getContext()
 
     paths.forEach((p) => {
-        const key = createPathKey(p.x, p.y, p.pressure, p.size, p.color)
+        const key = createPathKey(p)
 
         if (map.has(key)) {
             return
@@ -192,7 +193,7 @@ function drawPaths(paths: BrushPath[]) {
 
         if (p.erase) {
             ctx.globalCompositeOperation = 'destination-out'
-            ctx.globalAlpha = opacity
+            // ctx.globalAlpha = opacity
             ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
             ctx.beginPath()
             ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
@@ -203,7 +204,7 @@ function drawPaths(paths: BrushPath[]) {
         }
 
         ctx.globalCompositeOperation = 'source-over'
-        ctx.globalAlpha = opacity
+        // ctx.globalAlpha = opacity
         ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
@@ -212,15 +213,17 @@ function drawPaths(paths: BrushPath[]) {
     })
 }
 
+function begin() {
+    map.clear()
+}
+
+function end() {
+    map.clear()
+}
+
 layer.value.emitter.on('paths:draw', drawPaths)
-
-layer.value.emitter.on('paths:begin', () => {
-    map.clear()
-})
-
-layer.value.emitter.on('paths:end', () => {
-    map.clear()
-})
+layer.value.emitter.on('paths:begin', begin)
+layer.value.emitter.on('paths:end', end)
 
 function clear() {
     const ctx = getContext()
@@ -232,9 +235,13 @@ function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
 
     items.forEach((item) => {
+        begin()
+
         if (item.type === 'stroke') {
             drawPaths(item.paths)
         }
+
+        end()
     })
 }
 
