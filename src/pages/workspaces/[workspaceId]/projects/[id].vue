@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import pen from '@/brushes/pen'
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
 import { useLocalStorage } from '@vueuse/core'
@@ -214,11 +213,12 @@ const brushSelected = useLocalStorage('cd-brush-selected', 'pen')
 const brushes = useBrushes()
 
 const definition = computed(() => {
-    return brushes.find((b) => b.id === brushSelected.value) || pen
+    return brushes.find((b) => b.id === brushSelected.value)
 })
 
 const brush = createBrush({
     definition,
+    opacity: useLocalStorage('cd-brush-opacity', 1),
 })
 
 const minBrushSize = computed(() => {
@@ -234,7 +234,6 @@ watch(
     (value) => {
         if (!value) return
         brush.size = value.width * 0.01
-        brush.opacity = 1
     },
     { immediate: true }
 )

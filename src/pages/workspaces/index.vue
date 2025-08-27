@@ -123,7 +123,10 @@ onMounted(() => {
             </div>
 
             <!-- Empty State -->
-            <cd-card v-if="!workspaces.length" class="flex flex-col items-center text-center py-12">
+            <cd-card
+                v-if="!workspaces.length"
+                class="flex flex-col items-center text-center py-12 px-4"
+            >
                 <CdIcon name="folder" class="w-16 h-16 text-body-400 mx-auto mb-4" />
                 <h3 class="text-xl font-semibold text-white mb-2">No workspaces yet</h3>
                 <p class="text-body-300 mb-6">Create your first workspace to get started</p>

@@ -1,4 +1,3 @@
-import pen from '@/brushes/pen'
 import type { Board } from './createBoard'
 import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
@@ -10,7 +9,7 @@ export interface CreateBrushOptions {
     opacity?: MaybeRef<number>
     color?: MaybeRef<ColorRGB>
     erase?: MaybeRef<boolean>
-    definition?: MaybeRef<BrushDefinition>
+    definition?: MaybeRef<BrushDefinition | undefined>
 }
 
 export function createBrush(options?: CreateBrushOptions) {
@@ -18,7 +17,7 @@ export function createBrush(options?: CreateBrushOptions) {
     const opacity = toRef(options?.opacity ?? 1)
     const color = toRef(options?.color ?? { r: 0, g: 0, b: 0 })
     const erase = toRef(options?.erase ?? false)
-    const definition = toRef(options?.definition ?? pen)
+    const definition = toRef(options?.definition)
 
     let drawing = false
     let device = 'mouse' // Default to mouse, can be changed based on input type
@@ -32,17 +31,18 @@ export function createBrush(options?: CreateBrushOptions) {
         lastX = x
         lastY = y
         paths = []
-        const drawPath = definition.value.draw({
-            x: x + 1,
-            y: y + 1,
-            lastX,
-            lastY,
-            lastPressure,
-            pressure: 0.5,
-            size: size.value,
-            opacity: opacity.value,
-            color: color.value,
-        })
+        const drawPath =
+            definition.value?.draw({
+                x: x + 1,
+                y: y + 1,
+                lastX,
+                lastY,
+                lastPressure,
+                pressure: 0.5,
+                size: size.value,
+                opacity: opacity.value,
+                color: color.value,
+            }) ?? []
 
         drawPath.forEach((path) => {
             path.erase = erase.value
@@ -68,7 +68,9 @@ export function createBrush(options?: CreateBrushOptions) {
             color: color.value,
         }
 
-        definition.value.draw(payload).forEach((path) => {
+        const newPaths = definition.value?.draw(payload) ?? []
+
+        newPaths.forEach((path) => {
             paths.push({
                 ...path,
                 erase: erase.value,

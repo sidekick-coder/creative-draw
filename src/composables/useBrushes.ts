@@ -1,7 +1,7 @@
 import type { BrushDefinition } from './defineBrush'
 
 interface BrushModule {
-    default: BrushDefinition
+    default: BrushDefinition | BrushDefinition[]
 }
 
 export function useBrushes() {
@@ -11,8 +11,12 @@ export function useBrushes() {
     for (const path in modules) {
         const mod = modules[path] as BrushModule
 
-        if (mod && mod.default) {
+        if (!Array.isArray(mod.default)) {
             brushes.push(mod.default)
+        }
+
+        if (Array.isArray(mod.default)) {
+            brushes.push(...mod.default)
         }
     }
 
