@@ -49,12 +49,16 @@ export function createBrush(options?: CreateBrushOptions) {
             paths.push(path)
         })
 
-        layer.emitter.emit('paths:begin')
+        layer.emitter.emit('paths:begin', {
+            opacity: opacity.value,
+        })
         layer.emitter.emit('paths:draw', paths)
     }
 
     function move(layer: Layer, x: number, y: number, pressure = 0.5) {
         if (!drawing) return
+
+        console.log('p', device, pressure)
 
         const payload = {
             lastX,
@@ -90,11 +94,13 @@ export function createBrush(options?: CreateBrushOptions) {
             id: createId(),
             type: 'stroke',
             paths,
+            opacity: opacity.value,
         })
 
         paths = []
 
         layer.emitter.emit('paths:end')
+        layer.emitter.emit('redraw')
     }
 
     return defineBoardPlugin(
@@ -157,7 +163,7 @@ export function createBrush(options?: CreateBrushOptions) {
                         if (device !== 'touch') return
                         if (e.event.touches.length !== 1) return
 
-                        move(layer, e.x, e.y)
+                        move(layer, e.x, e.y, e.pressure)
                     })
 
                     layer.emitter.on('touchend', (_e: LayerTouchEvent) => {

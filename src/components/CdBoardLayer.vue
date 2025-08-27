@@ -4,14 +4,16 @@ import type { BrushPath } from '@/composables/defineBrush'
 import type { ColorRGB } from '@/utils/colors'
 
 // general
-const root = ref<HTMLCanvasElement | null>(null)
+const rootRef = ref<HTMLElement>()
+const canvasRef = ref<HTMLCanvasElement>()
+const previewRef = ref<HTMLCanvasElement>()
 const layer = defineModel('layer', {
     type: Object as () => Layer,
     required: true,
 })
 
 function getCanvas() {
-    const canvas = root.value
+    const canvas = canvasRef.value
 
     if (!canvas) {
         throw new Error('Failed to get canvas')
@@ -49,10 +51,10 @@ const y = defineProp<number>('y', {
 })
 
 function setPosition() {
-    const canvas = getCanvas()
+    if (!rootRef.value) return
 
-    canvas.style.left = `${x.value}px`
-    canvas.style.top = `${y.value}px`
+    rootRef.value.style.left = `${x.value}px`
+    rootRef.value.style.top = `${y.value}px`
 }
 
 watch([x, y], setPosition)
@@ -60,16 +62,16 @@ onMounted(setPosition)
 
 // bg
 function setColor() {
-    if (!root.value) return
+    if (!canvasRef.value) return
 
     if (!layer.value.backgroundColor) {
-        root.value.style.backgroundColor = 'transparent'
+        canvasRef.value.style.backgroundColor = 'transparent'
         return
     }
 
     const color = layer.value.backgroundColor
 
-    root.value.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`
+    canvasRef.value.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`
 }
 
 watch(() => layer.value.backgroundColor, setColor)
@@ -88,10 +90,10 @@ const height = defineProp<number>('height', {
 })
 
 function setSize() {
-    if (!root.value) return
+    if (!rootRef.value) return
 
-    root.value.width = width.value
-    root.value.height = height.value
+    rootRef.value.style.width = `${width.value}px`
+    rootRef.value.style.height = `${height.value}px`
 }
 
 watch([width, height], setSize)
@@ -115,7 +117,7 @@ function onTouchEvent(e: TouchEvent) {
     const ctx = getContext()
     const canvas = getCanvas()
 
-    const rect = root.value!.getBoundingClientRect()
+    const rect = canvas.getBoundingClientRect()
 
     const touch = e.touches[0]
 
@@ -178,7 +180,9 @@ function createPathKey(p: BrushPath) {
 }
 
 function drawPaths(paths: BrushPath[]) {
-    const ctx = getContext()
+    const ctx = previewRef.value?.getContext('2d')
+
+    if (!ctx) return
 
     paths.forEach((p) => {
         const key = createPathKey(p)
@@ -188,8 +192,6 @@ function drawPaths(paths: BrushPath[]) {
         }
 
         map.add(key)
-
-        const opacity = Math.max(p.opacity || 1, 0.05)
 
         if (p.erase) {
             ctx.globalCompositeOperation = 'destination-out'
@@ -203,7 +205,7 @@ function drawPaths(paths: BrushPath[]) {
         }
 
         ctx.globalCompositeOperation = 'source-over'
-        ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity})`
+        ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
         ctx.fill()
@@ -211,12 +213,24 @@ function drawPaths(paths: BrushPath[]) {
     })
 }
 
-function begin() {
+function begin(options?: any) {
+    const opacity = options?.opacity || 1
+
+    if (!previewRef.value) return
+
+    previewRef.value.style.opacity = String(opacity)
+
     map.clear()
 }
 
 function end() {
+    if (!previewRef.value) return
+
+    const ctx = previewRef.value.getContext('2d')
+
     map.clear()
+
+    ctx?.clearRect(0, 0, previewRef.value.width, previewRef.value.height)
 }
 
 layer.value.emitter.on('paths:draw', drawPaths)
@@ -231,15 +245,26 @@ function clear() {
 
 function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
+    const ctx = getContext()
+    const offscreen = new OffscreenCanvas(width.value, height.value)
+    const offCtx = offscreen.getContext('2d')!
 
     items.forEach((item) => {
-        begin()
+        offCtx.clearRect(0, 0, offscreen.width, offscreen.height)
 
-        if (item.type === 'stroke') {
-            drawPaths(item.paths)
-        }
+        item.paths.forEach((p: BrushPath) => {
+            offCtx.globalCompositeOperation = 'source-over'
+            offCtx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
+            offCtx.beginPath()
+            offCtx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
+            offCtx.fill()
+            offCtx.closePath()
+        })
 
-        end()
+        const opacity = item.opacity || 1
+        ctx.globalAlpha = opacity
+        ctx.drawImage(offscreen, 0, 0)
+        ctx.globalAlpha = 1
     })
 }
 
@@ -257,11 +282,19 @@ layer.value.emitter.on('draw', draw)
 onMounted(draw)
 </script>
 <template>
-    <canvas
-        ref="root"
+    <div
+        ref="rootRef"
         class="absolute"
         :class="{
             'opacity-0': !layer.visible,
         }"
-    />
+    >
+        <canvas
+            ref="previewRef"
+            :width
+            :height
+            class="size-full absolute inset-0 pointer-events-none"
+        />
+        <canvas ref="canvasRef" :width :height class="size-full" />
+    </div>
 </template>

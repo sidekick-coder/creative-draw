@@ -11,7 +11,7 @@ export default defineBrush({
         const endY = options.y
         const endPressure = options.pressure
 
-        const gap = 0.01
+        const gap = 0.1
 
         const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
         const steps = Math.floor(distance / gap)
@@ -33,12 +33,14 @@ export default defineBrush({
         for (let i = 0; i < points.length - 1; i++) {
             const p1 = points[i]
 
-            const size = options.size
+            let size = options.size
             const opacity = options.opacity
             const color = options.color || { r: 0, g: 0, b: 0 }
 
             const x = p1.x
             const y = p1.y
+
+            size = size * p1.pressure
 
             paths.push({
                 x: x,
