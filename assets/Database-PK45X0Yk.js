@@ -1,0 +1,1 @@
+import{D as e}from"./import-wrapper-prod-CRLXEcZY.js";const i=new e("default");i.version(1).stores({adapters:"id",files:"id,filename",file_metas:"fileId,name",threads:"id",thread_items:"id"});export{i as d};

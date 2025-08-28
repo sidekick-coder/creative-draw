@@ -1,0 +1,1 @@
+.cd-range{-webkit-appearance:none;-moz-appearance:none;appearance:none;outline:none}.cd-range::-webkit-slider-thumb{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-color:currentColor;width:calc(var(--353dcae0) * .9);height:calc(var(--353dcae0) * .9);border-radius:0;cursor:pointer}.cd-range:hover::-webkit-slider-thumb{@apply bg-body-50;}
