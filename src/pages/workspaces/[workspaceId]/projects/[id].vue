@@ -230,15 +230,6 @@ const maxBrushSize = computed(() => {
     return project.value?.width * 0.05
 })
 
-watch(
-    project,
-    (value) => {
-        if (!value) return
-        brush.size = value.width * 0.01
-    },
-    { immediate: true }
-)
-
 // export
 const exporting = ref(false)
 
