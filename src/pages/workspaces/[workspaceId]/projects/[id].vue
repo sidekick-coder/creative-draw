@@ -213,11 +213,12 @@ const brushSelected = useLocalStorage('cd-brush-selected', 'pen')
 const brushes = useBrushes()
 
 const definition = computed(() => {
-    return brushes.find((b) => b.id === brushSelected.value)
+    return brushes.find((b) => b.id === brushSelected.value) || brushes[0]
 })
 
 const brush = createBrush({
     definition,
+    size: useLocalStorage('cd-brush-size', 1),
     opacity: useLocalStorage('cd-brush-opacity', 1),
 })
 
