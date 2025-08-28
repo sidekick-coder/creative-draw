@@ -58,8 +58,6 @@ export function createBrush(options?: CreateBrushOptions) {
     function move(layer: Layer, x: number, y: number, pressure = 0.5) {
         if (!drawing) return
 
-        console.log('p', device, pressure)
-
         const payload = {
             lastX,
             lastY,
@@ -90,17 +88,20 @@ export function createBrush(options?: CreateBrushOptions) {
     function end(layer: Layer) {
         drawing = false
 
-        layer.add({
+        const item = {
             id: createId(),
             type: 'stroke',
             paths,
             opacity: opacity.value,
-        })
+        }
+
+        layer.add(item)
 
         paths = []
 
+        layer.emitter.emit('stroke', item)
+
         layer.emitter.emit('paths:end')
-        layer.emitter.emit('redraw')
     }
 
     return defineBoardPlugin(
@@ -111,8 +112,6 @@ export function createBrush(options?: CreateBrushOptions) {
             color,
             install(board: Board) {
                 board.emitter.on('layer:add', (layer: Layer) => {
-                    console.log('[brush] installing on layer', layer.id)
-
                     layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
                         start(layer, e.x, e.y)
                     })

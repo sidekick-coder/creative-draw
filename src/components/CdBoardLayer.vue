@@ -176,7 +176,7 @@ board.addLayer(layer)
 const map = new Set<string>()
 
 function createPathKey(p: BrushPath) {
-    return `${p.x}-${p.y}-${p.opacity.toFixed(2)}-${p.size.toFixed(2)}-${p.color.r}-${p.color.g}-${p.color.b}`
+    return `${p.x}-${p.y}-${p.size.toFixed(2)}-${p.color.r}-${p.color.g}-${p.color.b}`
 }
 
 function drawPaths(paths: BrushPath[]) {
@@ -203,8 +203,8 @@ function drawPaths(paths: BrushPath[]) {
             ctx.globalCompositeOperation = 'source-over'
             return
         }
-
         ctx.globalCompositeOperation = 'source-over'
+
         ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
@@ -233,14 +233,37 @@ function end() {
     ctx?.clearRect(0, 0, previewRef.value.width, previewRef.value.height)
 }
 
+function stroke(item: LayerObject) {
+    const ctx = getContext()
+    const offscreen = new OffscreenCanvas(width.value, height.value)
+    const offCtx = offscreen.getContext('2d')!
+
+    offCtx.clearRect(0, 0, offscreen.width, offscreen.height)
+
+    item.paths.forEach((p: BrushPath) => {
+        offCtx.globalCompositeOperation = 'source-over'
+        offCtx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
+        offCtx.beginPath()
+        offCtx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
+        offCtx.fill()
+        offCtx.closePath()
+    })
+
+    const opacity = item.opacity || 1
+    ctx.globalAlpha = opacity
+    ctx.drawImage(offscreen, 0, 0)
+    ctx.globalAlpha = 1
+}
+
 layer.value.emitter.on('paths:draw', drawPaths)
 layer.value.emitter.on('paths:begin', begin)
 layer.value.emitter.on('paths:end', end)
+layer.value.emitter.on('stroke', stroke)
 
 function clear() {
     const ctx = getContext()
-    ctx.clearRect(0, 0, width.value, height.value)
     map.clear()
+    ctx.clearRect(0, 0, width.value, height.value)
 }
 
 function draw() {
@@ -250,21 +273,7 @@ function draw() {
     const offCtx = offscreen.getContext('2d')!
 
     items.forEach((item) => {
-        offCtx.clearRect(0, 0, offscreen.width, offscreen.height)
-
-        item.paths.forEach((p: BrushPath) => {
-            offCtx.globalCompositeOperation = 'source-over'
-            offCtx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
-            offCtx.beginPath()
-            offCtx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
-            offCtx.fill()
-            offCtx.closePath()
-        })
-
-        const opacity = item.opacity || 1
-        ctx.globalAlpha = opacity
-        ctx.drawImage(offscreen, 0, 0)
-        ctx.globalAlpha = 1
+        stroke(item)
     })
 }
 

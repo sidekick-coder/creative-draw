@@ -5,8 +5,8 @@ const brush = defineProp<BrushDefinition>('brush', {
 })
 
 const canvas = ref<HTMLCanvasElement>()
-const height = 10
-const width = 200
+const height = 40
+const width = 320
 
 function load() {
     if (!canvas.value) {
@@ -22,19 +22,16 @@ function load() {
         y: height / 2,
         lastX: 1,
         lastY: height / 2,
-        lastPressure: 0.5,
+        lastPressure: 1,
         pressure: 1,
-        size: 2,
+        size: 6,
         opacity: 1,
         color: { r: 255, g: 255, b: 255 },
     })
 
     paths.forEach((p) => {
-        const opacity = Math.max(p.opacity || 1, 0.05)
-
         ctx.globalCompositeOperation = 'source-over'
-        ctx.globalAlpha = opacity
-        ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${opacity})`
+        ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
         ctx.fill()
