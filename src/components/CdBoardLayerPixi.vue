@@ -210,18 +210,19 @@ function rgbToHex(color: ColorRGB): number {
     return (color.r << 16) | (color.g << 8) | color.b
 }
 
+let graphics = new Graphics()
+
 function drawPaths(paths: BrushPath[]) {
     const container = getLayerContainer()
 
     paths.forEach((p) => {
-        // const key = createPathKey(p)
+        const key = createPathKey(p)
 
-        // if (pathGraphicsMap.has(key)) {
-        //     return
-        // }
+        if (pathGraphicsMap.has(key)) {
+            return
+        }
 
-        const graphics = new Graphics()
-        // pathGraphicsMap.set(key, graphics)
+        pathGraphicsMap.set(key, graphics)
 
         const opacity = Math.max(p.opacity || 1, 0.05)
         const hexColor = rgbToHex(p.color)
@@ -241,6 +242,7 @@ function drawPaths(paths: BrushPath[]) {
 }
 
 function begin() {
+    graphics = new Graphics()
     // Clear the path graphics map for new stroke
     pathGraphicsMap.clear()
 }
