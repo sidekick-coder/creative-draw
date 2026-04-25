@@ -5,12 +5,6 @@ const workspace = useWorkspace()
 
 const links = ref([
     {
-        label: __('Workspaces'),
-        to: '/workspaces',
-        icon: 'mdi:briefcase',
-        group: __('General'),
-    },
-    {
         label: __('Projects'),
         to: `/workspaces/${route.params.workspaceId}/projects`,
         icon: 'mdi:folder',
@@ -27,6 +21,7 @@ const links = ref([
 <template>
     <AppLayout
         :links
+        :home-url="`/workspaces/${route.params.workspaceId}/projects`"
         :title="workspace.name"
         :subtitle="workspace.typeLabel"
         :icon="workspace.icon"

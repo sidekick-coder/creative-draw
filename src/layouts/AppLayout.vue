@@ -16,6 +16,10 @@ const links = defineModel('links', {
 })
 
 defineProps({
+    homeUrl: {
+        type: String,
+        default: '/',
+    },
     icon: {
         type: String,
         default: null,
@@ -60,7 +64,7 @@ onMounted(() => {
         <aside v-show="sidebarVisible" class="w-72 bg-body-900">
             <nav class="px-4 flex flex-col h-dvh overflow-auto">
                 <slot name="header">
-                    <cd-list-item to="/workspaces" class="py-6 flex items-center">
+                    <cd-list-item :to="homeUrl" class="py-6 flex items-center">
                         <div
                             v-if="icon"
                             class="px-3 py-2 flex items-center justify-center rounded bg-primary-300 text-body-0 mr-1"
@@ -95,15 +99,6 @@ onMounted(() => {
                         </cd-list-item>
                     </template>
                 </template>
-
-                <div class="flex items-center mt-auto py-4 text-xs">
-                    <cd-list-item to="/legal/privacy-policy" class="flex items-center mt-auto">
-                        <span class="font-bold text-body-300">Privacy Policy</span>
-                    </cd-list-item>
-                    <cd-list-item to="/" class="flex items-center py-2 text-xs">
-                        <span class="font-bold text-body-300">Landing page</span>
-                    </cd-list-item>
-                </div>
             </nav>
         </aside>
         <main class="flex-1 h-dvh overflow-auto flex flex-col">
@@ -118,6 +113,52 @@ onMounted(() => {
                 </cd-btn>
 
                 <slot name="toolbar" />
+
+                <cd-menu
+                    placement="bottom-end"
+                    class="bg-body-600 rounded-lg shadow-lg min-w-44 py-1"
+                    :offset="4"
+                >
+                    <template #activator="{ attrs }">
+                        <cd-btn
+                            v-bind="attrs"
+                            size="sq-md"
+                            variant="text"
+                            color="none"
+                            rounded="full"
+                            class="ml-auto"
+                        >
+                            <cd-avatar>
+                                <cd-icon name="mdi:account" class="size-5 text-body-0" />
+                            </cd-avatar>
+                        </cd-btn>
+                    </template>
+
+                    <cd-list-item to="/workspaces" class="hover:bg-body-500 rounded-md mx-1">
+                        <cd-icon name="mdi:view-grid" class="size-4" />
+                        <span>{{ $t('Workspaces') }}</span>
+                    </cd-list-item>
+
+                    <cd-list-item to="/" class="hover:bg-body-500 rounded-md mx-1">
+                        <cd-icon name="mdi:home" class="size-4" />
+                        <span>{{ $t('Landing page') }}</span>
+                    </cd-list-item>
+
+                    <cd-list-item to="/legal/privacy-policy" class="hover:bg-body-500 rounded-md mx-1">
+                        <cd-icon name="mdi:shield-lock" class="size-4" />
+                        <span>{{ $t('Privacy policy') }}</span>
+                    </cd-list-item>
+
+                    <a
+                        href="https://github.com/sidekick-coder/creative-draw"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center gap-x-2 px-4 py-3 hover:bg-body-500 rounded-md mx-1 cursor-pointer"
+                    >
+                        <cd-icon name="mdi:github" class="size-4" />
+                        <span>{{ $t('GitHub') }}</span>
+                    </a>
+                </cd-menu>
             </header>
 
             <div class="flex-1 overflow-auto">
