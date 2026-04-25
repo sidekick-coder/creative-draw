@@ -2,6 +2,7 @@
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
 import { useLocalStorage } from '@vueuse/core'
+import { toggleEruda } from '@/plugins/eruda'
 
 // general
 const route = useRoute('/workspaces/[workspaceId]/projects/[id]')
@@ -350,6 +351,14 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 @click="board.emitter.emit('redraw')"
             >
                 <cd-icon name="heroicons:arrow-path" />
+            </cd-btn>
+            <cd-btn
+                color="body-900"
+                size="sq-md"
+                class="flex items-center justify-center"
+                @click="toggleEruda"
+            >
+                <cd-icon name="heroicons:code-solid" />
             </cd-btn>
         </div>
 
