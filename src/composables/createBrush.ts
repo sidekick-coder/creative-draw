@@ -20,7 +20,7 @@ export function createBrush(options?: CreateBrushOptions) {
     const definition = toRef(options?.definition)
 
     let drawing = false
-    let device = 'mouse' // Default to mouse, can be changed based on input type
+    let device = null as 'mouse' | 'pointer' | 'touch' | null
     let lastX = 0
     let lastY = 0
     let lastPressure = 0
@@ -102,6 +102,8 @@ export function createBrush(options?: CreateBrushOptions) {
         layer.emitter.emit('stroke', item)
 
         layer.emitter.emit('paths:end')
+
+        device = null
     }
 
     return defineBoardPlugin(
@@ -112,44 +114,87 @@ export function createBrush(options?: CreateBrushOptions) {
             color,
             install(board: Board) {
                 board.emitter.on('layer:add', (layer: Layer) => {
+                    console.log('[brush] installing on layer', layer.id)
+
+                    function endIfIsDevice(checkDevice: 'mouse' | 'pointer' | 'touch') {
+                        if (device === checkDevice) {
+                            end(layer)
+                        }
+                    }
+
+                    // testing lines
+                    // setTimeout(() => {
+                    //     console.log('testing brush')
+                    //     start(layer, 100, 100)
+                    //
+                    //     move(layer, 500, 500, 0.1)
+                    //
+                    //     move(layer, 800, 800, 0.8)
+                    //
+                    //     end(layer)
+                    // }, 1000)
+
                     layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
+                        if (device) return
+
+                        device = 'mouse'
+
                         start(layer, e.x, e.y)
                     })
 
                     layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
+                        if (device !== 'mouse') return
+
                         move(layer, e.x, e.y)
                     })
 
-                    layer.emitter.on('mouseup', () => end(layer))
-                    layer.emitter.on('mouseout', () => end(layer))
+                    layer.emitter.on('mouseup', () => endIfIsDevice('mouse'))
+                    layer.emitter.on('mouseout', () => endIfIsDevice('mouse'))
 
                     // pointer events / pen events
+                    let activePointerId: number | null = null
+
                     layer.emitter.on('pointerdown', (e: LayerPointEvent) => {
+                        if (device) return
+
                         if (e.event.pointerType !== 'pen') return
 
                         device = 'pointer'
+                        activePointerId = e.event.pointerId
+
                         start(layer, e.x, e.y)
                     })
 
                     layer.emitter.on('pointermove', (e: LayerPointEvent) => {
                         if (device !== 'pointer') return
+
+                        if (e.event.pointerId !== activePointerId) return
+
                         move(layer, e.x, e.y, e.pressure)
                     })
 
-                    layer.emitter.on('pointerup', () => {
-                        if (device !== 'pointer') return
+                    layer.emitter.on('pointerup', (e) => {
+                        if (e.event.pointerId !== activePointerId) return
 
-                        end(layer)
+                        endIfIsDevice('pointer')
                     })
 
-                    layer.emitter.on('pointerout', () => {
-                        if (device !== 'pointer') return
+                    layer.emitter.on('pointercancel', (e) => {
+                        if (e.event.pointerId !== activePointerId) return
 
-                        end(layer)
+                        endIfIsDevice('pointer')
+                    })
+
+                    layer.emitter.on('lostpointercapture', (e) => {
+                        if (e.event.pointerId !== activePointerId) return
+
+                        endIfIsDevice('pointer')
                     })
 
                     // touch events
                     layer.emitter.on('touchstart', (e: LayerTouchEvent) => {
+                        if (device) return
+
                         e.event.preventDefault()
 
                         if (e.event.touches.length !== 1) return
@@ -165,11 +210,7 @@ export function createBrush(options?: CreateBrushOptions) {
                         move(layer, e.x, e.y, e.pressure)
                     })
 
-                    layer.emitter.on('touchend', (_e: LayerTouchEvent) => {
-                        if (device !== 'touch') return
-
-                        end(layer)
-                    })
+                    layer.emitter.on('touchend', () => endIfIsDevice('touch'))
                 })
             },
         })

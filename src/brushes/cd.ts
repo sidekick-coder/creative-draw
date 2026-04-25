@@ -11,40 +11,41 @@ export default defineBrush({
         const endY = options.y
         const endPressure = options.pressure
 
-        const gap = 0.1
+        const baseSize = options.size || 1
+        const baseOpacity = options.opacity || 1
+        const color = options.color || { r: 0, g: 0, b: 0 }
+
+        const spacing = Math.max(1, baseSize * 0.1) // Adjust spacing based on size
 
         const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
-        const steps = Math.floor(distance / gap)
-        const map = new Map<string, { x: number; y: number; pressure: number }>()
+        const steps = Math.floor(distance / spacing)
+        const minSize = baseSize * 0.2 // Min size is 20% of the requested size
+        const minOpacity = baseOpacity * 0.2 // Min opacity
 
-        for (let i = 0; i < steps; i++) {
-            const t = i / steps
+        for (let i = 0; i <= steps; i++) {
+            const t = steps === 0 ? 1 : i / steps
+
+            // 1. Interpolate position
             const x = startX + t * (endX - startX)
             const y = startY + t * (endY - startY)
-            const pressure = startPressure + t * (endPressure - startPressure)
 
-            const key = `${Math.round(x)}-${Math.round(y)}`
+            // 2. Interpolate pressure
+            const rawPressure = startPressure + t * (endPressure - startPressure)
 
-            map.set(key, { x, y, pressure })
-        }
+            // 3. Apply a pressure curve (squaring it makes the pen feel firmer)
+            const curvedPressure = Math.pow(rawPressure, 1.5)
 
-        const points = Array.from(map.values())
-
-        for (let i = 0; i < points.length - 1; i++) {
-            const p1 = points[i]
-
-            const size = options.size * p1.pressure
-            const color = options.color || { r: 0, g: 0, b: 0 }
-
-            const x = p1.x
-            const y = p1.y
+            // 4. Calculate final size and opacity
+            const size = minSize + (baseSize - minSize) * curvedPressure
+            const opacity = minOpacity + (baseOpacity - minOpacity) * curvedPressure
 
             paths.push({
-                x: x,
-                y: y,
-                size: size,
-                pressure: p1.pressure,
-                color: color,
+                x,
+                y,
+                size,
+                opacity,
+                pressure: rawPressure,
+                color,
             })
         }
 

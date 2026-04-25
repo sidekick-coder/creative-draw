@@ -9,6 +9,18 @@ import { defineConfig, loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '')
+
+    const allowedHosts = ['localhost']
+    let host: string | boolean = false
+
+    if (env.VITE_ALLOWED_HOSTS) {
+        allowedHosts.push(...env.VITE_ALLOWED_HOSTS.split(',').map((host) => host.trim()))
+    }
+
+    if (env.VITE_HOST === 'true') {
+        host = true
+    }
+
     return {
         plugins: [
             tailwindcss(),
@@ -49,8 +61,8 @@ export default defineConfig(({ mode }) => {
             },
         },
         server: {
-            host: env.VITE_HOST === 'true' ? true : 'localhost',
-            allowedHosts: ['localhost', env.VITE_ALLOWED_HOST || ''],
+            host: host,
+            allowedHosts: allowedHosts,
         },
     }
 })

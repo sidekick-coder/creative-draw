@@ -114,6 +114,8 @@ function onPointerEvent(e: PointerEvent) {
 }
 
 function onTouchEvent(e: TouchEvent) {
+    e.preventDefault() // prevent mouse event emulation
+
     const ctx = getContext()
     const canvas = getCanvas()
 
@@ -157,6 +159,10 @@ onMounted(() => {
     canvas.addEventListener('pointerdown', onPointerEvent)
     canvas.addEventListener('pointerup', onPointerEvent)
     canvas.addEventListener('pointermove', onPointerEvent)
+    canvas.addEventListener('pointercancel', onPointerEvent)
+    canvas.addEventListener('pointerout', onPointerEvent)
+    canvas.addEventListener('pointerleave', onPointerEvent)
+    canvas.addEventListener('lostpointercapture', onPointerEvent)
 
     canvas.addEventListener('touchstart', onTouchEvent, { passive: false })
     canvas.addEventListener('touchend', onTouchEvent, { passive: false })
@@ -268,9 +274,6 @@ function clear() {
 
 function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
-    const ctx = getContext()
-    const offscreen = new OffscreenCanvas(width.value, height.value)
-    const offCtx = offscreen.getContext('2d')!
 
     items.forEach((item) => {
         stroke(item)
