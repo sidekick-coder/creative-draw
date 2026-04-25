@@ -1,1 +1,0 @@
-import{e as r,X as t,O as s,j as a,Y as n,o as c}from"./index-B2XBy0iB.js";const l=r({__name:"index",setup(p){const e=s();return t().replace(`/workspaces/${e.params.workspaceId}/projects`),(_,m)=>{const o=n("router-view");return c(),a(o)}}});export{l as default};

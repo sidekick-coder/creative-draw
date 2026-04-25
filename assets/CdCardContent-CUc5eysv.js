@@ -1,1 +1,0 @@
-import{_ as n,c as o,o as c,r as s}from"./index-B2XBy0iB.js";const t={},r={class:"card-content"};function _(e,a){return c(),o("div",r,[s(e.$slots,"default")])}const d=n(t,[["render",_]]);export{d as _};
