@@ -3,7 +3,7 @@ import Project from '@/entities/Project'
 import { createId } from '@/utils/createId'
 import Dexie from 'dexie'
 
-export default class IndexDbProjectRepository implements ProjectRepository {
+export default class ProjectRepositoryIndexDb implements ProjectRepository {
     constructor(public table: Dexie.Table<Project, string>) {}
 
     public async list(): Promise<Project[]> {

@@ -10,11 +10,6 @@ routes.push({
     },
 })
 
-routes.push({
-    path: '/',
-    redirect: '/workspaces',
-})
-
 const router = createRouter({
     history: createWebHistory(),
     routes,

@@ -15,7 +15,7 @@
                 <cd-icon name="mdi:github" class="mr-2" />
                 <span>Github</span>
             </cd-btn>
-            <cd-btn to="/projects"> Open app </cd-btn>
+            <cd-btn to="/workspaces"> Dashboard </cd-btn>
         </div>
 
         <!-- Hero Section -->

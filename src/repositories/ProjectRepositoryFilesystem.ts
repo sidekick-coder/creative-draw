@@ -2,7 +2,7 @@ import type ProjectRepository from '@/contracts/ProjectRepository'
 import Project from '@/entities/Project'
 import { createDrive } from 'drive-fsa'
 
-export default class FSProjectRepository implements ProjectRepository {
+export default class ProjectRepositoryFilesystem implements ProjectRepository {
     constructor(public drive: ReturnType<typeof createDrive>) {}
 
     public async list(): Promise<Project[]> {
@@ -44,8 +44,8 @@ export default class FSProjectRepository implements ProjectRepository {
         project.createdAt = new Date()
         project.updatedAt = new Date()
 
-        this.drive.mkdir(`projects/${project.id}`)
-        this.drive.write(`projects/${project.id}/index.json`, project as any, {
+        await this.drive.mkdir(`projects/${project.id}`)
+        await this.drive.write(`projects/${project.id}/index.json`, project as any, {
             contentType: 'json',
         })
 

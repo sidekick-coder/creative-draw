@@ -2,8 +2,8 @@
 import { provideWorkspace } from '@/composables/useWorkspace'
 import type { WorkspaceGateway } from '@/contracts/WorkspaceGateway'
 import WorkspaceRepository from '@/facades/WorkspaceRepository'
-import FSWorkspaceGateway from '@/gateways/FSWorkspaceGateway'
-import IndexDbWorkspaceGaeway from '@/gateways/IndexDbWorkspaceGateway'
+import WorkspaceGatewayFilesystem from '@/gateways/WorkspaceGatewayFilesystem'
+import WorkspaceGatewayIndexDb from '@/gateways/WorkspaceGatewayIndexDb'
 
 const route = useRoute('/workspaces/[workspaceId]')
 const router = useRouter()
@@ -17,11 +17,11 @@ if (!workspace) {
 let gateway: WorkspaceGateway | undefined = undefined
 
 if (workspace.type == 'index-db') {
-    gateway = new IndexDbWorkspaceGaeway(workspace)
+    gateway = new WorkspaceGatewayIndexDb(workspace)
 }
 
 if (workspace.type === 'filesystem') {
-    gateway = new FSWorkspaceGateway(workspace)
+    gateway = new WorkspaceGatewayFilesystem(workspace)
 }
 
 if (!gateway) {

@@ -1,11 +1,13 @@
 import type { WorkspaceGateway } from '@/contracts/WorkspaceGateway'
 import type Workspace from '@/entities/Workspace'
 import type ProjectRepository from '@/contracts/ProjectRepository'
-import FSProjectRepository from '@/repositories/FSProjectRepository'
+import ProjectRepositoryFilesystem from '@/repositories/ProjectRepositoryFilesystem'
 import { createDrive } from 'drive-fsa'
+import type LayerRepository from '@/contracts/LayerRepository'
 
-export default class FSWorkspaceGateway implements WorkspaceGateway {
+export default class WorkspaceGatewayFileSystem implements WorkspaceGateway {
     public projects: ProjectRepository
+    public layers: LayerRepository
     public drive: ReturnType<typeof createDrive>
     public handle: FileSystemDirectoryHandle
 
@@ -19,7 +21,7 @@ export default class FSWorkspaceGateway implements WorkspaceGateway {
         this.handle = handle
         this.drive = createDrive(handle)
 
-        this.projects = new FSProjectRepository(this.drive)
+        this.projects = new ProjectRepositoryFilesystem(this.drive)
     }
 
     public async load() {

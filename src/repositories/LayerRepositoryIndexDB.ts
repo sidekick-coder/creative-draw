@@ -4,7 +4,7 @@ import Layer from '@/entities/Layer'
 import { createId } from '@/utils/createId'
 import Dexie from 'dexie'
 
-export default class IndexDBLayerRepository implements LayerRepository {
+export default class LayerRepositoryIndexDB implements LayerRepository {
     constructor(public table: Dexie.Table<Layer, string>) {}
 
     public async list(params?: ListParameters): Promise<Layer[]> {

@@ -3,12 +3,12 @@ import type Workspace from '@/entities/Workspace'
 import Dexie from 'dexie'
 import type Project from '@/entities/Project'
 import type ProjectRepository from '@/contracts/ProjectRepository'
-import IndexDbProjectRepository from '@/repositories/IndexDBProjectRepository'
 import type LayerRepository from '@/contracts/LayerRepository'
 import Layer from '@/entities/Layer'
-import IndexDbLayerRepository from '@/repositories/IndexDBLayerRepository'
+import ProjectRepositoryIndexDB from '@/repositories/ProjectRepositoryIndexDB'
+import LayerRepositoryIndexDB from '@/repositories/LayerRepositoryIndexDB'
 
-export default class IndexDbWorkspaceGateway implements WorkspaceGateway {
+export default class WorkspaceGatewayIndexDB implements WorkspaceGateway {
     public projects: ProjectRepository
     public layers: LayerRepository
 
@@ -23,8 +23,8 @@ export default class IndexDbWorkspaceGateway implements WorkspaceGateway {
             layers: 'id',
         })
 
-        this.projects = new IndexDbProjectRepository(db.projects)
-        this.layers = new IndexDbLayerRepository(db.layers)
+        this.projects = new ProjectRepositoryIndexDB(db.projects)
+        this.layers = new LayerRepositoryIndexDB(db.layers)
     }
 
     public load: WorkspaceGateway['load'] = async () => {

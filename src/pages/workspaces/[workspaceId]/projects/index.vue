@@ -56,22 +56,15 @@ onMounted(() => {
 const deletingId = ref<string>()
 
 async function deleteItem(project: Project) {
-    const db = $database.selected
-
     deletingId.value = project.id
 
-    await db.projects.destroy(project.id)
+    await workspace.projects.destroy(project.id)
 
     setProjects()
 }
 // create
-async function create(width: number, height: number) {
-    const project = await workspace.projects.create({
-        name: 'New Project',
-        width: Number(width),
-        height: Number(height),
-    })
 
+function savePredefineSize(width: number, height: number) {
     const existsInPredefined = predefinedSizes.value.find(
         (size) => size.width === width && size.height === height
     )
@@ -95,6 +88,16 @@ async function create(width: number, height: number) {
             height,
         })
     }
+}
+
+async function create(width: number, height: number) {
+    const project = await workspace.projects.create({
+        name: 'New Project',
+        width: Number(width),
+        height: Number(height),
+    })
+
+    savePredefineSize(width, height)
 
     router.push(`/workspaces/${route.params.workspaceId}/projects/${project.id}`)
 }

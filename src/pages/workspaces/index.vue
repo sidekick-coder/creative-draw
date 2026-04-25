@@ -287,7 +287,7 @@ onMounted(() => {
             <cd-list-item to="/legal/privacy-policy" class="flex items-center mt-auto">
                 <span class="font-bold text-body-300">Privacy Policy</span>
             </cd-list-item>
-            <cd-list-item to="/lp" class="flex items-center py-2 text-xs">
+            <cd-list-item to="/" class="flex items-center py-2 text-xs">
                 <span class="font-bold text-body-300">Landing page</span>
             </cd-list-item>
         </div>
