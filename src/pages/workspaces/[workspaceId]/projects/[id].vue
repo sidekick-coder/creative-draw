@@ -60,6 +60,9 @@ async function loadLayers() {
         projectId: project.value.id,
     })
 
+    // sort layers by order 
+    response.sort((a, b) => b.order - a.order)
+
     for (const layerData of response) {
         const layer = createLayer(layerData)
 
@@ -186,6 +189,11 @@ async function save() {
     if (saving.value || !project.value) return
 
     saving.value = true
+
+    // set layer order
+    layers.value.forEach((layer, index) => {
+        layer.order = layers.value.length - index
+    })
 
     for (const layer of layers.value) {
         const payload = layer.serialize()

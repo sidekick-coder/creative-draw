@@ -4,6 +4,7 @@ import type ProjectRepository from '@/contracts/ProjectRepository'
 import ProjectRepositoryFilesystem from '@/repositories/ProjectRepositoryFilesystem'
 import { createDrive } from 'drive-fsa'
 import type LayerRepository from '@/contracts/LayerRepository'
+import LayerRepositoryFilesystem from '@/repositories/LayerRepositoryFilesystem'
 
 export default class WorkspaceGatewayFileSystem implements WorkspaceGateway {
     public projects: ProjectRepository
@@ -22,6 +23,7 @@ export default class WorkspaceGatewayFileSystem implements WorkspaceGateway {
         this.drive = createDrive(handle)
 
         this.projects = new ProjectRepositoryFilesystem(this.drive)
+        this.layers = new LayerRepositoryFilesystem(this.drive)
     }
 
     public async load() {
