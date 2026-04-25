@@ -6,15 +6,22 @@
     <link href="/src/assets/styles.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <title>Creative-draw</title>
-    <script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4273408069168239"
-        crossorigin="anonymous"
-     >
-    </script>
     <script src="/src/main.ts" type="module"></script>
 </head>
 <body>
+     <script id="config-script">
+      window.GOOGLE_ADSENSE_CLIENT_ID = "$GOOGLE_ADSENSE_CLIENT_ID";
+
+      if (window.GOOGLE_ADSENSE_CLIENT_ID) {
+        const script = document.createElement('script');
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${window.GOOGLE_ADSENSE_CLIENT_ID}`;
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+        console.log('Google AdSense script loaded with client ID:', window.GOOGLE_ADSENSE_CLIENT_ID);
+      }
+    </script>
+
     <div id="app"></div> 
     <div id="eruda"></div>
 </body>

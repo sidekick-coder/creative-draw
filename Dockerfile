@@ -4,18 +4,22 @@ WORKDIR /app
 
 COPY package.json yarn.lock* package-lock.json* ./
 
-RUN npm install --frozen-lockfile
+RUN npm install
 
 COPY . .
 
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:alpine 
+
+EXPOSE 80
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+COPY docker/entrypoint.sh /entrypoint.sh
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
