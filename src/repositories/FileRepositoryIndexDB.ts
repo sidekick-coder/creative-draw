@@ -57,9 +57,10 @@ export default class FileRepositoryIndexDB implements FileRepository {
         return File.fromData(file)
     }
 
-    public async create(contents: Uint8Array, data: Partial<Omit<File, 'id'>>): Promise<File> {
+    public async write(contents: Uint8Array, data: Partial<Omit<File, 'id'>>): Promise<File> {
         const file = File.fromData(data as any)
 
+        file.id = file.filename
         file.createdAt = file.createdAt || new Date()
         file.updatedAt = new Date()
 
@@ -73,26 +74,6 @@ export default class FileRepositoryIndexDB implements FileRepository {
         }
 
         await this.table.put(saveData, file.id)
-
-        return File.fromData(file)
-    }
-
-    public async update(fileId: string, data: Partial<Omit<File, 'id'>>): Promise<File | null> {
-        const file = await this.table.get(fileId)
-
-        if (!file) {
-            return null
-        }
-
-        Object.assign(file, data)
-
-        file.updatedAt = new Date()
-
-        if (!file.mimetype && file.filename) {
-            file.mimetype = File.mime(file.filename)
-        }
-
-        await this.table.put(JSON.parse(JSON.stringify(file)), file.id)
 
         return File.fromData(file)
     }

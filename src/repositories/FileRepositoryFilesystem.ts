@@ -7,30 +7,47 @@ export default class FileRepositoryFilesystem implements FileRepository {
 
     public async list(options: any = {}): Promise<File[]> {
         // if no metadata folder, return empty
-        if (!(await this.drive.find('files'))) {
+        if (!(await this.drive.find('/files'))) {
             return []
         }
 
-        const entries = await this.drive.list('files')
-        const files: File[] = []
+        const entries = await this.drive.list('/files')
+        let files: File[] = []
 
         for await (const entry of entries) {
-            try {
-                const text = await this.drive.read(`files/${entry.name}`, { contentType: 'text' })
-                const json = JSON.parse(text)
-                files.push(File.fromData(json))
-            } catch (err) {
-                // skip invalid metadata
-            }
+            const text = await this.drive.read(`files/${entry.name}/index.json`, {
+                contentType: 'text',
+            })
+
+            const json = JSON.parse(text)
+
+            files.push(File.fromData(json))
         }
 
         // sort by createdAt desc
         files.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
         const offset = options.offset || 0
+        const limit = options.limit || files.length
 
-        if (typeof options.limit === 'number') {
-            return files.slice(offset, offset + options.limit)
+        files = files.slice(offset, offset + limit)
+
+        files = files.map((file) => File.fromData(file))
+
+        for (const file of files) {
+            const exists = await this.drive.find(
+                `/files/${file.basename}/content.${file.extension}`
+            )
+
+            if (!exists) continue
+
+            const content = await this.drive.read(
+                `/files/${file.basename}/content.${file.extension}`
+            )
+
+            const blob = $uint8.toBlob(content, file.mimetype)
+
+            file.src = URL.createObjectURL(blob)
         }
 
         return files.slice(offset)
@@ -49,17 +66,18 @@ export default class FileRepositoryFilesystem implements FileRepository {
         return File.fromData(json)
     }
 
-    public async create(data: Partial<Omit<File, 'fileId'>>): Promise<File> {
+    public async write(contents: Uint8Array, data: Partial<Omit<File, 'fileId'>>): Promise<File> {
         const file = File.fromData(data as any)
 
         file.createdAt = file.createdAt || new Date()
         file.updatedAt = new Date()
 
-        if (!(await this.drive.find('files'))) {
-            await this.drive.mkdir('files')
-        }
-
-        await this.drive.write(`files/${file.id}.json`, file as any, { contentType: 'json' })
+        await this.drive.mkdir(`files/${file.basename}`)
+        await this.drive.write(`files/${file.basename}/index.json`, file as any, {
+            contentType: 'json',
+            recursive: true,
+        })
+        await this.drive.write(`files/${file.basename}/content.${file.extension}`, contents)
 
         return File.fromData(file)
     }

@@ -89,20 +89,19 @@ async function upload() {
 
     saving.value = true
 
-    const filename = `${createId()}.${File.extension(file.name)}`
+    const filename = `${createId()}.${File.getExtension(file.name)}`
     const contents = await $file.toUint8Array(file)
+    const data = {
+        filename,
+        mimetype: File.mime(filename),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    }
 
-    const [error] = await tryCatch(() =>
-        repo.create(contents, {
-            filename,
-            mimetype: File.mime(filename),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        })
-    )
+    const [error] = await tryCatch(() => repo.write(contents, data))
 
     if (error) {
-        console.error('Failed to create file meta:', error)
+        console.error('Failed to create file:', error)
         saving.value = false
         return
     }
@@ -138,7 +137,7 @@ async function upload() {
                     <template #item-preview="{ item }">
                         <div class="size-24 flex items-center justify-center bg-body-800 rounded">
                             <cd-img
-                                v-if="item.mimetype.includes('image')"
+                                v-if="item.mimetype.includes('image') && item.src"
                                 :src="item.src"
                                 :alt="item.filename"
                             />
