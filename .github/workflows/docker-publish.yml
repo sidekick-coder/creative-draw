@@ -1,6 +1,6 @@
-# Build and push Docker image to Docker Hub
-# Requires secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
-# Trigger: push tags, or manual dispatch with inputs (tag/ref/image)
+# Build and push Docker image to GitHub Container Registry (ghcr.io)
+# Uses GITHUB_TOKEN with packages: write (or a PAT with write:packages)
+# Trigger: push tags, or manual dispatch with inputs (tag/ref)
 
 name: Publish Docker image
 
@@ -16,9 +16,6 @@ on:
       ref:
         description: 'Git ref to build (branch, tag, or SHA). Used when tag input is not provided.'
         required: false
-      image:
-        description: 'Image name (owner/repo). If omitted, uses github.repository (owner/repo).'
-        required: false
 
 concurrency:
   group: 'docker-publish-${{ github.ref }}'
@@ -26,6 +23,7 @@ concurrency:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   build-and-push:
@@ -47,7 +45,7 @@ jobs:
         run: |
           set -e
           # IMAGE_NAME is fixed for this repository
-          echo "IMAGE_NAME=sidekickcoder/creative-draw" >> $GITHUB_ENV
+          echo "IMAGE_NAME=ghcr.io/sidekick-coder/creative-draw" >> $GITHUB_ENV
 
           # IMAGE_TAG: priority: input tag > GITHUB_REF tag > input ref > 'latest'
           if [ -n "${{ github.event.inputs.tag }}" ]; then
@@ -68,11 +66,12 @@ jobs:
           echo "Using image: $IMAGE_NAME"
           echo "Using tag: $IMAGE_TAG"
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
