@@ -35,35 +35,45 @@ export default class FileRepositoryFilesystem implements FileRepository {
         files = files.map((file) => File.fromData(file))
 
         for (const file of files) {
-            const exists = await this.drive.find(
-                `/files/${file.basename}/content.${file.extension}`
-            )
-
-            if (!exists) continue
-
-            const content = await this.drive.read(
-                `/files/${file.basename}/content.${file.extension}`
-            )
-
-            const blob = $uint8.toBlob(content, file.mimetype)
-
-            file.src = URL.createObjectURL(blob)
+            file.src = await this.findDownloadUrl(file)
         }
 
         return files.slice(offset)
     }
 
     public async find(fileId: string): Promise<File | null> {
-        const entry = await this.drive.find(`files/${fileId}.json`)
+        const entry = await this.drive.find(`/files/${fileId}/index.json`)
 
         if (!entry) {
             return null
         }
 
-        const text = await this.drive.read(`files/${fileId}.json`, { contentType: 'text' })
+        const text = await this.drive.read(`/files/${fileId}/index.json`, { contentType: 'text' })
+
         const json = JSON.parse(text)
 
         return File.fromData(json)
+    }
+
+    public async findDownloadUrl(file: File): Promise<string | null> {
+        const exists = await this.drive.find(`/files/${file.basename}/content.${file.extension}`)
+
+        if (!exists) return null
+
+        const content = await this.drive.read(`/files/${file.basename}/content.${file.extension}`)
+
+        const blob = $uint8.toBlob(content, file.mimetype)
+
+        return URL.createObjectURL(blob)
+    }
+
+    public async findDownloadUrlByFilename(filename: string): Promise<string | null> {
+        const basename = File.getBasename(filename)
+        const file = await this.find(basename)
+
+        if (!file) return null
+
+        return this.findDownloadUrl(file)
     }
 
     public async write(contents: Uint8Array, data: Partial<Omit<File, 'fileId'>>): Promise<File> {

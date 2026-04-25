@@ -60,7 +60,7 @@ async function loadLayers() {
         projectId: project.value.id,
     })
 
-    // sort layers by order 
+    // sort layers by order
     response.sort((a, b) => b.order - a.order)
 
     for (const layerData of response) {
@@ -185,6 +185,35 @@ onMounted(setCanvasSizes)
 // save
 const saving = ref(false)
 
+async function saveThumbnail() {
+    const canvas = new OffscreenCanvas(canvasWidth.value, canvasHeight.value)
+    const context = canvas.getContext('2d')
+
+    if (!context) return
+
+    for (const layer of layers.value.toReversed()) {
+        const layerCanvas = layer.get('canvas')
+        const color = layer.backgroundColor
+
+        if (color) {
+            context.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
+            context.fillRect(0, 0, canvasWidth.value, canvasHeight.value)
+        }
+
+        context.drawImage(layerCanvas, 0, 0, canvasWidth.value, canvasHeight.value)
+    }
+
+    const blob = await canvas.convertToBlob({
+        type: 'image/png',
+    })
+
+    const uint8 = await $uint8.fromBlob(blob)
+
+    await workspace.files.write(uint8, {
+        filename: project.value?.thumbnailFilename,
+    })
+}
+
 async function save() {
     if (saving.value || !project.value) return
 
@@ -211,6 +240,8 @@ async function save() {
             project_id: project.value.id,
         })
     }
+
+    await saveThumbnail()
 
     setTimeout(() => {
         saving.value = false

@@ -4,7 +4,7 @@ export default class File {
     public id: string
     public filename: string
     public mimetype: string
-    public src: string // This is a placeholder property for the file's data URL or blob URL. It should be set when the file is loaded.
+    public src: string | null // This is a placeholder property for the file's data URL or blob URL. It should be set when the file is loaded.
     public createdAt: Date = new Date()
     public updatedAt: Date = new Date()
 

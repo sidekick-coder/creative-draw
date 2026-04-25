@@ -13,6 +13,11 @@ export const $uint8 = {
 
         return uint8Array
     },
+    fromBlob: async (blob: Blob): Promise<Uint8Array> => {
+        const arrayBuffer = await blob.arrayBuffer()
+
+        return new Uint8Array(arrayBuffer)
+    },
     toBlob: (uint8Array: Uint8Array, mimeType: string): Blob => {
         return new Blob([uint8Array], { type: mimeType })
     },

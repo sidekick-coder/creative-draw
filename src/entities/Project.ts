@@ -1,6 +1,6 @@
 export default class Project {
     public id: string
-    public thumbnailSrc: string;
+    public thumbnailSrc: string | null;
     [key: string]: any
 
     constructor(data?: Partial<Project>) {
@@ -13,5 +13,9 @@ export default class Project {
 
     public static fromData(data: any): Project {
         return new Project(data)
+    }
+
+    public get thumbnailFilename(): string {
+        return `projects-thumbnail-${this.id}.png`
     }
 }

@@ -41,7 +41,18 @@ const projects = ref<Project[]>([])
 async function setProjects() {
     loading.value = true
 
-    projects.value = await workspace.projects.list()
+    const response = await workspace.projects.list()
+
+    console.log('Projects response:', response)
+
+    // set thumbnail for each project
+    for (const project of response) {
+        project.thumbnailSrc = await workspace.files.findDownloadUrlByFilename(
+            project.thumbnailFilename
+        )
+    }
+
+    projects.value = response
 
     setTimeout(() => {
         loading.value = false

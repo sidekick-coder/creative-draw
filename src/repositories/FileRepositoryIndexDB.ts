@@ -33,15 +33,7 @@ export default class FileRepositoryIndexDB implements FileRepository {
         // load src
 
         for (const file of files) {
-            if (!file.contents) {
-                continue
-            }
-
-            const uint8 = new Uint8Array((file as any).contents)
-
-            const blob = $uint8.toBlob(uint8, file.mimetype)
-
-            file.src = URL.createObjectURL(blob)
+            file.src = await this.findDownloadUrl(file)
         }
 
         return files
@@ -55,6 +47,34 @@ export default class FileRepositoryIndexDB implements FileRepository {
         }
 
         return File.fromData(file)
+    }
+
+    public async findDownloadUrl(payload: any): Promise<string | null> {
+        const file = payload as IndexDbFile
+
+        if (!file.contents) {
+            return null
+        }
+
+        const uint8 = new Uint8Array((file as any).contents)
+
+        const blob = $uint8.toBlob(uint8, file.mimetype)
+
+        return URL.createObjectURL(blob)
+    }
+
+    public async findDownloadUrlByFilename(filename: string): Promise<string | null> {
+        const file = await this.table.where('filename').equals(filename).first()
+
+        if (!file) {
+            return null
+        }
+
+        if (!file.contents) {
+            return null
+        }
+
+        return this.findDownloadUrl(file)
     }
 
     public async write(contents: Uint8Array, data: Partial<Omit<File, 'id'>>): Promise<File> {
