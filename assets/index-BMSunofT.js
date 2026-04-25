@@ -1,0 +1,1 @@
+import{e as r,W as t,N as s,j as a,X as n,o as c}from"./index-DQYk_12K.js";const l=r({__name:"index",setup(p){const e=s();return t().replace(`/workspaces/${e.params.workspaceId}/projects`),(_,m)=>{const o=n("router-view");return c(),a(o)}}});export{l as default};

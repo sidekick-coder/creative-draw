@@ -1,0 +1,1 @@
+const a={toBase64:r=>btoa(String.fromCharCode(...r)),fromBase64:r=>{const t=atob(r),n=t.length,o=new Uint8Array(n);for(let e=0;e<n;e++)o[e]=t.charCodeAt(e);return o},fromBlob:async r=>{const t=await r.arrayBuffer();return new Uint8Array(t)},toBlob:(r,t)=>new Blob([r],{type:t}),toFile:(r,t,n)=>new File([r],t,{type:n})};export{a as $};
