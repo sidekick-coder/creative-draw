@@ -8,6 +8,7 @@ export interface Link {
 </script>
 <script setup lang="ts">
 import { groupBy } from 'lodash-es'
+import { ref, onMounted, computed } from 'vue'
 
 const links = defineModel('links', {
     type: Array as PropType<Link[]>,
@@ -30,10 +31,33 @@ defineProps({
 })
 
 const groups = computed(() => groupBy(links.value, 'group'))
+
+// Sidebar visibility & mobile detection
+const sidebarVisible = ref(true)
+const isMobile = ref(false)
+
+onMounted(() => {
+    const m = window.matchMedia('(max-width: 768px)')
+    isMobile.value = m.matches
+    if (isMobile.value) sidebarVisible.value = false
+
+    const handle = (e: MediaQueryListEvent) => {
+        isMobile.value = e.matches
+        if (isMobile.value) sidebarVisible.value = false
+    }
+
+    if ('addEventListener' in m) {
+        m.addEventListener('change', handle)
+    } else {
+        // Safari fallback
+        // @ts-expect-error Safari fallback
+        m.addListener(handle)
+    }
+})
 </script>
 <template>
     <div class="flex min-h-dvh">
-        <aside class="w-72 bg-body-900">
+        <aside v-show="sidebarVisible" class="w-72 bg-body-900">
             <nav class="px-4 flex flex-col h-dvh overflow-auto">
                 <slot name="header">
                     <cd-list-item to="/workspaces" class="py-6 flex items-center">
@@ -82,8 +106,23 @@ const groups = computed(() => groupBy(links.value, 'group'))
                 </div>
             </nav>
         </aside>
-        <main class="flex-1 h-dvh overflow-auto">
-            <slot />
+        <main class="flex-1 h-dvh overflow-auto flex flex-col">
+            <header class="flex items-center gap-2 px-4 py-3 shrink-0">
+                <cd-btn
+                    size="sq-md"
+                    variant="text"
+                    aria-label="Toggle sidebar"
+                    @click="sidebarVisible = !sidebarVisible"
+                >
+                    <cd-icon name="mdi:menu" class="size-5 text-white" />
+                </cd-btn>
+
+                <slot name="toolbar" />
+            </header>
+
+            <div class="flex-1 overflow-auto">
+                <slot />
+            </div>
         </main>
     </div>
 </template>
