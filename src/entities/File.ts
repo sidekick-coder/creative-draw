@@ -4,6 +4,7 @@ export default class File {
     public id: string
     public filename: string
     public mimetype: string
+    public src: string // This is a placeholder property for the file's data URL or blob URL. It should be set when the file is loaded.
     public createdAt: Date = new Date()
     public updatedAt: Date = new Date()
 
@@ -17,10 +18,6 @@ export default class File {
         if (!this.mimetype) {
             this.mimetype = File.mime(this.filename)
         }
-    }
-
-    public get src(): string {
-        return `drive:${this.filename}`
     }
 
     public static fromData(data: any): File {

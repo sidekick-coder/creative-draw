@@ -18,11 +18,11 @@ const groups = computed(() => groupBy(links.value, 'group'))
 </script>
 <template>
     <div class="flex min-h-dvh">
-        <aside class="w-72 bg-body-900 border-r-2 border-body-600">
+        <aside class="w-72 bg-body-900">
             <nav class="px-4 flex flex-col h-dvh overflow-auto">
                 <cd-list-item to="/" class="py-6 flex items-center">
                     <cd-logo class="size-8 text-primary-300" />
-                    <span class="font-bold text-body-300">Creative draw</span>
+                    <span class="font-bold text-body-50">Creative draw</span>
                 </cd-list-item>
                 <template v-for="(group, groupName) in groups" :key="groupName">
                     <cd-list-item class="py-1 text-body-200 font-bold text-sm">
@@ -32,8 +32,8 @@ const groups = computed(() => groupBy(links.value, 'group'))
                     <template v-for="link in group" :key="link.to">
                         <cd-list-item
                             :to="link.to"
-                            class="py-3 flex items-center gap-x-3 hover:bg-body-700 rounded-md"
-                            exact-active-class="bg-body-800 text-body-50"
+                            class="py-3 flex items-center gap-x-3 hover:bg-primary-500 rounded-md"
+                            exact-active-class="bg-primary-500/25 text-body-0"
                         >
                             <cd-icon :name="link.icon" />
                             <span>{{ link.label }}</span>
