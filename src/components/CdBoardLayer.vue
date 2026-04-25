@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import type { LayerObject } from '@/composables/createLayer'
-import type { BrushPath } from '@/composables/defineBrush'
 import type { ColorRGB } from '@/utils/colors'
 
 // general
-const rootRef = ref<HTMLElement>()
-const canvasRef = ref<HTMLCanvasElement>()
-const previewRef = ref<HTMLCanvasElement>()
+const root = ref<HTMLCanvasElement | null>(null)
 const layer = defineModel('layer', {
     type: Object as () => Layer,
     required: true,
 })
 
 function getCanvas() {
-    const canvas = canvasRef.value
+    const canvas = root.value
 
     if (!canvas) {
         throw new Error('Failed to get canvas')
@@ -51,10 +48,10 @@ const y = defineProp<number>('y', {
 })
 
 function setPosition() {
-    if (!rootRef.value) return
+    const canvas = getCanvas()
 
-    rootRef.value.style.left = `${x.value}px`
-    rootRef.value.style.top = `${y.value}px`
+    canvas.style.left = `${x.value}px`
+    canvas.style.top = `${y.value}px`
 }
 
 watch([x, y], setPosition)
@@ -62,16 +59,16 @@ onMounted(setPosition)
 
 // bg
 function setColor() {
-    if (!canvasRef.value) return
+    if (!root.value) return
 
     if (!layer.value.backgroundColor) {
-        canvasRef.value.style.backgroundColor = 'transparent'
+        root.value.style.backgroundColor = 'transparent'
         return
     }
 
     const color = layer.value.backgroundColor
 
-    canvasRef.value.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`
+    root.value.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`
 }
 
 watch(() => layer.value.backgroundColor, setColor)
@@ -90,10 +87,10 @@ const height = defineProp<number>('height', {
 })
 
 function setSize() {
-    if (!rootRef.value) return
+    if (!root.value) return
 
-    rootRef.value.style.width = `${width.value}px`
-    rootRef.value.style.height = `${height.value}px`
+    root.value.width = width.value
+    root.value.height = height.value
 }
 
 watch([width, height], setSize)
@@ -119,7 +116,7 @@ function onTouchEvent(e: TouchEvent) {
     const ctx = getContext()
     const canvas = getCanvas()
 
-    const rect = canvas.getBoundingClientRect()
+    const rect = root.value!.getBoundingClientRect()
 
     const touch = e.touches[0]
 
@@ -181,17 +178,15 @@ board.addLayer(layer)
 // paths
 const map = new Set<string>()
 
-function createPathKey(p: BrushPath) {
-    return `${p.x}-${p.y}-${p.size.toFixed(2)}-${p.color.r}-${p.color.g}-${p.color.b}`
+function createPathKey(x: number, y: number, pressure: number, size: number, color: ColorRGB) {
+    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
 }
 
 function drawPaths(paths: BrushPath[]) {
-    const ctx = previewRef.value?.getContext('2d')
-
-    if (!ctx) return
+    const ctx = getContext()
 
     paths.forEach((p) => {
-        const key = createPathKey(p)
+        const key = createPathKey(p.x, p.y, p.pressure, p.size, p.color)
 
         if (map.has(key)) {
             return
@@ -199,8 +194,11 @@ function drawPaths(paths: BrushPath[]) {
 
         map.add(key)
 
+        const opacity = p.opacity || 1
+
         if (p.erase) {
             ctx.globalCompositeOperation = 'destination-out'
+            ctx.globalAlpha = opacity
             ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
             ctx.beginPath()
             ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
@@ -209,8 +207,9 @@ function drawPaths(paths: BrushPath[]) {
             ctx.globalCompositeOperation = 'source-over'
             return
         }
-        ctx.globalCompositeOperation = 'source-over'
 
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.globalAlpha = opacity
         ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
@@ -219,64 +218,29 @@ function drawPaths(paths: BrushPath[]) {
     })
 }
 
-function begin(options?: any) {
-    const opacity = options?.opacity || 1
-
-    if (!previewRef.value) return
-
-    previewRef.value.style.opacity = String(opacity)
-
-    map.clear()
-}
-
-function end() {
-    if (!previewRef.value) return
-
-    const ctx = previewRef.value.getContext('2d')
-
-    map.clear()
-
-    ctx?.clearRect(0, 0, previewRef.value.width, previewRef.value.height)
-}
-
-function stroke(item: LayerObject) {
-    const ctx = getContext()
-    const offscreen = new OffscreenCanvas(width.value, height.value)
-    const offCtx = offscreen.getContext('2d')!
-
-    offCtx.clearRect(0, 0, offscreen.width, offscreen.height)
-
-    item.paths.forEach((p: BrushPath) => {
-        offCtx.globalCompositeOperation = 'source-over'
-        offCtx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
-        offCtx.beginPath()
-        offCtx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
-        offCtx.fill()
-        offCtx.closePath()
-    })
-
-    const opacity = item.opacity || 1
-    ctx.globalAlpha = opacity
-    ctx.drawImage(offscreen, 0, 0)
-    ctx.globalAlpha = 1
-}
-
 layer.value.emitter.on('paths:draw', drawPaths)
-layer.value.emitter.on('paths:begin', begin)
-layer.value.emitter.on('paths:end', end)
-layer.value.emitter.on('stroke', stroke)
+
+layer.value.emitter.on('paths:begin', () => {
+    map.clear()
+})
+
+layer.value.emitter.on('paths:end', () => {
+    map.clear()
+})
 
 function clear() {
     const ctx = getContext()
-    map.clear()
     ctx.clearRect(0, 0, width.value, height.value)
+    map.clear()
 }
 
 function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
 
     items.forEach((item) => {
-        stroke(item)
+        if (item.type === 'stroke') {
+            drawPaths(item.paths)
+        }
     })
 }
 
@@ -294,19 +258,11 @@ layer.value.emitter.on('draw', draw)
 onMounted(draw)
 </script>
 <template>
-    <div
-        ref="rootRef"
+    <canvas
+        ref="root"
         class="absolute"
         :class="{
             'opacity-0': !layer.visible,
         }"
-    >
-        <canvas
-            ref="previewRef"
-            :width
-            :height
-            class="size-full absolute inset-0 pointer-events-none"
-        />
-        <canvas ref="canvasRef" :width :height class="size-full" />
-    </div>
+    />
 </template>

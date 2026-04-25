@@ -26,10 +26,11 @@ export function createBrush(options?: CreateBrushOptions) {
     let lastPressure = 0
     let paths = [] as BrushPath[]
 
-    function start(layer: Layer, x: number, y: number) {
+    function start(layer: Layer, x: number, y: number, pressure = 0.5) {
         drawing = true
         lastX = x
         lastY = y
+        lastPressure = pressure
         paths = []
         const drawPath =
             definition.value?.draw({
@@ -38,7 +39,7 @@ export function createBrush(options?: CreateBrushOptions) {
                 lastX,
                 lastY,
                 lastPressure,
-                pressure: 0.5,
+                pressure,
                 size: size.value,
                 opacity: opacity.value,
                 color: color.value,
@@ -162,7 +163,7 @@ export function createBrush(options?: CreateBrushOptions) {
                         device = 'pointer'
                         activePointerId = e.event.pointerId
 
-                        start(layer, e.x, e.y)
+                        start(layer, e.x, e.y, e.pressure)
                     })
 
                     layer.emitter.on('pointermove', (e: LayerPointEvent) => {

@@ -15,7 +15,7 @@ export default defineBrush({
         const baseOpacity = options.opacity || 1
         const color = options.color || { r: 0, g: 0, b: 0 }
 
-        const spacing = Math.max(1, baseSize * 0.1) // Adjust spacing based on size
+        const spacing = Math.max(1, baseSize * 0.05) // Adjust spacing based on size
 
         const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
         const steps = Math.floor(distance / spacing)
