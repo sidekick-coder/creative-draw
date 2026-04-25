@@ -1,0 +1,87 @@
+# Build and push Docker image to Docker Hub
+# Requires secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
+# Trigger: push tags, or manual dispatch with inputs (tag/ref/image)
+
+name: Publish Docker image
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for the image (e.g. v1.2.3). If omitted, the pushed tag or ref is used.'
+        required: false
+      ref:
+        description: 'Git ref to build (branch, tag, or SHA). Used when tag input is not provided.'
+        required: false
+      image:
+        description: 'Image name (owner/repo). If omitted, uses github.repository (owner/repo).'
+        required: false
+
+concurrency:
+  group: 'docker-publish-${{ github.ref }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Determine image name and tag
+        id: vars
+        run: |
+          set -e
+          # IMAGE_NAME is fixed for this repository
+          echo "IMAGE_NAME=sidekickcoder/creative-draw" >> $GITHUB_ENV
+
+          # IMAGE_TAG: priority: input tag > GITHUB_REF tag > input ref > 'latest'
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "IMAGE_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF}" =~ ^refs/tags/(.+) ]]; then
+            [[ "${GITHUB_REF}" =~ ^refs/tags/(.+) ]]
+            echo "IMAGE_TAG=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+          elif [ -n "${{ github.event.inputs.ref }}" ]; then
+            REF="${{ github.event.inputs.ref }}"
+            # strip refs/heads/ or refs/tags/ if present
+            REF="${REF#refs/tags/}"
+            REF="${REF#refs/heads/}"
+            echo "IMAGE_TAG=${REF}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          fi
+
+          echo "Using image: $IMAGE_NAME"
+          echo "Using tag: $IMAGE_TAG"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }},${{ env.IMAGE_NAME }}:latest
+
+      - name: Output pushed image
+        run: |
+          echo "image=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
