@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const route = useRoute('/workspaces/[workspaceId]/projects/')
 
+const workspace = useWorkspace()
+
 const links = ref([
     {
         label: __('Workspaces'),
@@ -23,7 +25,12 @@ const links = ref([
 ])
 </script>
 <template>
-    <AppLayout :links>
+    <AppLayout
+        :links
+        :title="workspace.name"
+        :subtitle="workspace.typeLabel"
+        :icon="workspace.icon"
+    >
         <slot />
     </AppLayout>
 </template>

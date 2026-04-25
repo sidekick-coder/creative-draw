@@ -1,5 +1,5 @@
 import type { WorkspaceGateway } from '@/contracts/WorkspaceGateway'
-import type Workspace from '@/entities/Workspace'
+import Workspace from '@/entities/Workspace'
 import Dexie from 'dexie'
 import type Project from '@/entities/Project'
 import type ProjectRepository from '@/contracts/ProjectRepository'
@@ -11,14 +11,13 @@ import type FileRepository from '@/contracts/FileRepository'
 import FileRepositoryIndexDB from '@/repositories/FileRepositoryIndexDB'
 import type { IndexDbFile } from '@/gateways/IndexDbDriveGateway'
 
-export default class WorkspaceGatewayIndexDB implements WorkspaceGateway {
-    public id: string
+export default class WorkspaceGatewayIndexDB extends Workspace implements WorkspaceGateway {
     public projects: ProjectRepository
     public layers: LayerRepository
     public files: FileRepository
 
     constructor(workspace: Workspace) {
-        this.id = workspace.id
+        super(workspace)
 
         const db = new Dexie(`workspaces:${workspace.id}`) as Dexie & {
             projects: Dexie.Table<Project, string>

@@ -1,5 +1,5 @@
 import type { WorkspaceGateway } from '@/contracts/WorkspaceGateway'
-import type Workspace from '@/entities/Workspace'
+import Workspace from '@/entities/Workspace'
 import type ProjectRepository from '@/contracts/ProjectRepository'
 import ProjectRepositoryFilesystem from '@/repositories/ProjectRepositoryFilesystem'
 import { createDrive } from 'drive-fsa'
@@ -8,8 +8,7 @@ import LayerRepositoryFilesystem from '@/repositories/LayerRepositoryFilesystem'
 import type FileRepository from '@/contracts/FileRepository'
 import FileRepositoryFilesystem from '@/repositories/FileRepositoryFilesystem'
 
-export default class WorkspaceGatewayFileSystem implements WorkspaceGateway {
-    public id: string
+export default class WorkspaceGatewayFileSystem extends Workspace implements WorkspaceGateway {
     public projects: ProjectRepository
     public layers: LayerRepository
     public files: FileRepository
@@ -17,7 +16,7 @@ export default class WorkspaceGatewayFileSystem implements WorkspaceGateway {
     public handle: FileSystemDirectoryHandle
 
     constructor(workspace: Workspace) {
-        this.id = workspace.id
+        super(workspace)
 
         const handle = workspace.config.handle as FileSystemDirectoryHandle
 

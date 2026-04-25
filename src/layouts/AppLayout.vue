@@ -14,16 +14,47 @@ const links = defineModel('links', {
     default: () => [],
 })
 
+defineProps({
+    icon: {
+        type: String,
+        default: null,
+    },
+    title: {
+        type: String,
+        default: null,
+    },
+    subtitle: {
+        type: String,
+        default: null,
+    },
+})
+
 const groups = computed(() => groupBy(links.value, 'group'))
 </script>
 <template>
     <div class="flex min-h-dvh">
         <aside class="w-72 bg-body-900">
             <nav class="px-4 flex flex-col h-dvh overflow-auto">
-                <cd-list-item to="/" class="py-6 flex items-center">
-                    <cd-logo class="size-8 text-primary-300" />
-                    <span class="font-bold text-body-50">Creative draw</span>
-                </cd-list-item>
+                <slot name="header">
+                    <cd-list-item to="/workspaces" class="py-6 flex items-center">
+                        <div
+                            v-if="icon"
+                            class="px-3 py-2 flex items-center justify-center rounded bg-primary-300 text-body-0 mr-1"
+                        >
+                            <cd-icon :name="icon" class="size-6" />
+                        </div>
+                        <cd-logo v-else class="size-8 text-primary-300" />
+
+                        <div class="flex flex-col leading-4 gap-2">
+                            <span class="font-bold text-body-50">
+                                {{ title || 'Creative Draw' }}
+                            </span>
+                            <span v-if="subtitle" class="text-body-300 text-xs">
+                                {{ subtitle }}
+                            </span>
+                        </div>
+                    </cd-list-item>
+                </slot>
                 <template v-for="(group, groupName) in groups" :key="groupName">
                     <cd-list-item class="py-1 text-body-200 font-bold text-sm">
                         {{ groupName }}

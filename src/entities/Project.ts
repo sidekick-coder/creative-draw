@@ -1,5 +1,6 @@
 export default class Project {
-    public id: string;
+    public id: string
+    public thumbnailSrc: string;
     [key: string]: any
 
     constructor(data?: Partial<Project>) {
