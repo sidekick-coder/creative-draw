@@ -144,7 +144,10 @@ onMounted(() => {
                         <span>{{ $t('Landing page') }}</span>
                     </cd-list-item>
 
-                    <cd-list-item to="/legal/privacy-policy" class="hover:bg-body-500 rounded-md mx-1">
+                    <cd-list-item
+                        to="/legal/privacy-policy"
+                        class="hover:bg-body-500 rounded-md mx-1"
+                    >
                         <cd-icon name="mdi:shield-lock" class="size-4" />
                         <span>{{ $t('Privacy policy') }}</span>
                     </cd-list-item>
