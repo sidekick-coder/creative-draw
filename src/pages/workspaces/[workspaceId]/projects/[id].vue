@@ -270,6 +270,27 @@ const maxBrushSize = computed(() => {
     return project.value?.width * 0.05
 })
 
+// edit title
+const editTitleDialog = ref(false)
+const editTitleValue = ref('')
+
+function openEditTitle() {
+    editTitleValue.value = project.value?.name || ''
+    editTitleDialog.value = true
+}
+
+async function saveTitle() {
+    if (!project.value) return
+
+    project.value.name = editTitleValue.value
+
+    await workspace.projects.update(project.value.id, {
+        name: editTitleValue.value,
+    })
+
+    editTitleDialog.value = false
+}
+
 // export
 const exporting = ref(false)
 
@@ -330,6 +351,32 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             <cd-spinner class="size-16" />
         </div>
 
+        <div
+            class="fixed top-0 left-0 right-0 flex items-center justify-center z-20 p-4 pointer-events-none"
+        >
+            <span class="text-body-300 text-sm font-medium truncate max-w-xs">
+                {{ project?.name || $t('Untitled') }}
+            </span>
+        </div>
+
+        <cd-dialog v-model="editTitleDialog">
+            <cd-card class="w-80">
+                <cd-card-head>
+                    <cd-card-title class="mr-auto text-base">{{ $t('Edit title') }}</cd-card-title>
+                </cd-card-head>
+                <cd-card-content class="flex flex-col gap-y-4">
+                    <cd-text-field
+                        v-model="editTitleValue"
+                        :label="$t('Title')"
+                        :placeholder="$t('Title')"
+                    />
+                    <cd-btn @click="saveTitle">
+                        {{ $t('Save') }}
+                    </cd-btn>
+                </cd-card-content>
+            </cd-card>
+        </cd-dialog>
+
         <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
             <cd-btn
                 color="body-900"
@@ -358,6 +405,10 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                         <cd-list-item @click="toggleEruda">
                             <cd-icon name="heroicons:code-solid" class="mr-2" />
                             {{ $t('Toggle Eruda') }}
+                        </cd-list-item>
+                        <cd-list-item @click="openEditTitle">
+                            <cd-icon name="heroicons:pencil-solid" class="mr-2" />
+                            {{ $t('Edit title') }}
                         </cd-list-item>
                     </cd-card>
                 </div>
