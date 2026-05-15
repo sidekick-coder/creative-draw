@@ -345,13 +345,19 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                         <cd-icon name="heroicons:cog-8-tooth" />
                     </cd-btn>
                 </template>
-                <div class="py-2 px-4">
+                <div class="py-2">
                     <cd-card class="border-2 border-body-600 min-w-64">
                         <cd-list-item @click="exportTo('PNG')">
+                            <cd-icon name="mdi:file-png-box" class="mr-2" />
                             {{ $t('Export {0}', ['PNG']) }}
                         </cd-list-item>
                         <cd-list-item @click="exportTo('JPEG')">
+                            <cd-icon name="mdi:file-jpg-box" class="mr-2" />
                             {{ $t('Export {0}', ['JPEG']) }}
+                        </cd-list-item>
+                        <cd-list-item @click="toggleEruda">
+                            <cd-icon name="heroicons:code-solid" class="mr-2" />
+                            {{ $t('Toggle Eruda') }}
                         </cd-list-item>
                     </cd-card>
                 </div>
@@ -390,14 +396,6 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 @click="board.emitter.emit('redraw')"
             >
                 <cd-icon name="heroicons:arrow-path" />
-            </cd-btn>
-            <cd-btn
-                color="body-900"
-                size="sq-md"
-                class="flex items-center justify-center"
-                @click="toggleEruda"
-            >
-                <cd-icon name="heroicons:code-solid" />
             </cd-btn>
         </div>
 

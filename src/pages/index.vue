@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-dvh w-dvw flex-col">
+    <div class="flex min-h-dvh w-full flex-col">
         <!-- Header -->
         <div class="flex shrink-0 items-center bg-body-900 px-4 py-3">
             <div class="flex items-center gap-x-4">
@@ -35,7 +35,7 @@
                 </h2>
             </div>
             <div class="flex flex-col items-center gap-y-2">
-                <cd-btn to="/projects"> Start drawing </cd-btn>
+                <cd-btn to="/workspaces"> Start drawing </cd-btn>
             </div>
         </div>
 
@@ -310,7 +310,7 @@
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <cd-btn
-                        to="/projects"
+                        to="/workspaces"
                         variant="outlined"
                         class="text-white border-white hover:bg-white hover:text-primary-300"
                     >
