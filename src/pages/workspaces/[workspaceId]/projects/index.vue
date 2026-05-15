@@ -286,13 +286,7 @@ async function create(width: number, height: number) {
 
                             <cd-menu>
                                 <template #activator="{ attrs }">
-                                    <cd-btn
-                                        v-bind="attrs"
-                                        variant="text"
-                                        color="body-700"
-                                        padding="none"
-                                        size="sm"
-                                    >
+                                    <cd-btn v-bind="attrs" variant="text" padding="none" size="sm">
                                         <cd-icon name="heroicons:ellipsis-vertical-20-solid" />
                                     </cd-btn>
                                 </template>
