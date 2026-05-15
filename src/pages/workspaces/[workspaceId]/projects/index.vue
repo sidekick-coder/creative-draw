@@ -73,6 +73,28 @@ async function deleteItem(project: Project) {
 
     setProjects()
 }
+
+// edit title
+const editTitleDialog = ref(false)
+const editTitleProject = ref<Project>()
+const editTitleValue = ref('')
+
+function openEditTitle(project: Project) {
+    editTitleProject.value = project
+    editTitleValue.value = project.name || ''
+    editTitleDialog.value = true
+}
+
+async function saveTitle() {
+    if (!editTitleProject.value) return
+
+    await workspace.projects.update(editTitleProject.value.id, {
+        name: editTitleValue.value,
+    })
+
+    editTitleProject.value.name = editTitleValue.value
+    editTitleDialog.value = false
+}
 // create
 
 function savePredefineSize(width: number, height: number) {
@@ -277,6 +299,9 @@ async function create(width: number, height: number) {
 
                                 <div class="p-2">
                                     <cd-card class="w-40">
+                                        <cd-list-item @click="openEditTitle(project)">
+                                            {{ $t('Edit title') }}
+                                        </cd-list-item>
                                         <cd-list-item @click="deleteItem(project)">
                                             Delete
                                         </cd-list-item>
@@ -288,5 +313,23 @@ async function create(width: number, height: number) {
                 </div>
             </div>
         </div>
+
+        <cd-dialog v-model="editTitleDialog">
+            <cd-card class="w-80">
+                <cd-card-head>
+                    <cd-card-title class="mr-auto text-base">{{ $t('Edit title') }}</cd-card-title>
+                </cd-card-head>
+                <cd-card-content class="flex flex-col gap-y-4">
+                    <cd-text-field
+                        v-model="editTitleValue"
+                        :label="$t('Title')"
+                        :placeholder="$t('Title')"
+                    />
+                    <cd-btn @click="saveTitle">
+                        {{ $t('Save') }}
+                    </cd-btn>
+                </cd-card-content>
+            </cd-card>
+        </cd-dialog>
     </workspace-layout>
 </template>
