@@ -89,6 +89,18 @@ export function createLayer(payload: Partial<Payload> = {}) {
         set('data', data)
     }
 
+    function update(id: LayerObject['id'], newData: Partial<LayerObject>) {
+        const data = context.get<LayerObject[]>('data', [])
+
+        const index = data.findIndex((i) => i.id === id)
+
+        if (index !== -1) {
+            data[index] = { ...data[index], ...newData }
+
+            set('data', data)
+        }
+    }
+
     function remove(id: LayerObject['id']) {
         const data = context.get<LayerObject[]>('data', [])
 
@@ -140,5 +152,6 @@ export function createLayer(payload: Partial<Payload> = {}) {
         add,
         remove,
         redraw,
+        update,
     })
 }

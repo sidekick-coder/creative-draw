@@ -53,7 +53,11 @@ export function createBrush(options?: CreateBrushOptions) {
         layer.emitter.emit('paths:begin', {
             opacity: opacity.value,
         })
-        layer.emitter.emit('paths:draw', paths)
+
+        layer.emitter.emit('paths:draw', {
+            paths: drawPath,
+            color: color.value,
+        })
     }
 
     function move(layer: Layer, x: number, y: number, pressure = 0.5) {
@@ -83,7 +87,11 @@ export function createBrush(options?: CreateBrushOptions) {
         lastX = x
         lastY = y
         lastPressure = pressure
-        layer.emitter.emit('paths:draw', paths)
+
+        layer.emitter.emit('paths:draw', {
+            paths: newPaths,
+            color: color.value,
+        })
     }
 
     function end(layer: Layer) {
@@ -92,8 +100,8 @@ export function createBrush(options?: CreateBrushOptions) {
         const item = {
             id: createId(),
             type: 'stroke',
+            color: color.value,
             paths,
-            opacity: opacity.value,
         }
 
         layer.add(item)

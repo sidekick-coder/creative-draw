@@ -30,7 +30,6 @@ export interface BrushPath {
     size: number
     opacity: number
     pressure: number
-    color: ColorRGB
     erase?: boolean
 }
 

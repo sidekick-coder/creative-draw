@@ -182,11 +182,11 @@ function createPathKey(x: number, y: number, pressure: number, size: number, col
     return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
 }
 
-function drawPaths(paths: BrushPath[]) {
+function drawPaths(paths: BrushPath[], color: ColorRGB = { r: 0, g: 0, b: 0 }) {
     const ctx = getContext()
 
     paths.forEach((p) => {
-        const key = createPathKey(p.x, p.y, p.pressure, p.size, p.color)
+        const key = createPathKey(p.x, p.y, p.pressure, p.size, color)
 
         if (map.has(key)) {
             return
@@ -199,7 +199,7 @@ function drawPaths(paths: BrushPath[]) {
         if (p.erase) {
             ctx.globalCompositeOperation = 'destination-out'
             ctx.globalAlpha = opacity
-            ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
+            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
             ctx.beginPath()
             ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
             ctx.fill()
@@ -210,7 +210,7 @@ function drawPaths(paths: BrushPath[]) {
 
         ctx.globalCompositeOperation = 'source-over'
         ctx.globalAlpha = opacity
-        ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
+        ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
         ctx.fill()
@@ -218,7 +218,9 @@ function drawPaths(paths: BrushPath[]) {
     })
 }
 
-layer.value.emitter.on('paths:draw', drawPaths)
+layer.value.emitter.on('paths:draw', (data: any) => {
+    drawPaths(data.paths, data.color)
+})
 
 layer.value.emitter.on('paths:begin', () => {
     map.clear()
@@ -237,11 +239,11 @@ function clear() {
 function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
 
-    items.forEach((item) => {
+    for (const item of items) {
         if (item.type === 'stroke') {
-            drawPaths(item.paths)
+            drawPaths(item.paths, item.color)
         }
-    })
+    }
 }
 
 function redraw() {

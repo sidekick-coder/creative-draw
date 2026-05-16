@@ -489,6 +489,19 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 <cd-menu :close-on-content-click="false">
                     <template #activator="{ attrs }">
                         <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                            <cd-icon name="mdi:vector-square" />
+                        </cd-btn>
+                    </template>
+                    <div class="py-2 px-4">
+                        <cd-card class="border-2 border-body-600">
+                            <cd-layer-objects v-model:layers="layers" />
+                        </cd-card>
+                    </div>
+                </cd-menu>
+
+                <cd-menu :close-on-content-click="false">
+                    <template #activator="{ attrs }">
+                        <cd-btn v-bind="attrs" size="sq-md" color="body-900">
                             <cd-icon name="streamline-ultimate:layers-stacked-bold" />
                         </cd-btn>
                     </template>
