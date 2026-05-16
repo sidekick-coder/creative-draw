@@ -261,8 +261,8 @@ onMounted(draw)
     <canvas
         ref="root"
         class="absolute"
-        :class="{
-            'opacity-0': !layer.visible,
+        :style="{
+            opacity: layer.visible ? layer.opacity : 0,
         }"
     />
 </template>

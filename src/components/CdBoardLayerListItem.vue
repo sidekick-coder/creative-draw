@@ -71,6 +71,7 @@ const emit = defineEmits<{
                                 max="1"
                                 step="0.01"
                                 class="flex-1 bg-body-600"
+                                @clic.stop.prevent
                             />
                         </cd-list-item>
 

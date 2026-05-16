@@ -131,6 +131,8 @@ export function createLayer(payload: Partial<Payload> = {}) {
         order,
         opacity,
         backgroundColor,
+        type,
+        parentId,
 
         get,
         set,

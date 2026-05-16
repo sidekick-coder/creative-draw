@@ -8,14 +8,14 @@ const activeLayerId = defineModel<string | undefined>('activeLayerId', {
     type: String,
 })
 
-// layer type helpers — type and parent_id are stored in the layer context
+// layer type helpers — layer.type and layer.parentId are reactive refs (auto-unwrapped via reactive())
 
 function isGroup(layer: Layer): boolean {
-    return layer.context.get('type', '') === 'group'
+    return layer.type === 'group'
 }
 
 function getParentId(layer: Layer): string | null {
-    return layer.context.get('parent_id', '') || null
+    return layer.parentId || null
 }
 
 // collapsed state
@@ -43,8 +43,7 @@ function addLayer() {
 }
 
 function addGroup() {
-    const groupLayer = createLayer({ name: 'New Group' })
-    groupLayer.set('type', 'group')
+    const groupLayer = createLayer({ name: 'New Group', type: 'group' })
     layers.value = [groupLayer, ...layers.value]
 }
 
@@ -81,11 +80,18 @@ function deleteLayer(layer: Layer) {
     }
 }
 
-// drag & drop — flat list reorder
+// drag & drop — Figma-like
+// Groups have 3 drop zones:
+//   top 25%    → insert before (border-t)
+//   middle 50% → drop inside group (ring highlight, sets parent_id)
+//   bottom 25% → insert after (border-b)
+// Regular layers have 2 zones: top 50% before, bottom 50% after
+
+type DragPosition = 'before' | 'after' | 'inside'
 
 const draggingLayerId = ref<string | null>(null)
 const dragOverLayerId = ref<string | null>(null)
-const dragOverPosition = ref<'before' | 'after'>('before')
+const dragOverPosition = ref<DragPosition>('before')
 
 function onDragStart(event: DragEvent, layer: Layer) {
     draggingLayerId.value = layer.id
@@ -102,8 +108,17 @@ function onDragOver(event: DragEvent, layer: Layer) {
     event.preventDefault()
     event.dataTransfer!.dropEffect = 'move'
     dragOverLayerId.value = layer.id
+
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-    dragOverPosition.value = event.clientY < rect.top + rect.height / 2 ? 'before' : 'after'
+    const ratio = (event.clientY - rect.top) / rect.height
+
+    if (isGroup(layer)) {
+        if (ratio < 0.25) dragOverPosition.value = 'before'
+        else if (ratio > 0.75) dragOverPosition.value = 'after'
+        else dragOverPosition.value = 'inside'
+    } else {
+        dragOverPosition.value = ratio < 0.5 ? 'before' : 'after'
+    }
 }
 
 function onDragLeaveContainer(event: DragEvent) {
@@ -111,6 +126,19 @@ function onDragLeaveContainer(event: DragEvent) {
     if (!container.contains(event.relatedTarget as Node)) {
         dragOverLayerId.value = null
     }
+}
+
+function reorder(sourceId: string, targetId: string, position: 'before' | 'after') {
+    const arr = layers.value.slice()
+    const sourceIndex = arr.findIndex((l) => l.id === sourceId)
+    const targetIndex = arr.findIndex((l) => l.id === targetId)
+    if (sourceIndex === -1 || targetIndex === -1) return
+
+    const [item] = arr.splice(sourceIndex, 1)
+    const adjustedTarget = targetIndex > sourceIndex ? targetIndex - 1 : targetIndex
+    const insertAt = position === 'before' ? adjustedTarget : adjustedTarget + 1
+    arr.splice(insertAt, 0, item)
+    layers.value = arr
 }
 
 function onDrop(event: DragEvent, targetLayer: Layer) {
@@ -121,20 +149,36 @@ function onDrop(event: DragEvent, targetLayer: Layer) {
         return
     }
 
-    const arr = layers.value.slice()
-    const sourceIndex = arr.findIndex((l) => l.id === sourceId)
-    const targetIndex = arr.findIndex((l) => l.id === targetLayer.id)
-
-    if (sourceIndex === -1 || targetIndex === -1) {
+    const sourceLayer = layers.value.find((l) => l.id === sourceId)
+    if (!sourceLayer) {
         onDragEnd()
         return
     }
 
-    const [item] = arr.splice(sourceIndex, 1)
-    const adjustedTarget = targetIndex > sourceIndex ? targetIndex - 1 : targetIndex
-    const insertAt = dragOverPosition.value === 'before' ? adjustedTarget : adjustedTarget + 1
-    arr.splice(insertAt, 0, item)
-    layers.value = arr
+    const position = dragOverPosition.value
+
+    if (position === 'inside' && isGroup(targetLayer)) {
+        // move source to right after the last child of the target group (or the group itself)
+        const groupChildren = layers.value.filter((l) => getParentId(l) === targetLayer.id)
+        const anchor = groupChildren[groupChildren.length - 1] ?? targetLayer
+        reorder(sourceId, anchor.id, 'after')
+
+        // set parent
+        sourceLayer.parentId = targetLayer.id
+
+        // expand the group so the dropped layer is visible
+        collapsedGroups.value = new Set(
+            [...collapsedGroups.value].filter((id) => id !== targetLayer.id)
+        )
+    } else {
+        // before / after: positional reorder
+        reorder(sourceId, targetLayer.id, position)
+
+        // inherit the target's group context:
+        // - group header or ungrouped layer → detach (parentId = null)
+        // - child of a group → join that group
+        sourceLayer.parentId = isGroup(targetLayer) ? null : (targetLayer.parentId ?? null)
+    }
 
     onDragEnd()
 }
@@ -179,7 +223,12 @@ function onDrop(event: DragEvent, targetLayer: Layer) {
                 <!-- group row -->
                 <cd-card-head
                     v-if="isGroup(layer)"
-                    class="border-b border-body-600 !py-0 !px-2 bg-body-800 gap-x-0"
+                    class="border-b border-body-600 !py-0 !px-2 bg-body-800 gap-x-0 transition-colors"
+                    :class="
+                        dragOverLayerId === layer.id && dragOverPosition === 'inside'
+                            ? 'bg-primary-900/30 ring-1 ring-inset ring-primary-500'
+                            : ''
+                    "
                 >
                     <cd-btn
                         size="none"
@@ -212,10 +261,7 @@ function onDrop(event: DragEvent, targetLayer: Layer) {
                             variant="text"
                             @click="layer.visible = !layer.visible"
                         >
-                            <cd-icon
-                                v-if="layer.visible"
-                                name="heroicons:eye-16-solid"
-                            />
+                            <cd-icon v-if="layer.visible" name="heroicons:eye-16-solid" />
                             <cd-icon v-else name="heroicons:eye-slash-16-solid" />
                         </cd-btn>
 
