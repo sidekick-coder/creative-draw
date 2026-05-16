@@ -17,37 +17,25 @@ function loadObjects() {
     layerObjects.value = selectedLayer.value ? selectedLayer.value.context.get('data', []) : []
 }
 
+if (!selectedLayer.value && layers.value.length > 0) {
+    selectedLayerId.value = layers.value[0].id
+}
+
 onMounted(loadObjects)
 
 watch(selectedLayerId, loadObjects)
 
-// stroke color dialog
+function applyStrokeColor(obj: LayerObject, color: ColorRGB) {
+    if (!selectedLayer.value) return
 
-const strokeDialogOpen = ref(false)
-const editingObject = ref<LayerObject | null>(null)
-const editingColor = ref<ColorRGB>({ r: 0, g: 0, b: 0 })
+    obj.color = { ...color }
 
-function onItemClick(obj: LayerObject) {
-    if (obj.type !== 'stroke') return
-
-    editingObject.value = obj
-    editingColor.value = { ...obj.color }
-    strokeDialogOpen.value = true
-}
-
-function applyStrokeColor() {
-    if (!editingObject.value || !selectedLayer.value) return
-
-    editingObject.value.color = { ...editingColor.value }
-
-    selectedLayer.value.update(editingObject.value.id, {
-        ...editingObject.value,
-        color: { ...editingColor.value },
+    selectedLayer.value.update(obj.id, {
+        ...obj,
+        color: { ...color },
     })
 
     selectedLayer.value.redraw()
-
-    strokeDialogOpen.value = false
 }
 </script>
 
@@ -86,18 +74,17 @@ function applyStrokeColor() {
             <div
                 v-for="o in layerObjects"
                 :key="o.id"
-                class="flex items-center gap-x-3 px-4 py-4 border-b border-body-700 text-body-0 hover:bg-body-800"
-                :class="o.type === 'stroke' ? 'cursor-pointer' : ''"
-                @click="onItemClick(o)"
+                class="flex items-center gap-x-3 px-4 py-4 border-b border-body-700 text-body-0"
             >
-                <cd-icon name="mdi:vector-square" class="text-body-100 text-base shrink-0" />
-                <span class="truncate text-base">{{ o.type ?? 'object' }}</span>
-                <div
+                <div class="flex items-center gap-x-4 flex-1">
+                    <cd-icon name="mdi:vector-square" class="text-body-100 text-lg shrink-0" />
+                    <span class="truncate text-base">{{ o.type ?? 'object' }}</span>
+                </div>
+                <cd-color-picker
                     v-if="o.type === 'stroke'"
-                    class="ml-auto size-4 rounded-full shrink-0 border border-body-600"
-                    :style="{
-                        backgroundColor: `rgb(${o.color?.r || 0},${o.color?.g || 0},${o.color?.b || 0})`,
-                    }"
+                    :model-value="o.color"
+                    class="ml-auto"
+                    @update:model-value="applyStrokeColor(o, $event)"
                 />
                 <span v-else class="ml-auto text-sm font-mono shrink-0">
                     {{ o.id.slice(0, 6) }}
@@ -105,24 +92,4 @@ function applyStrokeColor() {
             </div>
         </div>
     </cd-card>
-
-    <cd-dialog v-model="strokeDialogOpen">
-        <cd-card class="min-w-72">
-            <cd-card-head class="border-b border-body-600">
-                <cd-card-title class="mr-auto text-sm font-bold text-body-100">
-                    {{ $t('Stroke color') }}
-                </cd-card-title>
-                <cd-btn variant="text" size="sq-sm" @click="strokeDialogOpen = false">
-                    <cd-icon name="heroicons:x-mark-20-solid" />
-                </cd-btn>
-            </cd-card-head>
-            <cd-card-content>
-                <cd-color-picker v-model="editingColor" />
-            </cd-card-content>
-            <cd-card-footer class="flex justify-end gap-x-2">
-                <cd-btn variant="text" @click="strokeDialogOpen = false">{{ $t('Cancel') }}</cd-btn>
-                <cd-btn @click="applyStrokeColor">{{ $t('Apply') }}</cd-btn>
-            </cd-card-footer>
-        </cd-card>
-    </cd-dialog>
 </template>
