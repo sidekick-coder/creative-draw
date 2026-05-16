@@ -15,7 +15,9 @@ export default class LayerRepositoryFilesystem implements LayerRepository {
         const json = JSON.parse(text)
 
         // data
-        const dataFiles = await this.drive.list(`projects/${projectId}/layers/${layerId}/data`)
+        let dataFiles = await this.drive.list(`projects/${projectId}/layers/${layerId}/data`)
+
+        dataFiles = dataFiles.filter((file) => file.type === 'file' && file.name.endsWith('.json'))
 
         const data = [] as any[]
 
