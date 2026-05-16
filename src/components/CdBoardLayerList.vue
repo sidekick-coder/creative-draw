@@ -80,7 +80,14 @@ function deleteLayer(layer: Layer) {
     }
 }
 
-// drag & drop — Figma-like
+function toggleGroupVisibility(group: Layer) {
+    group.visible = !group.visible
+    layers.value
+        .filter((l) => l.parentId === group.id)
+        .forEach((l) => (l.visible = group.visible))
+}
+
+
 // Groups have 3 drop zones:
 //   top 25%    → insert before (border-t)
 //   middle 50% → drop inside group (ring highlight, sets parent_id)
@@ -259,7 +266,7 @@ function onDrop(event: DragEvent, targetLayer: Layer) {
                         <cd-btn
                             size="sq-md"
                             variant="text"
-                            @click="layer.visible = !layer.visible"
+                            @click="toggleGroupVisibility(layer)"
                         >
                             <cd-icon v-if="layer.visible" name="heroicons:eye-16-solid" />
                             <cd-icon v-else name="heroicons:eye-slash-16-solid" />
