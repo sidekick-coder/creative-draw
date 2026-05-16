@@ -62,11 +62,9 @@ watch(projectId, setProject, { immediate: true })
 // layers
 const layers = ref<Layer[]>([])
 const activeLayerId = ref<string>()
-const layerGroups = ref<LayerGroup[]>([])
 
 async function loadLayers() {
     layers.value = []
-    layerGroups.value = []
 
     if (!project.value) return
 
@@ -106,8 +104,6 @@ async function loadLayers() {
 
     layers.value = projectLayers
     activeLayerId.value = layers.value[0]?.id
-
-    layerGroups.value = await workspace.layerGroups.list({ projectId: project.value.id })
 }
 
 watch(project, loadLayers, { immediate: true })
@@ -226,17 +222,6 @@ async function save() {
         })
     }
 
-    for (const group of layerGroups.value) {
-        const payload = { ...group, project_id: project.value.id }
-
-        if (!(await workspace.layerGroups.find(group.id))) {
-            await workspace.layerGroups.create(payload)
-            continue
-        }
-
-        await workspace.layerGroups.update(group.id, payload)
-    }
-
     await saveThumbnail()
 
     setTimeout(() => {
@@ -268,6 +253,7 @@ const maxBrushSize = computed(() => {
 
 // edit title
 const editTitleDialog = ref(false)
+const autoreloadDialog = ref(false)
 const editTitleValue = ref('')
 
 function openEditTitle() {
@@ -363,6 +349,12 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 </span>
             </div>
 
+            <cd-board-autoreload
+                v-model="autoreloadDialog"
+                :project-id="route.params.id"
+                @changed="refresh"
+            />
+
             <cd-dialog v-model="editTitleDialog">
                 <cd-card class="w-80">
                     <cd-card-head>
@@ -415,6 +407,10 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                             <cd-list-item @click="openEditTitle">
                                 <cd-icon name="heroicons:pencil-solid" class="mr-2" />
                                 {{ $t('Edit title') }}
+                            </cd-list-item>
+                            <cd-list-item @click="autoreloadDialog = true">
+                                <cd-icon name="heroicons:arrow-path" class="mr-2" />
+                                {{ $t('Filesystem auto reload') }}
                             </cd-list-item>
                         </cd-card>
                     </div>

@@ -5,15 +5,12 @@ import ProjectRepositoryFilesystem from '@/repositories/ProjectRepositoryFilesys
 import { createDrive } from 'drive-fsa'
 import type LayerRepository from '@/contracts/LayerRepository'
 import LayerRepositoryFilesystem from '@/repositories/LayerRepositoryFilesystem'
-import type LayerGroupRepository from '@/contracts/LayerGroupRepository'
-import LayerGroupRepositoryFilesystem from '@/repositories/LayerGroupRepositoryFilesystem'
 import type FileRepository from '@/contracts/FileRepository'
 import FileRepositoryFilesystem from '@/repositories/FileRepositoryFilesystem'
 
 export default class WorkspaceGatewayFileSystem extends Workspace implements WorkspaceGateway {
     public projects: ProjectRepository
     public layers: LayerRepository
-    public layerGroups: LayerGroupRepository
     public files: FileRepository
     public drive: ReturnType<typeof createDrive>
     public handle: FileSystemDirectoryHandle
@@ -32,7 +29,6 @@ export default class WorkspaceGatewayFileSystem extends Workspace implements Wor
 
         this.projects = new ProjectRepositoryFilesystem(this.drive)
         this.layers = new LayerRepositoryFilesystem(this.drive)
-        this.layerGroups = new LayerGroupRepositoryFilesystem(this.drive)
         this.files = new FileRepositoryFilesystem(this.drive)
     }
 
