@@ -11,6 +11,10 @@ export default class ProjectRepositoryFilesystem implements ProjectRepository {
         const projects = [] as Project[]
 
         for await (const folder of folders) {
+            if (folder.type !== 'directory') {
+                continue
+            }
+
             const text = await this.drive.read(`projects/${folder.name}/index.json`, {
                 contentType: 'text',
             })

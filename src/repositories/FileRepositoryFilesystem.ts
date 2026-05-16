@@ -15,6 +15,9 @@ export default class FileRepositoryFilesystem implements FileRepository {
         let files: File[] = []
 
         for await (const entry of entries) {
+            if (entry.type !== 'directory') {
+                continue
+            }
             const text = await this.drive.read(`files/${entry.name}/index.json`, {
                 contentType: 'text',
             })
