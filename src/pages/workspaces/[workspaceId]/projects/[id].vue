@@ -601,6 +601,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     :layer="layer"
                     :style="{
                         'z-index': layers.length - index,
+                        'opacity': layer.opacity,
                         'pointer-events': activeLayerId === layer.id ? 'auto' : 'none',
                     }"
                 />
