@@ -101,6 +101,8 @@ const emit = defineEmits<{
                                 <cd-icon name="mdi:image-off" />
                             </cd-btn>
                         </cd-list-item>
+                        <slot name="menu-extra" />
+
                         <cd-list-item class="justify-end">
                             <cd-btn color="danger" size="sm" @click="emit('delete', layer)">
                                 <cd-icon name="heroicons:trash-16-solid" class="mr-2" />

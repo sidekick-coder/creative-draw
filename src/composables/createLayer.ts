@@ -34,6 +34,8 @@ interface Payload {
     visible: boolean
     order: number
     opacity: number
+    type?: string
+    parent_id?: string | null
     background_color?: ColorRGB
     data: LayerObject[]
 }
@@ -47,11 +49,15 @@ export function createLayer(payload: Partial<Payload> = {}) {
         order: payload.order || 0,
         visible: payload.visible !== undefined ? payload.visible : true,
         opacity: payload.opacity || 1,
+        type: payload.type || null,
+        parent_id: payload.parent_id || null,
         background_color: payload.background_color || undefined,
     })
 
     const name = context.createRef<string>(`name`)
     const visible = context.createRef<boolean>(`visible`)
+    const type = context.createRef<string>(`type`)
+    const parentId = context.createRef<string | null>(`parent_id`)
     const order = context.createRef<number>(`order`)
     const opacity = context.createRef<number>(`opacity`)
     const backgroundColor = context.createRef<ColorRGB | undefined>(`background_color`)
@@ -107,6 +113,8 @@ export function createLayer(payload: Partial<Payload> = {}) {
             order: order.value,
             opacity: opacity.value,
             background_color: backgroundColor.value,
+            type: type.value,
+            parent_id: parentId.value,
             data: context.get('data') || [],
         }
 

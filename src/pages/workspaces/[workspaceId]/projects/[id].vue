@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
+import LayerGroup from '@/entities/LayerGroup'
 import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 
@@ -61,9 +62,11 @@ watch(projectId, setProject, { immediate: true })
 // layers
 const layers = ref<Layer[]>([])
 const activeLayerId = ref<string>()
+const layerGroups = ref<LayerGroup[]>([])
 
 async function loadLayers() {
     layers.value = []
+    layerGroups.value = []
 
     if (!project.value) return
 
@@ -103,39 +106,8 @@ async function loadLayers() {
 
     layers.value = projectLayers
     activeLayerId.value = layers.value[0]?.id
-}
 
-function addLayer() {
-    const newLayer = createLayer()
-
-    layers.value.unshift(newLayer)
-}
-
-function moveLayer(layer: Layer, direction: 'up' | 'down') {
-    const index = layers.value.indexOf(layer)
-
-    if (index === -1) return
-
-    if (direction === 'up' && index > 0) {
-        layers.value.splice(index, 1)
-        layers.value.splice(index - 1, 0, layer)
-        return
-    }
-
-    layers.value.splice(index, 1)
-    layers.value.splice(index + 1, 0, layer)
-}
-
-function deleteLayer(layer: Layer) {
-    const index = layers.value.indexOf(layer)
-
-    if (index === -1) return
-
-    layers.value.splice(index, 1)
-
-    if (activeLayerId.value === layer.id) {
-        activeLayerId.value = layers.value[index - 1]?.id
-    }
+    layerGroups.value = await workspace.layerGroups.list({ projectId: project.value.id })
 }
 
 watch(project, loadLayers, { immediate: true })
@@ -252,6 +224,17 @@ async function save() {
             ...payload,
             project_id: project.value.id,
         })
+    }
+
+    for (const group of layerGroups.value) {
+        const payload = { ...group, project_id: project.value.id }
+
+        if (!(await workspace.layerGroups.find(group.id))) {
+            await workspace.layerGroups.create(payload)
+            continue
+        }
+
+        await workspace.layerGroups.update(group.id, payload)
     }
 
     await saveThumbnail()
@@ -501,6 +484,8 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     <cd-icon name="mdi:hand-back-left" />
                 </cd-btn>
 
+                <cd-color-picker v-model="brush.color" />
+
                 <cd-menu :close-on-content-click="false">
                     <template #activator="{ attrs }">
                         <cd-btn v-bind="attrs" size="sq-md" color="body-900">
@@ -509,28 +494,13 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     </template>
                     <div class="py-2 px-4">
                         <cd-card class="border-2 border-body-600 min-w-64">
-                            <cd-card-head class="border-b border-body-600">
-                                <cd-card-title class="mr-auto text-base">Layers</cd-card-title>
-                                <cd-btn variant="text" size="sq-md" @click="addLayer">
-                                    <cd-icon name="heroicons:plus-20-solid" />
-                                </cd-btn>
-                            </cd-card-head>
-                            <cd-board-layer-list-item
-                                v-for="layer in layers"
-                                :key="layer.id"
-                                v-model:active-id="activeLayerId"
-                                :layer
-                                @move-up="moveLayer(layer, 'up')"
-                                @move-down="moveLayer(layer, 'down')"
-                                @delete="deleteLayer(layer)"
-                            >
-                                {{ layer.id }}
-                            </cd-board-layer-list-item>
+                            <cd-board-layer-list
+                                v-model:layers="layers"
+                                v-model:active-layer-id="activeLayerId"
+                            />
                         </cd-card>
                     </div>
                 </cd-menu>
-
-                <cd-color-picker v-model="brush.color" />
             </div>
 
             <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">

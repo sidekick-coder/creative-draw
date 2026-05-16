@@ -4,9 +4,12 @@ import Dexie from 'dexie'
 import type Project from '@/entities/Project'
 import type ProjectRepository from '@/contracts/ProjectRepository'
 import type LayerRepository from '@/contracts/LayerRepository'
+import type LayerGroupRepository from '@/contracts/LayerGroupRepository'
 import Layer from '@/entities/Layer'
+import LayerGroup from '@/entities/LayerGroup'
 import ProjectRepositoryIndexDB from '@/repositories/ProjectRepositoryIndexDB'
 import LayerRepositoryIndexDB from '@/repositories/LayerRepositoryIndexDB'
+import LayerGroupRepositoryIndexDB from '@/repositories/LayerGroupRepositoryIndexDB'
 import type FileRepository from '@/contracts/FileRepository'
 import FileRepositoryIndexDB from '@/repositories/FileRepositoryIndexDB'
 import type { IndexDbFile } from '@/gateways/IndexDbDriveGateway'
@@ -14,6 +17,7 @@ import type { IndexDbFile } from '@/gateways/IndexDbDriveGateway'
 export default class WorkspaceGatewayIndexDB extends Workspace implements WorkspaceGateway {
     public projects: ProjectRepository
     public layers: LayerRepository
+    public layerGroups: LayerGroupRepository
     public files: FileRepository
 
     constructor(workspace: Workspace) {
@@ -22,6 +26,7 @@ export default class WorkspaceGatewayIndexDB extends Workspace implements Worksp
         const db = new Dexie(`workspaces:${workspace.id}`) as Dexie & {
             projects: Dexie.Table<Project, string>
             layers: Dexie.Table<Layer, string>
+            layerGroups: Dexie.Table<LayerGroup, string>
             files: Dexie.Table<IndexDbFile, string>
         }
 
@@ -31,8 +36,16 @@ export default class WorkspaceGatewayIndexDB extends Workspace implements Worksp
             files: 'id,filename',
         })
 
+        db.version(2).stores({
+            projects: 'id',
+            layers: 'id',
+            layerGroups: 'id',
+            files: 'id,filename',
+        })
+
         this.projects = new ProjectRepositoryIndexDB(db.projects)
         this.layers = new LayerRepositoryIndexDB(db.layers)
+        this.layerGroups = new LayerGroupRepositoryIndexDB(db.layerGroups)
         this.files = new FileRepositoryIndexDB(db.files)
     }
 
