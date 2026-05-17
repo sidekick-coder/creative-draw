@@ -9,6 +9,7 @@ interface CreateRectOptions {
     color?: MaybeRef<ColorRGB>
     size?: MaybeRef<number>
     opacity?: MaybeRef<number>
+    fill?: MaybeRef<boolean>
     debug?: boolean
 }
 
@@ -17,8 +18,15 @@ const render = defineObjectRender({
     render({ ctx, item }) {
         ctx.globalAlpha = item.opacity ?? 1
         ctx.strokeStyle = `rgb(${item.color.r}, ${item.color.g}, ${item.color.b})`
+        ctx.fillStyle = `rgb(${item.color.r}, ${item.color.g}, ${item.color.b})`
         ctx.lineWidth = item.strokeWidth ?? 2
-        ctx.strokeRect(item.x, item.y, item.width, item.height)
+
+        if (item.fill) {
+            ctx.fillRect(item.x, item.y, item.width, item.height)
+        } else {
+            ctx.strokeRect(item.x, item.y, item.width, item.height)
+        }
+
         ctx.globalAlpha = 1
     },
 })
@@ -28,20 +36,32 @@ export function createRect(options: CreateRectOptions = {}) {
     const color = toRef(options.color ?? { r: 0, g: 0, b: 0 })
     const size = toRef(options.size ?? 2)
     const opacity = toRef(options.opacity ?? 1)
+    const fill = toRef(options.fill ?? false)
 
     let drawing = false
     let startX = 0
     let startY = 0
     let savedImageData: ImageData | null = null
 
+    function drawRect(ctx: OffscreenCanvasRenderingContext2D, x: number, y: number, w: number, h: number, isFill: boolean) {
+        ctx.globalAlpha = opacity.value
+        ctx.strokeStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
+        ctx.fillStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
+        ctx.lineWidth = size.value
+
+        if (isFill) {
+            ctx.fillRect(x, y, w, h)
+        } else {
+            ctx.strokeRect(x, y, w, h)
+        }
+
+        ctx.globalAlpha = 1
+    }
+
     function drawPreview(ctx: OffscreenCanvasRenderingContext2D, x: number, y: number) {
         if (savedImageData) ctx.putImageData(savedImageData, 0, 0)
 
-        ctx.globalAlpha = opacity.value
-        ctx.strokeStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
-        ctx.lineWidth = size.value
-        ctx.strokeRect(startX, startY, x - startX, y - startY)
-        ctx.globalAlpha = 1
+        drawRect(ctx, startX, startY, x - startX, y - startY, fill.value)
     }
 
     function cancel(ctx: OffscreenCanvasRenderingContext2D) {
@@ -56,6 +76,7 @@ export function createRect(options: CreateRectOptions = {}) {
     return defineBoardPlugin(
         reactive({
             active,
+            fill,
             render,
             install(board: Board) {
                 board.emitter.on('layer:add', (layer: Layer) => {
@@ -101,13 +122,10 @@ export function createRect(options: CreateRectOptions = {}) {
                             color: { ...color.value },
                             strokeWidth: size.value,
                             opacity: opacity.value,
+                            fill: fill.value,
                         }
 
-                        e.ctx.globalAlpha = item.opacity
-                        e.ctx.strokeStyle = `rgb(${item.color.r}, ${item.color.g}, ${item.color.b})`
-                        e.ctx.lineWidth = item.strokeWidth
-                        e.ctx.strokeRect(item.x, item.y, item.width, item.height)
-                        e.ctx.globalAlpha = 1
+                        drawRect(e.ctx, item.x, item.y, item.width, item.height, item.fill)
 
                         layer.add(item)
                     })

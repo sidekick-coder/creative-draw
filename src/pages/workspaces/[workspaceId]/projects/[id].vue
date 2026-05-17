@@ -510,6 +510,15 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 />
 
                 <cd-btn
+                    v-if="activeTool === 'rect'"
+                    size="sq-md"
+                    :color="rect.fill ? 'primary' : 'body-900'"
+                    @click="rect.fill = !rect.fill"
+                >
+                    <cd-icon name="mdi:square" />
+                </cd-btn>
+
+                <cd-btn
                     size="sq-md"
                     :color="activeTool === 'brush' ? 'primary' : 'body-900'"
                     @click="activeTool = 'brush'"
