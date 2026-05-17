@@ -9,7 +9,7 @@ const { set, classes } = useClassBuilder({
     class: className,
 })
 
-set('base', 'cd-range bg-body-800')
+set('base', 'cd-range bg-body-700')
 
 // model
 const model = defineModel({
@@ -86,7 +86,7 @@ const size = defineProp<number>('size', {
 
     &:hover {
         &::-webkit-slider-thumb {
-            @apply bg-body-50;
+            @apply bg-body-0;
         }
     }
 }

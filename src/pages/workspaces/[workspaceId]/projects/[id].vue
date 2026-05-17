@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
+import { createRect } from '@/composables/createRect'
 import type Project from '@/entities/Project'
 import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
+import type { ObjectRender } from '@/composables/defineObjectRender'
 
 // general
 const route = useRoute('/workspaces/[workspaceId]/projects/[id]')
@@ -16,6 +18,7 @@ const boardHeight = ref(500)
 
 const history = createHistory()
 const pan = createPan()
+const rect = createRect()
 const transform = createTransform()
 const zoom = createZoom(transform)
 const rotate = createRotate(transform)
@@ -237,9 +240,10 @@ async function save() {
     }, 1000)
 }
 
-// brush
+// tools
 const brushSelected = useLocalStorage('cd-brush-selected', 'pen')
 const brushes = useBrushes()
+const renders = new Map<string, ObjectRender>()
 
 const definition = computed(() => {
     return brushes.find((b) => b.id === brushSelected.value) || brushes[0]
@@ -259,6 +263,7 @@ const maxBrushSize = computed(() => {
     return project.value?.width * 0.05
 })
 
+renders.set(brush.render.name, brush.render)
 // edit title
 const editTitleDialog = ref(false)
 const autoreloadDialog = ref(false)
@@ -487,6 +492,14 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 >
                     <cd-icon name="mdi:hand-back-left" />
                 </cd-btn>
+                <cd-btn
+                    size="sq-md"
+                    color="body-900"
+                    :class="rect.active ? 'bg-primary-300' : ''"
+                    @click="rect.toggle"
+                >
+                    <cd-icon name="mdi:shape-outline" />
+                </cd-btn>
 
                 <cd-color-picker v-model="brush.color" />
 
@@ -573,7 +586,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             <cd-board
                 :width="boardWidth"
                 :height="boardHeight"
-                :plugins="[transform, zoom, pan, rotate, brush, history]"
+                :plugins="[transform, zoom, pan, rect, rotate, brush, history]"
                 :style="{
                     'will-change': 'transform',
                 }"
@@ -586,6 +599,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     :x="canvasX"
                     :y="canvasY"
                     :layer="layer"
+                    :object-renders="renders"
                     :style="{
                         'z-index': layers.length - index,
                         'pointer-events': activeLayerId === layer.id ? 'auto' : 'none',

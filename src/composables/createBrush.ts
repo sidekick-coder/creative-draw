@@ -3,6 +3,7 @@ import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
 import type { ColorRGB } from '@/utils/colors'
 import type { BrushDefinition } from './defineBrush'
+import { defineObjectRender } from './defineObjectRender'
 
 export interface CreateBrushOptions {
     size?: MaybeRef<number>
@@ -11,6 +12,59 @@ export interface CreateBrushOptions {
     erase?: MaybeRef<boolean>
     definition?: MaybeRef<BrushDefinition | undefined>
 }
+
+const map = new Set<string>()
+const layerExcludeMap = new Map<string, Set<string>>()
+
+function createPathKey(x: number, y: number, pressure: number, size: number, color: ColorRGB) {
+    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
+}
+
+function drawPaths(
+    ctx: CanvasRenderingContext2D,
+    paths: BrushPath[],
+    color: ColorRGB = { r: 0, g: 0, b: 0 },
+    exclude = new Set<string>()
+) {
+    paths.forEach((p) => {
+        const key = createPathKey(p.x, p.y, p.pressure, p.size, color)
+
+        if (exclude.has(key)) {
+            return
+        }
+
+        exclude.add(key)
+
+        const opacity = p.opacity || 1
+
+        if (p.erase) {
+            ctx.globalCompositeOperation = 'destination-out'
+            ctx.globalAlpha = opacity
+            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
+            ctx.beginPath()
+            ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.closePath()
+            ctx.globalCompositeOperation = 'source-over'
+            return
+        }
+
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.globalAlpha = opacity
+        ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.closePath()
+    })
+}
+
+const render = defineObjectRender({
+    name: 'stroke',
+    render({ ctx, item }) {
+        drawPaths(ctx, item.paths, item.color)
+    },
+})
 
 export function createBrush(options?: CreateBrushOptions) {
     const size = toRef(options?.size ?? 1)
@@ -50,14 +104,12 @@ export function createBrush(options?: CreateBrushOptions) {
             paths.push(path)
         })
 
-        layer.emitter.emit('paths:begin', {
-            opacity: opacity.value,
-        })
+        const ctx = layer.context.get('context')
+        const exclude = layerExcludeMap.get(layer.id) || new Set<string>()
 
-        layer.emitter.emit('paths:draw', {
-            paths: drawPath,
-            color: color.value,
-        })
+        exclude.clear()
+
+        drawPaths(ctx, paths, color.value, exclude)
     }
 
     function move(layer: Layer, x: number, y: number, pressure = 0.5) {
@@ -88,10 +140,10 @@ export function createBrush(options?: CreateBrushOptions) {
         lastY = y
         lastPressure = pressure
 
-        layer.emitter.emit('paths:draw', {
-            paths: newPaths,
-            color: color.value,
-        })
+        const ctx = layer.context.get('context')
+        const exclude = layerExcludeMap.get(layer.id) || new Set<string>()
+
+        drawPaths(ctx, newPaths, color.value, exclude)
     }
 
     function end(layer: Layer) {
@@ -108,9 +160,14 @@ export function createBrush(options?: CreateBrushOptions) {
 
         paths = []
 
-        layer.emitter.emit('stroke', item)
+        map.clear()
 
-        layer.emitter.emit('paths:end')
+        const ctx = layer.context.get('context')
+        const exclude = layerExcludeMap.get(layer.id) || new Set<string>()
+
+        drawPaths(ctx, paths, color.value, exclude)
+
+        exclude.clear()
 
         device = null
     }
@@ -121,8 +178,11 @@ export function createBrush(options?: CreateBrushOptions) {
             size,
             opacity,
             color,
+            render,
             install(board: Board) {
                 board.emitter.on('layer:add', (layer: Layer) => {
+                    layerExcludeMap.set(layer.id, new Set<string>())
+
                     console.log('[brush] installing on layer', layer.id)
 
                     function endIfIsDevice(checkDevice: 'mouse' | 'pointer' | 'touch') {

@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import type { LayerObject } from '@/composables/createLayer'
-import type { ColorRGB } from '@/utils/colors'
+import type { ObjectRender } from '@/composables/defineObjectRender'
 
 // general
 const root = ref<HTMLCanvasElement | null>(null)
+
 const layer = defineModel('layer', {
     type: Object as () => Layer,
     required: true,
+})
+
+const objectRenders = defineModel<Map<string, ObjectRender>>('objectRenders', {
+    type: Map as PropType<Map<string, ObjectRender>>,
+    default: () => new Map(),
 })
 
 function getCanvas() {
@@ -176,73 +182,28 @@ const board = useBoard()
 board.addLayer(layer)
 
 // paths
-const map = new Set<string>()
-
-function createPathKey(x: number, y: number, pressure: number, size: number, color: ColorRGB) {
-    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
-}
-
-function drawPaths(paths: BrushPath[], color: ColorRGB = { r: 0, g: 0, b: 0 }) {
-    const ctx = getContext()
-
-    paths.forEach((p) => {
-        const key = createPathKey(p.x, p.y, p.pressure, p.size, color)
-
-        if (map.has(key)) {
-            return
-        }
-
-        map.add(key)
-
-        const opacity = p.opacity || 1
-
-        if (p.erase) {
-            ctx.globalCompositeOperation = 'destination-out'
-            ctx.globalAlpha = opacity
-            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
-            ctx.beginPath()
-            ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
-            ctx.fill()
-            ctx.closePath()
-            ctx.globalCompositeOperation = 'source-over'
-            return
-        }
-
-        ctx.globalCompositeOperation = 'source-over'
-        ctx.globalAlpha = opacity
-        ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.closePath()
-    })
-}
-
-layer.value.emitter.on('paths:draw', (data: any) => {
-    drawPaths(data.paths, data.color)
-})
-
-layer.value.emitter.on('paths:begin', () => {
-    map.clear()
-})
-
-layer.value.emitter.on('paths:end', () => {
-    map.clear()
-})
-
 function clear() {
     const ctx = getContext()
     ctx.clearRect(0, 0, width.value, height.value)
-    map.clear()
 }
 
 function draw() {
     const items = layer.value.get<LayerObject[]>('data', [])
+    const ctx = getContext()
 
     for (const item of items) {
-        if (item.type === 'stroke') {
-            drawPaths(item.paths, item.color)
+        const objectRender = objectRenders.value.get(item.type)
+
+        if (!objectRender) {
+            console.warn(`No render found for type ${item.type}`)
+            continue
         }
+
+        objectRender.render({
+            layer: layer.value,
+            ctx: ctx,
+            item,
+        })
     }
 }
 

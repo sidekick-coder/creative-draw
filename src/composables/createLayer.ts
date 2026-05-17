@@ -114,7 +114,9 @@ export function createLayer(payload: Partial<Payload> = {}) {
     }
 
     function redraw() {
-        emitter.emit('redraw')
+        emitter.emit('redraw', {
+            layerId: id,
+        })
     }
 
     function serialize() {
