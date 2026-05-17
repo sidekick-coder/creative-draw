@@ -28,14 +28,27 @@ watch([selectedLayerId, selectedObjectId], ([layerId, objectId]) => {
 <template>
     <cd-card color="none" class="rounded-none border-0 min-w-72">
         <cd-card-head class="border-b border-body-600">
-            <cd-card-title class="mr-auto text-sm font-bold text-body-100">
-                {{ $t('Inspector') }}
-            </cd-card-title>
+            <div class="flex flex-col mr-auto">
+                <cd-card-title class="text-sm font-bold text-body-100">
+                    {{ selectedObject ? (selectedObject.type ?? 'object') : $t('Inspector') }}
+                </cd-card-title>
+                <span v-if="selectedLayer" class="text-xs text-body-400">
+                    {{ selectedLayer.name }}
+                </span>
+            </div>
+            <span v-if="selectedObject" class="text-xs text-body-400 font-mono ml-auto">
+                {{ selectedObject.id.slice(0, 6) }}
+            </span>
         </cd-card-head>
 
         <template v-if="selectedObject && selectedLayer">
             <cd-object-inspector-stroke
                 v-if="selectedObject.type === 'stroke'"
+                :object="selectedObject"
+                :layer="selectedLayer"
+            />
+            <cd-object-inspector-rect
+                v-else-if="selectedObject.type === 'rect'"
                 :object="selectedObject"
                 :layer="selectedLayer"
             />
