@@ -14,7 +14,6 @@ const inspectorObjectId = board.context.createRef<string | null>('inspectorObjec
 const allObjects = ref<LayerObjectWithMeta[]>([])
 
 function load() {
-    console.log('Load objects', layers.value.length)
     const objects: LayerObjectWithMeta[] = []
 
     layers.value.forEach((layer) => {
@@ -56,7 +55,7 @@ function init() {
     load()
 }
 
-watch(layers, init, { immediate: true })
+board.emitter.on('layer:added', init)
 </script>
 
 <template>

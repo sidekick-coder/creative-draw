@@ -43,7 +43,14 @@ export function createRect(options: CreateRectOptions = {}) {
     let startY = 0
     let savedImageData: ImageData | null = null
 
-    function drawRect(ctx: OffscreenCanvasRenderingContext2D, x: number, y: number, w: number, h: number, isFill: boolean) {
+    function drawRect(
+        ctx: OffscreenCanvasRenderingContext2D,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        isFill: boolean
+    ) {
         ctx.globalAlpha = opacity.value
         ctx.strokeStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
         ctx.fillStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
@@ -79,7 +86,7 @@ export function createRect(options: CreateRectOptions = {}) {
             fill,
             render,
             install(board: Board) {
-                board.emitter.on('layer:add', (layer: Layer) => {
+                board.emitter.on('layer:added', (layer: Layer) => {
                     layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
                         if (!active.value) return
 

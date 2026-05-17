@@ -184,7 +184,7 @@ export function createBrush(options?: CreateBrushOptions) {
             active,
             render,
             install(board: Board) {
-                board.emitter.on('layer:add', (layer: Layer) => {
+                board.emitter.on('layer:added', (layer: Layer) => {
                     layerExcludeMap.set(layer.id, new Set<string>())
 
                     console.log('[brush] installing on layer', layer.id)

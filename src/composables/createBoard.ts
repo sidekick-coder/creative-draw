@@ -23,7 +23,7 @@ export function createBoard() {
 
         layers.value.push(layer)
 
-        emitter.emit('layer:add', layer)
+        emitter.emit('layer:added', layer)
 
         layer.emitter.on('set', ({ key, value }: { key: string; value: any }) => {
             emitter.emit(`layer:set:${key}`, { key, value, layer })
