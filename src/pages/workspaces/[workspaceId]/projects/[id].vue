@@ -2,6 +2,7 @@
 import { createTransform } from '@/composables/createTransform'
 import { createRect } from '@/composables/createRect'
 import type Project from '@/entities/Project'
+import type { ColorRGB } from '@/utils/colors'
 import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 import type { ObjectRender } from '@/composables/defineObjectRender'
@@ -19,10 +20,13 @@ const boardHeight = ref(500)
 const history = createHistory()
 
 type ActiveTool = 'brush' | 'pan' | 'rect'
-const activeTool = ref<ActiveTool>('brush')
+const activeTool = useLocalStorage<ActiveTool>('brush', 'brush')
+const color = useLocalStorage<ColorRGB>('cd-color', { r: 0, g: 0, b: 0 })
+const size = useLocalStorage('cd-tool-size', 1)
+const opacity = useLocalStorage('cd-tool-opacity', 1)
 
 const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
-const rect = createRect({ active: computed(() => activeTool.value === 'rect') })
+const rect = createRect({ active: computed(() => activeTool.value === 'rect'), color, size, opacity })
 const transform = createTransform()
 const zoom = createZoom(transform)
 const rotate = createRotate(transform)
@@ -255,9 +259,10 @@ const definition = computed(() => {
 
 const brush = createBrush({
     definition,
-    size: useLocalStorage('cd-brush-size', 1),
-    opacity: useLocalStorage('cd-brush-opacity', 1),
+    size,
+    opacity,
     active: computed(() => activeTool.value === 'brush'),
+    color,
 })
 
 const minBrushSize = computed(() => {
@@ -269,6 +274,7 @@ const maxBrushSize = computed(() => {
 })
 
 renders.set(brush.render.name, brush.render)
+renders.set(rect.render.name, rect.render)
 // edit title
 const editTitleDialog = ref(false)
 const autoreloadDialog = ref(false)
@@ -482,7 +488,6 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                             <cd-brush-list v-model="brushSelected" />
                         </div>
                     </cd-menu>
-                    <cd-color-picker v-model="brush.color" />
                     <cd-btn
                         size="sq-md"
                         :color="brush.erase && activeTool === 'brush' ? 'primary' : 'body-900'"
@@ -491,6 +496,11 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                         <cd-icon name="mdi:eraser" />
                     </cd-btn>
                 </template>
+
+                <cd-color-picker
+                    v-if="activeTool === 'brush' || activeTool === 'rect'"
+                    v-model="color"
+                />
 
                 <cd-btn
                     size="sq-md"
@@ -511,13 +521,13 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     :color="activeTool === 'rect' ? 'primary' : 'body-900'"
                     @click="activeTool = 'rect'"
                 >
-                    <cd-icon name="mdi:shape-outline" />
+                    <cd-icon name="mdi:square-outline" />
                 </cd-btn>
 
                 <cd-menu :close-on-content-click="false">
                     <template #activator="{ attrs }">
                         <cd-btn v-bind="attrs" size="sq-md" color="body-900">
-                            <cd-icon name="mdi:vector-square" />
+                            <cd-icon name="mdi:cube" />
                         </cd-btn>
                     </template>
                     <div class="py-2 px-4">
@@ -547,7 +557,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">
                 <div class="bg-body-900 p-2 flex flex-col gap-y-4">
                     <cd-range
-                        v-model="brush.size"
+                        v-model="size"
                         :min="minBrushSize"
                         :max="maxBrushSize"
                         step="1"
@@ -556,7 +566,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                         class="h-[30dvh] w-6"
                     />
                     <cd-range
-                        v-model="brush.opacity"
+                        v-model="opacity"
                         min="0"
                         max="1"
                         step="0.01"

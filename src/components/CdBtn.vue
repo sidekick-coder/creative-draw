@@ -69,7 +69,7 @@ function setDefaultColor() {
         ],
         'body-900': [
             'bg-body-900 text-body-0',
-            'hover:bg-body-800',
+            'hover:bg-body-900/70',
             'data-[active=true]:text-body-900',
             'data-[loading=true]:text-body-900/0',
             '[&>*:is(.spinner)]:text-body-0',
