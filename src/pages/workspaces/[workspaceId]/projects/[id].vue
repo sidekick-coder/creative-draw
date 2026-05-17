@@ -17,8 +17,12 @@ const boardWidth = ref(500)
 const boardHeight = ref(500)
 
 const history = createHistory()
-const pan = createPan()
-const rect = createRect()
+
+type ActiveTool = 'brush' | 'pan' | 'rect'
+const activeTool = ref<ActiveTool>('brush')
+
+const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
+const rect = createRect({ active: computed(() => activeTool.value === 'rect') })
 const transform = createTransform()
 const zoom = createZoom(transform)
 const rotate = createRotate(transform)
@@ -253,6 +257,7 @@ const brush = createBrush({
     definition,
     size: useLocalStorage('cd-brush-size', 1),
     opacity: useLocalStorage('cd-brush-opacity', 1),
+    active: computed(() => activeTool.value === 'brush'),
 })
 
 const minBrushSize = computed(() => {
@@ -466,42 +471,48 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             </div>
 
             <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
+                <template v-if="activeTool === 'brush'">
+                    <cd-menu :close-on-content-click="false">
+                        <template #activator="{ attrs }">
+                            <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                                <cd-icon name="heroicons:paint-brush-solid" />
+                            </cd-btn>
+                        </template>
+                        <div class="py-2 px-4">
+                            <cd-brush-list v-model="brushSelected" />
+                        </div>
+                    </cd-menu>
+                    <cd-color-picker v-model="brush.color" />
+                    <cd-btn
+                        size="sq-md"
+                        :color="brush.erase && activeTool === 'brush' ? 'primary' : 'body-900'"
+                        @click="brush.erase = !brush.erase"
+                    >
+                        <cd-icon name="mdi:eraser" />
+                    </cd-btn>
+                </template>
+
                 <cd-btn
                     size="sq-md"
-                    color="body-900"
-                    :class="brush.erase ? 'bg-primary-300' : ''"
-                    @click="brush.erase = !brush.erase"
+                    :color="activeTool === 'brush' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'brush'"
                 >
-                    <cd-icon name="mdi:eraser" />
+                    <cd-icon name="heroicons:paint-brush-solid" />
                 </cd-btn>
-                <cd-menu :close-on-content-click="false">
-                    <template #activator="{ attrs }">
-                        <cd-btn v-bind="attrs" size="sq-md" color="body-900">
-                            <cd-icon name="heroicons:paint-brush-solid" />
-                        </cd-btn>
-                    </template>
-                    <div class="py-2 px-4">
-                        <cd-brush-list v-model="brushSelected" />
-                    </div>
-                </cd-menu>
                 <cd-btn
                     size="sq-md"
-                    color="body-900"
-                    :class="pan.active ? 'bg-primary-300' : ''"
-                    @click="pan.toggle"
+                    :color="activeTool === 'pan' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'pan'"
                 >
                     <cd-icon name="mdi:hand-back-left" />
                 </cd-btn>
                 <cd-btn
                     size="sq-md"
-                    color="body-900"
-                    :class="rect.active ? 'bg-primary-300' : ''"
-                    @click="rect.toggle"
+                    :color="activeTool === 'rect' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'rect'"
                 >
                     <cd-icon name="mdi:shape-outline" />
                 </cd-btn>
-
-                <cd-color-picker v-model="brush.color" />
 
                 <cd-menu :close-on-content-click="false">
                     <template #activator="{ attrs }">

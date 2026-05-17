@@ -11,6 +11,7 @@ export interface CreateBrushOptions {
     color?: MaybeRef<ColorRGB>
     erase?: MaybeRef<boolean>
     definition?: MaybeRef<BrushDefinition | undefined>
+    active?: MaybeRef<boolean>
 }
 
 const map = new Set<string>()
@@ -72,6 +73,7 @@ export function createBrush(options?: CreateBrushOptions) {
     const color = toRef(options?.color ?? { r: 0, g: 0, b: 0 })
     const erase = toRef(options?.erase ?? false)
     const definition = toRef(options?.definition)
+    const active = toRef(options?.active ?? true)
 
     let drawing = false
     let device = null as 'mouse' | 'pointer' | 'touch' | null
@@ -81,6 +83,7 @@ export function createBrush(options?: CreateBrushOptions) {
     let paths = [] as BrushPath[]
 
     function start(layer: Layer, x: number, y: number, pressure = 0.5) {
+        if (!active.value) return
         drawing = true
         lastX = x
         lastY = y
@@ -178,6 +181,7 @@ export function createBrush(options?: CreateBrushOptions) {
             size,
             opacity,
             color,
+            active,
             render,
             install(board: Board) {
                 board.emitter.on('layer:add', (layer: Layer) => {
