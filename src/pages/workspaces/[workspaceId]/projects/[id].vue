@@ -6,6 +6,12 @@ import type { ColorRGB } from '@/utils/colors'
 import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 import type { ObjectRender } from '@/composables/defineObjectRender'
+import type { WidgetDefinition, WidgetData } from '@/utils/defineWidget'
+import type { Component } from 'vue'
+import objectsListWidget from '@/widgets/objectsList'
+import objectInspectorWidget from '@/widgets/objectInspector'
+import CdLayerObjects from '@/components/CdLayerObjects.vue'
+import CdObjectInspector from '@/components/CdObjectInspector.vue'
 
 // general
 const route = useRoute('/workspaces/[workspaceId]/projects/[id]')
@@ -77,8 +83,6 @@ watch(projectId, setProject, { immediate: true })
 // layers
 const layers = ref<Layer[]>([])
 const activeLayerId = ref<string>()
-const inspectorLayerId = ref<string>()
-const inspectorObjectId = ref<string>()
 
 async function loadLayers() {
     layers.value = []
@@ -303,6 +307,34 @@ async function saveTitle() {
 
     editTitleDialog.value = false
 }
+
+// widgets
+
+const widgetsDefinitions = Object.values(import.meta.glob('@/widgets/*.ts', { eager: true })).map(
+    (mod) => mod.default as WidgetDefinition
+)
+
+const widgetData = ref<WidgetData[]>([
+    { widget_id: 'objects-list', x: 20, y: 100, width: 300, height: 400 },
+    { widget_id: 'object-inspector', x: 340, y: 100, width: 300, height: 400 },
+])
+
+const widgets = shallowRef<(WidgetDefinition & WidgetData)[]>([])
+
+function loadWidgets() {
+    for (const data of widgetData.value) {
+        const definition = widgetsDefinitions.find((d) => d.id === data.widget_id)
+
+        if (definition) {
+            widgets.value.push({
+                ...definition,
+                ...data,
+            })
+        }
+    }
+}
+
+onMounted(loadWidgets)
 
 // export
 const exporting = ref(false)
@@ -548,11 +580,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     </template>
                     <div class="py-2 px-4">
                         <cd-card class="border-2 border-body-600">
-                            <cd-object-inspector
-                                v-model:layers="layers"
-                                v-model:selected-layer-id="inspectorLayerId"
-                                v-model:selected-object-id="inspectorObjectId"
-                            />
+                            <cd-object-inspector />
                         </cd-card>
                     </div>
                 </cd-menu>
@@ -565,11 +593,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     </template>
                     <div class="py-2 px-4">
                         <cd-card class="border-2 border-body-600">
-                            <cd-layer-objects
-                                v-model:layers="layers"
-                                v-model:inspector-layer-id="inspectorLayerId"
-                                v-model:inspector-object-id="inspectorObjectId"
-                            />
+                            <cd-layer-objects />
                         </cd-card>
                     </div>
                 </cd-menu>
@@ -640,6 +664,10 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     <cd-icon name="mdi:magnify-plus" />
                 </cd-btn>
             </div>
+
+            <cd-board-widget v-for="w in widgets" :key="w.id" :x="w.x" :y="w.y">
+                <component :is="w.component" />
+            </cd-board-widget>
 
             <cd-board
                 :width="boardWidth"

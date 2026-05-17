@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import type { LayerObject } from '@/composables/createLayer'
 
-const layers = defineModel<Layer[]>('layers', {
-    type: Array as PropType<Layer[]>,
-    default: () => [],
-})
-
-const selectedLayerId = defineModel<string | undefined>('selectedLayerId')
-const selectedObjectId = defineModel<string | undefined>('selectedObjectId')
+const board = useBoard()
+const layers = computed(() => board.layers)
+const selectedLayerId = board.context.createRef<string | null>('inspectorLayerId', null)
+const selectedObjectId = board.context.createRef<string | null>('inspectorObjectId', null)
 
 const selectedLayer = ref<Layer | undefined>()
 const selectedObject = ref<LayerObject | undefined>()

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import type { LayerObject } from '@/composables/createLayer'
-import type { ColorRGB } from '@/utils/colors'
 
 interface LayerObjectWithMeta extends LayerObject {
     _layerName: string
     _layer: Layer
 }
 
-const layers = defineModel<Layer[]>('layers', {
-    type: Array as PropType<Layer[]>,
-    default: () => [],
-})
+const board = useBoard()
+const layers = computed(() => board.layers)
+const inspectorLayerId = board.context.createRef<string | null>('inspectorLayerId', null)
+const inspectorObjectId = board.context.createRef<string | null>('inspectorObjectId', null)
 
 const allObjects = ref<LayerObjectWithMeta[]>([])
 
 function load() {
+    console.log('Load objects', layers.value.length)
     const objects: LayerObjectWithMeta[] = []
 
     layers.value.forEach((layer) => {
@@ -31,9 +31,6 @@ function load() {
 
     allObjects.value = objects
 }
-
-const inspectorLayerId = defineModel<string | undefined>('inspectorLayerId')
-const inspectorObjectId = defineModel<string | undefined>('inspectorObjectId')
 
 function selectObject(obj: LayerObjectWithMeta) {
     inspectorLayerId.value = obj._layer.id
@@ -71,6 +68,9 @@ watch(layers, init, { immediate: true })
                     >({{ allObjects.length }})</span
                 >
             </cd-card-title>
+            <cd-btn size="sq-sm" color="body-900" @click.stop.prevent="load">
+                <cd-icon name="heroicons:arrow-path" />
+            </cd-btn>
         </cd-card-head>
 
         <div v-if="allObjects.length === 0" class="px-4 py-3 text-xs text-body-100">
