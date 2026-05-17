@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
-import LayerGroup from '@/entities/LayerGroup'
 import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 
