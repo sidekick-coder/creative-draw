@@ -26,7 +26,12 @@ const size = useLocalStorage('cd-tool-size', 1)
 const opacity = useLocalStorage('cd-tool-opacity', 1)
 
 const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
-const rect = createRect({ active: computed(() => activeTool.value === 'rect'), color, size, opacity })
+const rect = createRect({
+    active: computed(() => activeTool.value === 'rect'),
+    color,
+    size,
+    opacity,
+})
 const transform = createTransform()
 const zoom = createZoom(transform)
 const rotate = createRotate(transform)
@@ -72,6 +77,8 @@ watch(projectId, setProject, { immediate: true })
 // layers
 const layers = ref<Layer[]>([])
 const activeLayerId = ref<string>()
+const inspectorLayerId = ref<string>()
+const inspectorObjectId = ref<string>()
 
 async function loadLayers() {
     layers.value = []
@@ -527,12 +534,33 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 <cd-menu :close-on-content-click="false">
                     <template #activator="{ attrs }">
                         <cd-btn v-bind="attrs" size="sq-md" color="body-900">
+                            <cd-icon name="boxicons:diamond-filled" />
+                        </cd-btn>
+                    </template>
+                    <div class="py-2 px-4">
+                        <cd-card class="border-2 border-body-600">
+                            <cd-object-inspector
+                                v-model:layers="layers"
+                                v-model:selected-layer-id="inspectorLayerId"
+                                v-model:selected-object-id="inspectorObjectId"
+                            />
+                        </cd-card>
+                    </div>
+                </cd-menu>
+
+                <cd-menu :close-on-content-click="false">
+                    <template #activator="{ attrs }">
+                        <cd-btn v-bind="attrs" size="sq-md" color="body-900">
                             <cd-icon name="mdi:cube" />
                         </cd-btn>
                     </template>
                     <div class="py-2 px-4">
                         <cd-card class="border-2 border-body-600">
-                            <cd-layer-objects v-model:layers="layers" />
+                            <cd-layer-objects
+                                v-model:layers="layers"
+                                v-model:inspector-layer-id="inspectorLayerId"
+                                v-model:inspector-object-id="inspectorObjectId"
+                            />
                         </cd-card>
                     </div>
                 </cd-menu>

@@ -87,6 +87,8 @@ export function createLayer(payload: Partial<Payload> = {}) {
         data.push(object)
 
         set('data', data)
+
+        emitter.emit('object:added', object)
     }
 
     function update(id: LayerObject['id'], newData: Partial<LayerObject>) {
@@ -98,6 +100,8 @@ export function createLayer(payload: Partial<Payload> = {}) {
             data[index] = { ...data[index], ...newData }
 
             set('data', data)
+
+            emitter.emit('object:updated', data[index])
         }
     }
 
@@ -110,6 +114,8 @@ export function createLayer(payload: Partial<Payload> = {}) {
             data.splice(index, 1)
 
             set('data', data)
+
+            emitter.emit('object:removed', id)
         }
     }
 
