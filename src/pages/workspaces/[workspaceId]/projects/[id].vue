@@ -205,6 +205,15 @@ async function save() {
         layer.order = layers.value.length - index
     })
 
+    const existingLayers = await workspace.layers.list({ projectId: project.value.id })
+    const currentLayerIds = new Set(layers.value.map((l) => l.id))
+
+    for (const existing of existingLayers) {
+        if (!currentLayerIds.has(existing.id)) {
+            await workspace.layers.destroy(existing.id)
+        }
+    }
+
     for (const layer of layers.value) {
         const payload = layer.serialize()
 
