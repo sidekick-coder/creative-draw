@@ -325,6 +325,22 @@ const widgets = computed(() =>
         .filter(Boolean)
 )
 
+function addWidget(id: string) {
+    const definition = widgetsDefinitions.find((d) => d.id === id)
+    if (!definition) return
+
+    const w = definition.minWidth ?? 300
+    const h = definition.minHeight ?? 400
+    const x = Math.round((window.innerWidth - w) / 2)
+    const y = Math.round((window.innerHeight - h) / 2)
+
+    widgetData.value.push({ widget_id: id, x, y, width: w, height: h })
+}
+
+function removeWidget(id: string) {
+    widgetData.value = widgetData.value.filter((d) => d.widget_id !== id)
+}
+
 onMounted(() => {})
 
 // export
@@ -465,6 +481,18 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                             <cd-list-item @click="autoreloadDialog = true">
                                 <cd-icon name="heroicons:arrow-path" class="mr-2" />
                                 {{ $t('Filesystem auto reload') }}
+                            </cd-list-item>
+                            <div class="border-t border-body-600 my-1" />
+                            <div class="px-3 py-1 text-xs text-body-400 uppercase tracking-wide">
+                                {{ $t('Widgets') }}
+                            </div>
+                            <cd-list-item
+                                v-for="def in widgetsDefinitions"
+                                :key="def.id"
+                                @click="addWidget(def.id)"
+                            >
+                                <cd-icon :name="def.icon || 'heroicons:squares-2x2'" class="mr-2" />
+                                {{ def.id }}
                             </cd-list-item>
                         </cd-card>
                     </div>
@@ -667,6 +695,8 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 :max-width="w.maxWidth"
                 :min-height="w.minHeight"
                 :max-height="w.maxHeight"
+                :icon="w.icon"
+                @remove="removeWidget(w.id)"
             >
                 <component :is="w.component" />
             </cd-board-widget>

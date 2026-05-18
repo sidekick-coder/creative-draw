@@ -1,6 +1,7 @@
 export interface WidgetDefinition {
     id: string
     component: ReturnType<typeof defineAsyncComponent>
+    icon?: string
     minWidth?: number
     maxWidth?: number
     minHeight?: number

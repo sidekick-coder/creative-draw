@@ -9,17 +9,31 @@ const selectedObjectId = board.context.createRef<string | null>('inspectorObject
 const selectedLayer = ref<Layer | undefined>()
 const selectedObject = ref<LayerObject | undefined>()
 
-watch([selectedLayerId, selectedObjectId], ([layerId, objectId]) => {
-    selectedLayer.value = layers.value.find((l) => l.id === layerId)
+function load() {
+    const layer = layers.value.find((l) => l.id === selectedLayerId.value)
 
-    if (!selectedLayer.value || !objectId) {
+    if (!layer) {
+        selectedLayer.value = undefined
         selectedObject.value = undefined
         return
     }
 
-    const data: LayerObject[] = selectedLayer.value.context.get('data', [])
-    selectedObject.value = data.find((o) => o.id === objectId)
-})
+    selectedLayer.value = layer
+
+    const object = layer.context
+        .get('data', [])
+        .find((o: LayerObject) => o.id === selectedObjectId.value)
+
+    if (!object) {
+        selectedObject.value = undefined
+        return
+    }
+
+    selectedObject.value = object
+}
+
+watch([selectedLayerId, selectedObjectId], load)
+onMounted(load)
 </script>
 
 <template>

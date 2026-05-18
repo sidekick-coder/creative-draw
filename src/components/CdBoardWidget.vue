@@ -31,6 +31,27 @@ const maxHeight = defineProp<number>('maxHeight', {
     default: Infinity,
 })
 
+const icon = defineProp<string>('icon', {
+    type: String,
+    default: null,
+})
+
+const emit = defineEmits<{ remove: [] }>()
+
+// minimized state
+const minimized = ref(false)
+
+const COMPACT_SIZE = 40
+
+watch(minimized, (val) => {
+    if (!val) {
+        // when expanding, clamp position so widget fits within viewport
+        posX.value = Math.min(Math.max(0, posX.value), window.innerWidth - width.value)
+        posY.value = Math.min(Math.max(0, posY.value), window.innerHeight - height.value)
+        update()
+    }
+})
+
 // virtual reference element for floating-ui positioning
 const virtualRef = computed(() => ({
     getBoundingClientRect() {
@@ -68,7 +89,6 @@ function onPointerDown(e: PointerEvent) {
     startClientY = e.clientY
     startPosX = posX.value
     startPosY = posY.value
-
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
 
     e.preventDefault()
@@ -77,14 +97,15 @@ function onPointerDown(e: PointerEvent) {
 function onPointerMove(e: PointerEvent) {
     if (!isDragging.value) return
 
-    posX.value = Math.min(
-        Math.max(0, startPosX + (e.clientX - startClientX)),
-        window.innerWidth - width.value
-    )
-    posY.value = Math.min(
-        Math.max(0, startPosY + (e.clientY - startClientY)),
-        window.innerHeight - height.value
-    )
+    const maxX = minimized.value
+        ? window.innerWidth - COMPACT_SIZE
+        : window.innerWidth - width.value
+    const maxY = minimized.value
+        ? window.innerHeight - COMPACT_SIZE
+        : window.innerHeight - height.value
+
+    posX.value = Math.min(Math.max(0, startPosX + (e.clientX - startClientX)), maxX)
+    posY.value = Math.min(Math.max(0, startPosY + (e.clientY - startClientY)), maxY)
 
     update()
 }
@@ -107,7 +128,6 @@ function onResizePointerDown(e: PointerEvent) {
     startResizeY = e.clientY
     startWidth = width.value
     startHeight = height.value
-
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
 
     e.preventDefault()
@@ -134,30 +154,68 @@ function onResizePointerUp() {
 
 <template>
     <div ref="floatingRef" :style="floatingStyles" class="z-50 group/widget">
-        <div
-            class="flex items-center justify-center py-1 rounded-t bg-body-700 opacity-0 group-hover/widget:opacity-100 transition-opacity"
-            :class="isDragging ? 'cursor-grabbing select-none opacity-100' : 'cursor-grab'"
-            @pointerdown="onPointerDown"
-            @pointermove="onPointerMove"
-            @pointerup="onPointerUp"
-        >
-            <cd-icon name="heroicons:bars-2" class="text-body-200" />
-        </div>
-        <cd-card
-            class="relative overflow-auto"
-            :style="{ width: `${width}px`, height: `${height}px` }"
-        >
-            <slot />
-
-            <div
-                class="absolute bottom-0 right-0 size-4 cursor-se-resize opacity-0 group-hover/widget:opacity-100 transition-opacity flex items-center justify-center"
-                :class="isResizing ? 'opacity-100' : ''"
-                @pointerdown="onResizePointerDown"
-                @pointermove="onResizePointerMove"
-                @pointerup="onResizePointerUp"
+        <!-- minimized: single icon button -->
+        <template v-if="minimized">
+            <cd-btn
+                color="body-900"
+                size="sq-md"
+                :class="isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'"
+                @pointerdown="onPointerDown"
+                @pointermove="onPointerMove"
+                @pointerup="onPointerUp"
+                @dblclick="minimized = false"
             >
-                <cd-icon name="heroicons:arrows-pointing-out" class="text-body-400 text-xs rotate-90" />
+                <cd-icon :name="icon || 'heroicons:squares-2x2'" />
+            </cd-btn>
+        </template>
+
+        <!-- expanded -->
+        <template v-else>
+            <div
+                class="flex items-center justify-end gap-x-1 px-2 py-1 rounded-t bg-body-700 transition-opacity"
+                :class="isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'"
+                @pointerdown="onPointerDown"
+                @pointermove="onPointerMove"
+                @pointerup="onPointerUp"
+            >
+                <cd-btn
+                    size="sq-xs"
+                    color="none"
+                    class="text-body-0 shrink-0"
+                    @pointerdown.stop
+                    @click.stop="minimized = true"
+                >
+                    <cd-icon name="heroicons:minus" />
+                </cd-btn>
+                <cd-btn
+                    size="sq-xs"
+                    color="none"
+                    class="text-body-0 shrink-0"
+                    @pointerdown.stop
+                    @click.stop="emit('remove')"
+                >
+                    <cd-icon name="heroicons:x-mark" />
+                </cd-btn>
             </div>
-        </cd-card>
+            <cd-card
+                class="relative overflow-auto rounded-t-none"
+                :style="{ width: `${width}px`, height: `${height}px` }"
+            >
+                <slot />
+
+                <div
+                    class="absolute bottom-0 right-0 size-4 cursor-se-resize opacity-0 group-hover/widget:opacity-100 transition-opacity flex items-center justify-center"
+                    :class="isResizing ? 'opacity-100' : ''"
+                    @pointerdown="onResizePointerDown"
+                    @pointermove="onResizePointerMove"
+                    @pointerup="onResizePointerUp"
+                >
+                    <cd-icon
+                        name="heroicons:arrows-pointing-out"
+                        class="text-body-400 text-xs rotate-90"
+                    />
+                </div>
+            </cd-card>
+        </template>
     </div>
 </template>

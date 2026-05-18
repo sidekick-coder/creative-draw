@@ -56,6 +56,8 @@ function init() {
 }
 
 board.emitter.on('layer:added', init)
+
+onMounted(init)
 </script>
 
 <template>
