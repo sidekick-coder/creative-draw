@@ -150,6 +150,8 @@ export function createBrush(options?: CreateBrushOptions) {
     }
 
     function end(layer: Layer) {
+        if (!drawing) return
+
         drawing = false
 
         const item = {
