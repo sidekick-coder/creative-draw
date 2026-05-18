@@ -7,9 +7,6 @@ import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 import type { ObjectRender } from '@/composables/defineObjectRender'
 import type { WidgetDefinition, WidgetData } from '@/utils/defineWidget'
-import type { Component } from 'vue'
-import objectsListWidget from '@/widgets/objectsList'
-import objectInspectorWidget from '@/widgets/objectInspector'
 import CdLayerObjects from '@/components/CdLayerObjects.vue'
 import CdObjectInspector from '@/components/CdObjectInspector.vue'
 
@@ -314,27 +311,21 @@ const widgetsDefinitions = Object.values(import.meta.glob('@/widgets/*.ts', { ea
     (mod) => mod.default as WidgetDefinition
 )
 
-const widgetData = ref<WidgetData[]>([
+const widgetData = useLocalStorage<WidgetData[]>(`cd-widgets-${route.params.id}`, [
     { widget_id: 'objects-list', x: 20, y: 100, width: 300, height: 400 },
     { widget_id: 'object-inspector', x: 340, y: 100, width: 300, height: 400 },
 ])
 
-const widgets = shallowRef<(WidgetDefinition & WidgetData)[]>([])
+const widgets = computed(() =>
+    widgetData.value
+        .map((data) => {
+            const definition = widgetsDefinitions.find((d) => d.id === data.widget_id)
+            return definition ? { ...definition, data } : null
+        })
+        .filter(Boolean)
+)
 
-function loadWidgets() {
-    for (const data of widgetData.value) {
-        const definition = widgetsDefinitions.find((d) => d.id === data.widget_id)
-
-        if (definition) {
-            widgets.value.push({
-                ...definition,
-                ...data,
-            })
-        }
-    }
-}
-
-onMounted(loadWidgets)
+onMounted(() => {})
 
 // export
 const exporting = ref(false)
@@ -665,7 +656,18 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 </cd-btn>
             </div>
 
-            <cd-board-widget v-for="w in widgets" :key="w.id" :x="w.x" :y="w.y">
+            <cd-board-widget
+                v-for="w in widgets"
+                :key="w.id"
+                v-model:x="w.data.x"
+                v-model:y="w.data.y"
+                v-model:width="w.data.width"
+                v-model:height="w.data.height"
+                :min-width="w.minWidth"
+                :max-width="w.maxWidth"
+                :min-height="w.minHeight"
+                :max-height="w.maxHeight"
+            >
                 <component :is="w.component" />
             </cd-board-widget>
 

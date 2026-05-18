@@ -59,7 +59,7 @@ board.emitter.on('layer:added', init)
 </script>
 
 <template>
-    <cd-card color="none" class="rounded-none border-0 min-w-72">
+    <cd-card color="none" class="rounded-none border-0 min-w-72 h-full flex flex-col">
         <cd-card-head class="border-b border-body-600">
             <cd-card-title class="mr-auto text-sm font-bold text-body-100">
                 {{ $t('Objects') }}
@@ -76,7 +76,7 @@ board.emitter.on('layer:added', init)
             {{ $t('No objects') }}
         </div>
 
-        <div v-else class="max-h-96 overflow-y-auto">
+        <div v-else class="overflow-y-auto h-full">
             <div
                 v-for="o in allObjects"
                 :key="o.id"
@@ -91,13 +91,7 @@ board.emitter.on('layer:added', init)
                         <span class="truncate text-xs text-body-400">{{ o._layerName }}</span>
                     </div>
                 </div>
-                <cd-color-picker
-                    v-if="o.type === 'stroke'"
-                    :model-value="o.color"
-                    class="ml-auto"
-                    @update:model-value="applyStrokeColor(o, $event)"
-                />
-                <span v-else class="ml-auto text-sm font-mono shrink-0">
+                <span class="ml-auto text-sm font-mono shrink-0">
                     {{ o.id.slice(0, 6) }}
                 </span>
             </div>
