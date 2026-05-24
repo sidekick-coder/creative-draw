@@ -3,14 +3,13 @@ import type { LayerObject } from '@/composables/createLayer'
 
 const board = useBoard()
 const layers = computed(() => board.layers)
-const selectedLayerId = board.context.createRef<string | null>('inspectorLayerId', null)
-const selectedObjectId = board.context.createRef<string | null>('inspectorObjectId', null)
+const { layerId, objectId } = useInspectorOptions(board)
 
 const selectedLayer = ref<Layer | undefined>()
 const selectedObject = ref<LayerObject | undefined>()
 
 function load() {
-    const layer = layers.value.find((l) => l.id === selectedLayerId.value)
+    const layer = layers.value.find((l) => l.id === layerId.value)
 
     if (!layer) {
         selectedLayer.value = undefined
@@ -20,9 +19,7 @@ function load() {
 
     selectedLayer.value = layer
 
-    const object = layer.context
-        .get('data', [])
-        .find((o: LayerObject) => o.id === selectedObjectId.value)
+    const object = layer.context.get('data', []).find((o: LayerObject) => o.id === objectId.value)
 
     if (!object) {
         selectedObject.value = undefined
@@ -32,7 +29,7 @@ function load() {
     selectedObject.value = object
 }
 
-watch([selectedLayerId, selectedObjectId], load)
+watch([layerId, objectId], load)
 onMounted(load)
 </script>
 
@@ -53,12 +50,12 @@ onMounted(load)
         </cd-card-head>
 
         <template v-if="selectedObject && selectedLayer">
-            <cd-object-inspector-stroke
+            <cd-object-inspect-form-stroke
                 v-if="selectedObject.type === 'stroke'"
                 :object="selectedObject"
                 :layer="selectedLayer"
             />
-            <cd-object-inspector-rect
+            <cd-object-inspect-form-rect
                 v-else-if="selectedObject.type === 'rect'"
                 :object="selectedObject"
                 :layer="selectedLayer"

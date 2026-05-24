@@ -8,9 +8,8 @@ interface LayerObjectWithMeta extends LayerObject {
 
 const board = useBoard()
 const layers = computed(() => board.layers)
-const inspectorLayerId = board.context.createRef<string | null>('inspectorLayerId', null)
-const inspectorObjectId = board.context.createRef<string | null>('inspectorObjectId', null)
 
+const { layerId, objectId, formOpen } = useInspectorOptions(board)
 const allObjects = ref<LayerObjectWithMeta[]>([])
 
 function load() {
@@ -32,8 +31,9 @@ function load() {
 }
 
 function selectObject(obj: LayerObjectWithMeta) {
-    inspectorLayerId.value = obj._layer.id
-    inspectorObjectId.value = obj.id
+    layerId.value = obj._layer.id
+    objectId.value = obj.id
+    formOpen.value = true
 }
 
 function onLayerLoad(layer: Layer) {
@@ -83,7 +83,7 @@ onMounted(init)
                 v-for="o in allObjects"
                 :key="o.id"
                 class="flex items-center gap-x-3 px-4 py-4 border-b border-body-700 text-body-0 cursor-pointer hover:bg-body-800"
-                :class="inspectorObjectId === o.id ? 'bg-body-800' : ''"
+                :class="objectId === o.id ? 'bg-body-800' : ''"
                 @click="selectObject(o)"
             >
                 <div class="flex items-center gap-x-4 flex-1 min-w-0">

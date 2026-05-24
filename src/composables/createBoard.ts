@@ -8,9 +8,16 @@ export interface BoardLayerSetEvent<T = any> {
     layer: Layer
 }
 
-export function createBoard() {
+export interface CreateBoardOptions {
+    width?: MaybeRef<number>
+    height?: MaybeRef<number>
+}
+
+export function createBoard(options: CreateBoardOptions = {}) {
     const emitter = createEmitter()
     const context = createContext()
+    const width = toRef(options.width ?? 800)
+    const height = toRef(options.height ?? 600)
 
     // layers
     const layers = ref([] as Layer[])
@@ -35,6 +42,9 @@ export function createBoard() {
     })
 
     return reactive({
+        width,
+        height,
+
         emitter,
         context,
 

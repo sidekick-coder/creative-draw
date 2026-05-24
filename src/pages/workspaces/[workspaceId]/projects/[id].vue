@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
-import { createRect } from '@/composables/createRect'
 import type Project from '@/entities/Project'
 import type { ColorRGB } from '@/utils/colors'
 import { syncRef, useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 import type { ObjectRender } from '@/composables/defineObjectRender'
 import type { WidgetDefinition, WidgetData } from '@/utils/defineWidget'
-import CdLayerObjects from '@/components/CdLayerObjects.vue'
-import CdObjectInspector from '@/components/CdObjectInspector.vue'
+import { createAndProvideBoard } from '@/composables/useBoard'
 
 // general
 const route = useRoute('/workspaces/[workspaceId]/projects/[id]')
@@ -16,9 +14,10 @@ const router = useRouter()
 const workspace = useWorkspace()
 
 // board
-const board = useBoard()
-const boardWidth = ref(500)
-const boardHeight = ref(500)
+const board = createAndProvideBoard({
+    width: 500,
+    height: 500,
+})
 
 const history = createHistory()
 
@@ -54,8 +53,8 @@ const zoom = createZoom(transform)
 const rotate = createRotate(transform)
 
 function setSizes() {
-    boardWidth.value = window.innerWidth
-    boardHeight.value = window.innerHeight
+    board.width = window.innerWidth
+    board.height = window.innerHeight
 }
 
 onMounted(() => {
@@ -155,8 +154,8 @@ const canvasY = ref(0)
 function centralize() {
     pan.reset()
 
-    canvasX.value = boardWidth.value / 2 - canvasWidth.value / 2
-    canvasY.value = boardHeight.value / 2 - canvasHeight.value / 2
+    canvasX.value = board.width / 2 - canvasWidth.value / 2
+    canvasY.value = board.height / 2 - canvasHeight.value / 2
 }
 
 function focus() {
@@ -171,8 +170,8 @@ function fit() {
     const paddingX = 80
     const paddingY = 80
 
-    const availableWidth = boardWidth.value - paddingX * 2
-    const availableHeight = boardHeight.value - paddingY * 2
+    const availableWidth = board.width - paddingX * 2
+    const availableHeight = board.height - paddingY * 2
 
     const width = canvasWidth.value
     const height = canvasHeight.value
@@ -390,7 +389,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             v-else
             class="relative w-dvw h-dvh overflow-hidden"
             :style="{
-                'background-size': `${boardWidth * 0.02}px ${boardWidth * 0.02}px`,
+                'background-size': `${board.width * 0.02}px ${board.width * 0.02}px`,
                 'background-image': `
                 linear-gradient(to right, var(--color-body-700) 1px, transparent 1px),
                 linear-gradient(to bottom, var(--color-body-700) 1px, transparent 1px)
@@ -526,6 +525,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
                 <cd-tool-brush-options v-if="activeTool === 'brush'" />
                 <cd-tool-rect-options v-if="activeTool === 'rect'" />
+                <cd-tool-inspect-options v-if="activeTool === 'inspect'" />
 
                 <cd-btn
                     size="sq-md"
@@ -550,6 +550,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 >
                     <cd-icon name="mdi:square-outline" />
                 </cd-btn>
+
                 <cd-btn
                     size="sq-md"
                     :color="activeTool === 'inspect' ? 'primary' : 'body-900'"
@@ -557,32 +558,6 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 >
                     <cd-icon name="iconamoon:cursor-fill" />
                 </cd-btn>
-
-                <cd-menu :close-on-content-click="false">
-                    <template #activator="{ attrs }">
-                        <cd-btn v-bind="attrs" size="sq-md" color="body-900">
-                            <cd-icon name="boxicons:diamond-filled" />
-                        </cd-btn>
-                    </template>
-                    <div class="py-2 px-4">
-                        <cd-card class="border-2 border-body-600">
-                            <cd-object-inspector />
-                        </cd-card>
-                    </div>
-                </cd-menu>
-
-                <cd-menu :close-on-content-click="false">
-                    <template #activator="{ attrs }">
-                        <cd-btn v-bind="attrs" size="sq-md" color="body-900">
-                            <cd-icon name="mdi:cube" />
-                        </cd-btn>
-                    </template>
-                    <div class="py-2 px-4">
-                        <cd-card class="border-2 border-body-600">
-                            <cd-layer-objects />
-                        </cd-card>
-                    </div>
-                </cd-menu>
 
                 <cd-menu :close-on-content-click="false">
                     <template #activator="{ attrs }">
@@ -651,26 +626,26 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 </cd-btn>
             </div>
 
-            <cd-board-widget
-                v-for="w in widgets"
-                :key="w.id"
-                v-model:x="w.data.x"
-                v-model:y="w.data.y"
-                v-model:width="w.data.width"
-                v-model:height="w.data.height"
-                :min-width="w.minWidth"
-                :max-width="w.maxWidth"
-                :min-height="w.minHeight"
-                :max-height="w.maxHeight"
-                :icon="w.icon"
-                @remove="removeWidget(w.id)"
-            >
-                <component :is="w.component" />
-            </cd-board-widget>
+            <!-- <cd-board-widget -->
+            <!--     v-for="w in widgets" -->
+            <!--     :key="w.id" -->
+            <!--     v-model:x="w.data.x" -->
+            <!--     v-model:y="w.data.y" -->
+            <!--     v-model:width="w.data.width" -->
+            <!--     v-model:height="w.data.height" -->
+            <!--     :min-width="w.minWidth" -->
+            <!--     :max-width="w.maxWidth" -->
+            <!--     :min-height="w.minHeight" -->
+            <!--     :max-height="w.maxHeight" -->
+            <!--     :icon="w.icon" -->
+            <!--     @remove="removeWidget(w.id)" -->
+            <!-- > -->
+            <!--     <component :is="w.component" /> -->
+            <!-- </cd-board-widget> -->
 
             <cd-board
-                :width="boardWidth"
-                :height="boardHeight"
+                :width="board.width"
+                :height="board.height"
                 :plugins="[transform, zoom, pan, rect, rotate, brush, history]"
                 :style="{
                     'will-change': 'transform',

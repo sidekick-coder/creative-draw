@@ -5,5 +5,5 @@ export default defineWidget({
     icon: 'mdi:cube',
     minWidth: 300,
     minHeight: 500,
-    component: defineAsyncComponent(() => import('@/components/CdLayerObjects.vue')),
+    component: defineAsyncComponent(() => import('@/components/CdCard.vue')),
 })
