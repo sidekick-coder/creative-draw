@@ -1,18 +1,27 @@
 import type { Board } from './createBoard'
 import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
-import type { ColorRGB } from '@/utils/colors'
 import { defineObjectRender } from './defineObjectRender'
 
 interface CreateRectOptions {
+    board: Board
     active?: MaybeRef<boolean>
-    color?: MaybeRef<ColorRGB>
-    size?: MaybeRef<number>
-    opacity?: MaybeRef<number>
-    fill?: MaybeRef<boolean>
     debug?: boolean
 }
 
+export function useRectOptions(board: Board) {
+    const size = board.context.ref('tools:rect:size', 10)
+    const opacity = board.context.ref('tools:rect:opacity', 1)
+    const color = board.context.ref('tools:rect:color', { r: 0, g: 0, b: 0 })
+    const fill = board.context.ref('tools:rect:fill', false)
+
+    return {
+        size,
+        opacity,
+        color,
+        fill,
+    }
+}
 const render = defineObjectRender({
     name: 'rect',
     render({ ctx, item }) {
@@ -31,12 +40,10 @@ const render = defineObjectRender({
     },
 })
 
-export function createRect(options: CreateRectOptions = {}) {
+export function createToolRect(options: CreateRectOptions) {
     const active = toRef(options.active ?? false)
-    const color = toRef(options.color ?? { r: 0, g: 0, b: 0 })
-    const size = toRef(options.size ?? 2)
-    const opacity = toRef(options.opacity ?? 1)
-    const fill = toRef(options.fill ?? false)
+
+    const { size, opacity, color, fill } = useRectOptions(options.board)
 
     let drawing = false
     let startX = 0

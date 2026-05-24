@@ -23,6 +23,8 @@ const boardHeight = ref(500)
 const history = createHistory()
 
 const activeTool = useLocalStorage<string>('brush', 'brush')
+
+// brush
 const color = board.context.ref('tools:brush:color', { r: 0, g: 0, b: 0 } as ColorRGB)
 const size = board.context.ref('tools:brush:size', 10)
 const opacity = board.context.ref('tools:brush:opacity', 1)
@@ -31,13 +33,22 @@ syncRef(useLocalStorage('tools:brush:size', 10), size)
 syncRef(useLocalStorage('tools:brush:opacity', 1), opacity)
 syncRef(useLocalStorage('tools:brush:color', { r: 0, g: 0, b: 0 }), color)
 
-const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
-const rect = createRect({
+// react
+const rect = createToolRect({
+    board,
     active: computed(() => activeTool.value === 'rect'),
-    color,
-    size,
-    opacity,
 })
+
+const brush = createBrush({
+    board,
+    active: computed(() => activeTool.value === 'brush'),
+})
+
+const minBrushSize = computed(() => project.value?.width * 0.001)
+const maxBrushSize = computed(() => project.value?.width * 0.05)
+
+// pan
+const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
 const transform = createTransform()
 const zoom = createZoom(transform)
 const rotate = createRotate(transform)
@@ -52,6 +63,12 @@ onMounted(() => {
 
     window.addEventListener('resize', setSizes)
 })
+
+// renders
+const renders = new Map<string, ObjectRender>()
+
+renders.set(brush.render.name, brush.render)
+renders.set(rect.render.name, rect.render)
 
 // project
 const projectId = computed(() => route.params.id)
@@ -259,24 +276,6 @@ async function save() {
     }, 1000)
 }
 
-// tools
-const renders = new Map<string, ObjectRender>()
-
-const brush = createBrush({
-    board,
-    active: computed(() => activeTool.value === 'brush'),
-})
-
-const minBrushSize = computed(() => {
-    return project.value?.width * 0.001
-})
-
-const maxBrushSize = computed(() => {
-    return project.value?.width * 0.05
-})
-
-renders.set(brush.render.name, brush.render)
-renders.set(rect.render.name, rect.render)
 // edit title
 const editTitleDialog = ref(false)
 const autoreloadDialog = ref(false)
@@ -526,35 +525,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
 
             <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
                 <cd-tool-brush-options v-if="activeTool === 'brush'" />
-
-                <!-- <template v-if="activeTool === 'brush'"> -->
-                <!--     <cd-menu :close-on-content-click="false"> -->
-                <!--         <template #activator="{ attrs }"> -->
-                <!--             <cd-btn v-bind="attrs" size="sq-md" color="body-900"> -->
-                <!--                 <cd-icon name="heroicons:paint-brush-solid" /> -->
-                <!--             </cd-btn> -->
-                <!--         </template> -->
-                <!--         <div class="py-2 px-4"> -->
-                <!--             <cd-brush-list v-model="brushSelected" /> -->
-                <!--         </div> -->
-                <!--     </cd-menu> -->
-                <!--     <cd-btn -->
-                <!--         size="sq-md" -->
-                <!--         :color="brush.erase && activeTool === 'brush' ? 'primary' : 'body-900'" -->
-                <!--         @click="brush.erase = !brush.erase" -->
-                <!--     > -->
-                <!--         <cd-icon name="mdi:eraser" /> -->
-                <!--     </cd-btn> -->
-                <!-- </template> -->
-
-                <cd-btn
-                    v-if="activeTool === 'rect'"
-                    size="sq-md"
-                    :color="rect.fill ? 'primary' : 'body-900'"
-                    @click="rect.fill = !rect.fill"
-                >
-                    <cd-icon name="mdi:square" />
-                </cd-btn>
+                <cd-tool-rect-options v-if="activeTool === 'rect'" />
 
                 <cd-btn
                     size="sq-md"
