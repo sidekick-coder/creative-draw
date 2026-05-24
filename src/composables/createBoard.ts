@@ -22,6 +22,13 @@ export function createBoard(options: CreateBoardOptions = {}) {
 
     const renders = new Map<string, ObjectRender>()
 
+    // plugins
+    const plugins = ref([] as BoardPlugin[])
+
+    function addPlugin(...args: BoardPlugin[]) {
+        plugins.value.push(...args)
+    }
+
     // layers
     const layers = ref([] as Layer[])
     const activeLayerId = context.createRef<string | null>('activeLayerId', null)
@@ -54,7 +61,9 @@ export function createBoard(options: CreateBoardOptions = {}) {
 
         layers,
         activeLayerId,
-
         addLayer,
+
+        plugins,
+        addPlugin,
     })
 }

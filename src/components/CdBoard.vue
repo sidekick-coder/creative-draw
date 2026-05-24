@@ -36,13 +36,8 @@ watch([width, height], load)
 onMounted(load)
 
 // plugins
-const plugins = defineProp<BoardPlugin[]>('plugins', {
-    type: Array,
-    default: () => [],
-})
-
 onMounted(() => {
-    for (const plugin of plugins.value) {
+    for (const plugin of board.plugins) {
         plugin.install(board)
     }
 
