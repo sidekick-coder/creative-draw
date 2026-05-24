@@ -43,5 +43,6 @@ export function createContext(initialContext: Record<string, any> = {}) {
         set,
         all,
         createRef,
+        ref: createRef,
     }
 }

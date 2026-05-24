@@ -4,8 +4,10 @@ import type { LayerMouseEvent } from './createLayer'
 import type { ColorRGB } from '@/utils/colors'
 import type { BrushDefinition } from './defineBrush'
 import { defineObjectRender } from './defineObjectRender'
+import { drawBrushPath } from '@/utils/drawBrushPaths'
 
 export interface CreateBrushOptions {
+    board: Board
     size?: MaybeRef<number>
     opacity?: MaybeRef<number>
     color?: MaybeRef<ColorRGB>
@@ -14,65 +16,39 @@ export interface CreateBrushOptions {
     active?: MaybeRef<boolean>
 }
 
-const map = new Set<string>()
+export function useBrushOptions(board: Board) {
+    const definitionId = board.context.ref<string | null>('tools:brush:definition-id', 'cd01')
+    const size = board.context.ref('tools:brush:size', 10)
+    const opacity = board.context.ref('tools:brush:opacity', 1)
+    const color = board.context.ref('tools:brush:color', { r: 0, g: 0, b: 0 })
+    const erase = board.context.ref('tools:brush:erase', false)
+
+    return {
+        definitionId,
+        size,
+        opacity,
+        color,
+        erase,
+    }
+}
+
 const layerExcludeMap = new Map<string, Set<string>>()
-
-function createPathKey(x: number, y: number, pressure: number, size: number, color: ColorRGB) {
-    return `${Math.round(x)}-${Math.round(y)}-${pressure.toFixed(2)}-${size.toFixed(2)}-${color.r}-${color.g}-${color.b}`
-}
-
-function drawPaths(
-    ctx: CanvasRenderingContext2D,
-    paths: BrushPath[],
-    color: ColorRGB = { r: 0, g: 0, b: 0 },
-    exclude = new Set<string>()
-) {
-    paths.forEach((p) => {
-        const key = createPathKey(p.x, p.y, p.pressure, p.size, color)
-
-        if (exclude.has(key)) {
-            return
-        }
-
-        exclude.add(key)
-
-        const opacity = p.opacity || 1
-
-        if (p.erase) {
-            ctx.globalCompositeOperation = 'destination-out'
-            ctx.globalAlpha = opacity
-            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
-            ctx.beginPath()
-            ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
-            ctx.fill()
-            ctx.closePath()
-            ctx.globalCompositeOperation = 'source-over'
-            return
-        }
-
-        ctx.globalCompositeOperation = 'source-over'
-        ctx.globalAlpha = opacity
-        ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.closePath()
-    })
-}
 
 const render = defineObjectRender({
     name: 'stroke',
     render({ ctx, item }) {
-        drawPaths(ctx, item.paths, item.color)
+        drawBrushPath(ctx, item.paths, item.color)
     },
 })
 
-export function createBrush(options?: CreateBrushOptions) {
-    const size = toRef(options?.size ?? 1)
-    const opacity = toRef(options?.opacity ?? 1)
-    const color = toRef(options?.color ?? { r: 0, g: 0, b: 0 })
-    const erase = toRef(options?.erase ?? false)
-    const definition = toRef(options?.definition)
+export function createBrush(options: CreateBrushOptions) {
+    const board = options.board
+    const availableBrushes = useBrushes()
+
+    const { size, opacity, color, erase, definitionId } = useBrushOptions(board)
+
+    const definition = computed(() => availableBrushes.find((b) => b.id === definitionId.value))
+
     const active = toRef(options?.active ?? true)
 
     let drawing = false
@@ -84,23 +60,25 @@ export function createBrush(options?: CreateBrushOptions) {
 
     function start(layer: Layer, x: number, y: number, pressure = 0.5) {
         if (!active.value) return
+        if (!definition.value) return
+
         drawing = true
         lastX = x
         lastY = y
         lastPressure = pressure
         paths = []
-        const drawPath =
-            definition.value?.draw({
-                x: x + 1,
-                y: y + 1,
-                lastX,
-                lastY,
-                lastPressure,
-                pressure,
-                size: size.value,
-                opacity: opacity.value,
-                color: color.value,
-            }) ?? []
+
+        const drawPath = definition.value.draw({
+            x: x + 1,
+            y: y + 1,
+            lastX,
+            lastY,
+            lastPressure,
+            pressure,
+            size: size.value,
+            opacity: opacity.value,
+            color: color.value,
+        })
 
         drawPath.forEach((path) => {
             path.erase = erase.value
@@ -112,7 +90,7 @@ export function createBrush(options?: CreateBrushOptions) {
 
         exclude.clear()
 
-        drawPaths(ctx, paths, color.value, exclude)
+        drawBrushPath(ctx, paths, color.value, exclude)
     }
 
     function move(layer: Layer, x: number, y: number, pressure = 0.5) {
@@ -146,7 +124,7 @@ export function createBrush(options?: CreateBrushOptions) {
         const ctx = layer.context.get('context')
         const exclude = layerExcludeMap.get(layer.id) || new Set<string>()
 
-        drawPaths(ctx, newPaths, color.value, exclude)
+        drawBrushPath(ctx, newPaths, color.value, exclude)
     }
 
     function end(layer: Layer) {
@@ -165,12 +143,10 @@ export function createBrush(options?: CreateBrushOptions) {
 
         paths = []
 
-        map.clear()
-
         const ctx = layer.context.get('context')
         const exclude = layerExcludeMap.get(layer.id) || new Set<string>()
 
-        drawPaths(ctx, paths, color.value, exclude)
+        drawBrushPath(ctx, paths, color.value, exclude)
 
         exclude.clear()
 
@@ -196,18 +172,6 @@ export function createBrush(options?: CreateBrushOptions) {
                             end(layer)
                         }
                     }
-
-                    // testing lines
-                    // setTimeout(() => {
-                    //     console.log('testing brush')
-                    //     start(layer, 100, 100)
-                    //
-                    //     move(layer, 500, 500, 0.1)
-                    //
-                    //     move(layer, 800, 800, 0.8)
-                    //
-                    //     end(layer)
-                    // }, 1000)
 
                     layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
                         if (device) return

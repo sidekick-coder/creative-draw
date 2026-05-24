@@ -257,20 +257,11 @@ async function save() {
 }
 
 // tools
-const brushSelected = useLocalStorage('cd-brush-selected', 'pen')
-const brushes = useBrushes()
 const renders = new Map<string, ObjectRender>()
 
-const definition = computed(() => {
-    return brushes.find((b) => b.id === brushSelected.value) || brushes[0]
-})
-
 const brush = createBrush({
-    definition,
-    size,
-    opacity,
+    board,
     active: computed(() => activeTool.value === 'brush'),
-    color,
 })
 
 const minBrushSize = computed(() => {
@@ -446,14 +437,6 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             </cd-dialog>
 
             <div class="fixed top-0 left-0 flex flex-wrap gap-2 z-30 p-4">
-                <cd-btn
-                    color="body-900"
-                    :to="`/workspaces/${route.params.workspaceId}/projects`"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                >
-                    <cd-icon name="home" />
-                </cd-btn>
                 <cd-menu placement="bottom-start">
                     <template #activator="{ attrs }">
                         <cd-btn v-bind="attrs" size="sq-md" color="body-900">
@@ -462,6 +445,10 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     </template>
                     <div class="py-2">
                         <cd-card class="border-2 border-body-600 min-w-64">
+                            <cd-list-item :to="`/workspaces/${route.params.workspaceId}/projects/`">
+                                <cd-icon name="home" class="mr-2" />
+                                {{ $t('Home') }}
+                            </cd-list-item>
                             <cd-list-item @click="exportTo('PNG')">
                                 <cd-icon name="mdi:file-png-box" class="mr-2" />
                                 {{ $t('Export {0}', ['PNG']) }}
@@ -482,18 +469,18 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                                 <cd-icon name="heroicons:arrow-path" class="mr-2" />
                                 {{ $t('Filesystem auto reload') }}
                             </cd-list-item>
-                            <div class="border-t border-body-600 my-1" />
-                            <div class="px-3 py-1 text-xs text-body-400 uppercase tracking-wide">
-                                {{ $t('Widgets') }}
-                            </div>
-                            <cd-list-item
-                                v-for="def in widgetsDefinitions"
-                                :key="def.id"
-                                @click="addWidget(def.id)"
-                            >
-                                <cd-icon :name="def.icon || 'heroicons:squares-2x2'" class="mr-2" />
-                                {{ def.id }}
-                            </cd-list-item>
+                            <!-- <div class="border-t border-body-600 my-1" /> -->
+                            <!-- <div class="px-3 py-1 text-xs text-body-400 uppercase tracking-wide"> -->
+                            <!--     {{ $t('Widgets') }} -->
+                            <!-- </div> -->
+                            <!-- <cd-list-item -->
+                            <!--     v-for="def in widgetsDefinitions" -->
+                            <!--     :key="def.id" -->
+                            <!--     @click="addWidget(def.id)" -->
+                            <!-- > -->
+                            <!--     <cd-icon :name="def.icon || 'heroicons:squares-2x2'" class="mr-2" /> -->
+                            <!--     {{ def.id }} -->
+                            <!-- </cd-list-item> -->
                         </cd-card>
                     </div>
                 </cd-menu>
@@ -535,30 +522,27 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             </div>
 
             <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
-                <template v-if="activeTool === 'brush'">
-                    <cd-menu :close-on-content-click="false">
-                        <template #activator="{ attrs }">
-                            <cd-btn v-bind="attrs" size="sq-md" color="body-900">
-                                <cd-icon name="heroicons:paint-brush-solid" />
-                            </cd-btn>
-                        </template>
-                        <div class="py-2 px-4">
-                            <cd-brush-list v-model="brushSelected" />
-                        </div>
-                    </cd-menu>
-                    <cd-btn
-                        size="sq-md"
-                        :color="brush.erase && activeTool === 'brush' ? 'primary' : 'body-900'"
-                        @click="brush.erase = !brush.erase"
-                    >
-                        <cd-icon name="mdi:eraser" />
-                    </cd-btn>
-                </template>
+                <cd-tool-brush-options v-if="activeTool === 'brush'" />
 
-                <cd-color-picker
-                    v-if="activeTool === 'brush' || activeTool === 'rect'"
-                    v-model="color"
-                />
+                <!-- <template v-if="activeTool === 'brush'"> -->
+                <!--     <cd-menu :close-on-content-click="false"> -->
+                <!--         <template #activator="{ attrs }"> -->
+                <!--             <cd-btn v-bind="attrs" size="sq-md" color="body-900"> -->
+                <!--                 <cd-icon name="heroicons:paint-brush-solid" /> -->
+                <!--             </cd-btn> -->
+                <!--         </template> -->
+                <!--         <div class="py-2 px-4"> -->
+                <!--             <cd-brush-list v-model="brushSelected" /> -->
+                <!--         </div> -->
+                <!--     </cd-menu> -->
+                <!--     <cd-btn -->
+                <!--         size="sq-md" -->
+                <!--         :color="brush.erase && activeTool === 'brush' ? 'primary' : 'body-900'" -->
+                <!--         @click="brush.erase = !brush.erase" -->
+                <!--     > -->
+                <!--         <cd-icon name="mdi:eraser" /> -->
+                <!--     </cd-btn> -->
+                <!-- </template> -->
 
                 <cd-btn
                     v-if="activeTool === 'rect'"
