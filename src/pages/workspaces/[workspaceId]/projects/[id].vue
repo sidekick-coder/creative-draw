@@ -29,7 +29,7 @@ const rect = createToolRect({
     active: computed(() => activeTool.value === 'rect'),
 })
 
-const brush = createBrush({
+const brush = createToolBrush({
     board,
     active: computed(() => activeTool.value === 'brush'),
 })

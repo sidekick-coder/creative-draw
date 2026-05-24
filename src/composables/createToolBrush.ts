@@ -17,7 +17,7 @@ export interface CreateBrushOptions {
     active?: MaybeRef<boolean>
 }
 
-export function useBrushOptions(board: Board) {
+export function useBrushToolOptions(board: Board) {
     const definitionId = board.context.ref<string | null>('tools:brush:definition-id', 'cd01')
     const size = board.context.ref('tools:brush:size', 10)
     const opacity = board.context.ref('tools:brush:opacity', 1)
@@ -42,11 +42,11 @@ const render = defineObjectRender({
     },
 })
 
-export function createBrush(options: CreateBrushOptions) {
+export function createToolBrush(options: CreateBrushOptions) {
     const board = options.board
     const availableBrushes = useBrushes()
 
-    const { size, opacity, color, erase, definitionId } = useBrushOptions(board)
+    const { size, opacity, color, erase, definitionId } = useBrushToolOptions(board)
 
     syncRef(useLocalStorage('tools:brush:size', 10), size)
     syncRef(useLocalStorage('tools:brush:opacity', 1), opacity)

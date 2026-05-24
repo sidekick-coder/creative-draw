@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { useBrushOptions } from '@/composables/createBrush'
-
 const board = useBoard()
 
-const { erase, definitionId, color } = useBrushOptions(board)
+const { erase, definitionId, color } = useBrushToolOptions(board)
 </script>
 <template>
     <cd-btn size="sq-md" :color="erase ? 'primary' : 'body-900'" @click="erase = !erase">
