@@ -3,17 +3,17 @@ import type { Layer } from './useLayer'
 import type { LayerMouseEvent } from './createLayer'
 import { defineObjectRender } from './defineObjectRender'
 
-interface CreateRectOptions {
+interface CreateToolEllipseOptions {
     board: Board
     active?: MaybeRef<boolean>
     debug?: boolean
 }
 
-export function useRectOptions(board: Board) {
-    const size = board.context.ref('tools:shared:size', 10)
+export function useEllipseToolOptions(board: Board) {
+    const size = board.context.ref('tools:ellipse:size', 10)
     const opacity = board.context.ref('tools:shared:opacity', 1)
     const color = board.context.ref('tools:shared:color', { r: 0, g: 0, b: 0 })
-    const fill = board.context.ref('tools:rect:fill', false)
+    const fill = board.context.ref('tools:ellipse:fill', false)
 
     return {
         size,
@@ -22,25 +22,50 @@ export function useRectOptions(board: Board) {
         fill,
     }
 }
+
+interface DrawEllipseOptions {
+    ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
+    x: number
+    y: number
+    w: number
+    h: number
+    size: number
+    opacity: number
+    color: { r: number; g: number; b: number }
+}
+
+function drawEllipse(options: DrawEllipseOptions) {
+    const { ctx, x, y, w, h, size, opacity, color } = options
+
+    ctx.globalAlpha = opacity
+    ctx.strokeStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
+    ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
+    ctx.lineWidth = size
+
+    ctx.beginPath()
+    ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2)
+    ctx.fill()
+
+    ctx.globalAlpha = 1
+}
+
 const render = defineObjectRender({
-    name: 'rect',
+    name: 'ellipse',
     render({ ctx, item }) {
-        ctx.globalAlpha = item.opacity ?? 1
-        ctx.strokeStyle = `rgb(${item.color.r}, ${item.color.g}, ${item.color.b})`
-        ctx.fillStyle = `rgb(${item.color.r}, ${item.color.g}, ${item.color.b})`
-        ctx.lineWidth = item.strokeWidth ?? 2
-
-        if (item.fill) {
-            ctx.fillRect(item.x, item.y, item.width, item.height)
-        } else {
-            ctx.strokeRect(item.x, item.y, item.width, item.height)
-        }
-
-        ctx.globalAlpha = 1
+        drawEllipse({
+            ctx,
+            x: item.x,
+            y: item.y,
+            w: item.width,
+            h: item.height,
+            size: item.strokeWidth ?? 10,
+            opacity: item.opacity ?? 1,
+            color: item.color,
+        })
     },
 })
 
-export function createToolRect(options: CreateRectOptions) {
+export function createToolEllipse(options: CreateToolEllipseOptions) {
     const active = toRef(options.active ?? false)
 
     const { size, opacity, color, fill } = useRectOptions(options.board)
@@ -50,32 +75,20 @@ export function createToolRect(options: CreateRectOptions) {
     let startY = 0
     let savedImageData: ImageData | null = null
 
-    function drawRect(
-        ctx: OffscreenCanvasRenderingContext2D,
-        x: number,
-        y: number,
-        w: number,
-        h: number,
-        isFill: boolean
-    ) {
-        ctx.globalAlpha = opacity.value
-        ctx.strokeStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
-        ctx.fillStyle = `rgb(${color.value.r}, ${color.value.g}, ${color.value.b})`
-        ctx.lineWidth = size.value
-
-        if (isFill) {
-            ctx.fillRect(x, y, w, h)
-        } else {
-            ctx.strokeRect(x, y, w, h)
-        }
-
-        ctx.globalAlpha = 1
-    }
-
     function drawPreview(ctx: OffscreenCanvasRenderingContext2D, x: number, y: number) {
         if (savedImageData) ctx.putImageData(savedImageData, 0, 0)
 
-        drawRect(ctx, startX, startY, x - startX, y - startY, fill.value)
+        drawEllipse({
+            ctx,
+            x: Math.min(startX, x),
+            y: Math.min(startY, y),
+            w: Math.abs(x - startX),
+            h: Math.abs(y - startY),
+            size: size.value,
+            opacity: opacity.value,
+            color: color.value,
+            isFill: fill.value,
+        })
     }
 
     function cancel(ctx: OffscreenCanvasRenderingContext2D) {
@@ -92,7 +105,7 @@ export function createToolRect(options: CreateRectOptions) {
         fill,
         render,
         install(board: Board) {
-            board.renders.set('rect', render)
+            board.renders.set('ellipse', render)
 
             board.emitter.on('layer:added', (layer: Layer) => {
                 layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
@@ -129,7 +142,7 @@ export function createToolRect(options: CreateRectOptions) {
 
                     const item = {
                         id: createId(),
-                        type: 'rect',
+                        type: 'ellipse',
                         x,
                         y,
                         width,
@@ -140,7 +153,17 @@ export function createToolRect(options: CreateRectOptions) {
                         fill: fill.value,
                     }
 
-                    drawRect(e.ctx, item.x, item.y, item.width, item.height, item.fill)
+                    drawEllipse({
+                        ctx: e.ctx,
+                        x,
+                        y,
+                        w: width,
+                        h: height,
+                        size: size.value,
+                        opacity: opacity.value,
+                        color: color.value,
+                        isFill: fill.value,
+                    })
 
                     layer.add(item)
                 })

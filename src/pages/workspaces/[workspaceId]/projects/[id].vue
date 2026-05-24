@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
-import { useLocalStorage } from '@vueuse/core'
+import { syncRef, useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 import type { WidgetDefinition, WidgetData } from '@/utils/defineWidget'
 import { createAndProvideBoard } from '@/composables/useBoard'
@@ -21,12 +21,22 @@ const board = createAndProvideBoard({
 const history = createHistory()
 const activeTool = useLocalStorage<string>('brush', 'brush')
 
-const size = board.context.ref('tools:brush:size', 10)
-const opacity = board.context.ref('tools:brush:opacity', 1)
+const size = board.context.ref('tools:shared:size', 10)
+const opacity = board.context.ref('tools:shared:opacity', 1)
+const color = board.context.ref('tools:shared:color', { r: 0, g: 0, b: 0 })
+
+syncRef(useLocalStorage('tools:shared:size', 10), size)
+syncRef(useLocalStorage('tools:shared:opacity', 1), opacity)
+syncRef(useLocalStorage('tools:shared:color', { r: 0, g: 0, b: 0 }), color)
 
 const rect = createToolRect({
     board,
     active: computed(() => activeTool.value === 'rect'),
+})
+
+const ellipse = createToolEllipse({
+    board,
+    active: computed(() => activeTool.value === 'ellipse'),
 })
 
 const brush = createToolBrush({
@@ -316,7 +326,7 @@ function removeWidget(id: string) {
     widgetData.value = widgetData.value.filter((d) => d.widget_id !== id)
 }
 
-onMounted(() => {})
+onMounted(() => { })
 
 // export
 const exporting = ref(false)
@@ -362,54 +372,34 @@ async function exportTo(format: 'PNG' | 'JPEG') {
 </script>
 <template>
     <div class="w-dvw h-dvh">
-        <div
-            v-if="loading"
-            class="fixed inset-0 bg-body-900 flex items-center justify-center z-[100]"
-        >
+        <div v-if="loading" class="fixed inset-0 bg-body-900 flex items-center justify-center z-[100]">
             <cd-spinner class="size-10" />
         </div>
-        <div
-            v-else
-            class="relative w-dvw h-dvh overflow-hidden"
-            :style="{
-                'background-size': `${board.width * 0.02}px ${board.width * 0.02}px`,
-                'background-image': `linear-gradient(to right, var(--color-body-700) 1px, transparent 1px), linear-gradient(to bottom, var(--color-body-700) 1px, transparent 1px)`,
-            }"
-        >
-            <div
-                v-if="exporting"
-                class="fixed inset-0 bg-body-900/50 flex items-center justify-center z-50"
-            >
+        <div v-else class="relative w-dvw h-dvh overflow-hidden" :style="{
+            'background-size': `${board.width * 0.02}px ${board.width * 0.02}px`,
+            'background-image': `linear-gradient(to right, var(--color-body-700) 1px, transparent 1px), linear-gradient(to bottom, var(--color-body-700) 1px, transparent 1px)`,
+        }">
+            <div v-if="exporting" class="fixed inset-0 bg-body-900/50 flex items-center justify-center z-50">
                 <cd-spinner class="size-16" />
             </div>
 
-            <div
-                class="fixed top-0 left-0 right-0 flex items-center justify-center z-20 p-4 pointer-events-none"
-            >
+            <div class="fixed top-0 left-0 right-0 flex items-center justify-center z-20 p-4 pointer-events-none">
                 <span class="text-body-300 text-sm font-medium truncate max-w-xs">
                     {{ project?.name || $t('Untitled') }}
                 </span>
             </div>
 
-            <cd-board-autoreload
-                v-model="autoreloadDialog"
-                :project-id="route.params.id"
-                @changed="refresh"
-            />
+            <cd-board-autoreload v-model="autoreloadDialog" :project-id="route.params.id" @changed="refresh" />
 
             <cd-dialog v-model="editTitleDialog">
                 <cd-card class="w-80">
                     <cd-card-head>
                         <cd-card-title class="mr-auto text-base">{{
                             $t('Edit title')
-                        }}</cd-card-title>
+                            }}</cd-card-title>
                     </cd-card-head>
                     <cd-card-content class="flex flex-col gap-y-4">
-                        <cd-text-field
-                            v-model="editTitleValue"
-                            :label="$t('Title')"
-                            :placeholder="$t('Title')"
-                        />
+                        <cd-text-field v-model="editTitleValue" :label="$t('Title')" :placeholder="$t('Title')" />
                         <cd-btn @click="saveTitle">
                             {{ $t('Save') }}
                         </cd-btn>
@@ -465,39 +455,19 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                         </cd-card>
                     </div>
                 </cd-menu>
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    :loading="saving"
-                    @click="save"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center" :loading="saving"
+                    @click="save">
                     <cd-icon name="mdi:content-save" />
                 </cd-btn>
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    :disabled="!history.undoStack.length"
-                    @click="history.undo"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center"
+                    :disabled="!history.undoStack.length" @click="history.undo">
                     <cd-icon name="heroicons:arrow-uturn-left" />
                 </cd-btn>
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    :disabled="!history.redoStack.length"
-                    @click="history.redo"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center"
+                    :disabled="!history.redoStack.length" @click="history.redo">
                     <cd-icon name="heroicons:arrow-uturn-right" />
                 </cd-btn>
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    @click="refresh"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center" @click="refresh">
                     <cd-icon name="heroicons:arrow-path" />
                 </cd-btn>
             </div>
@@ -505,37 +475,29 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             <div class="fixed top-0 right-0 flex gap-2 z-20 p-4">
                 <cd-tool-brush-options v-if="activeTool === 'brush'" />
                 <cd-tool-rect-options v-if="activeTool === 'rect'" />
+                <cd-tool-ellipse-options v-if="activeTool === 'ellipse'" />
                 <cd-tool-inspect-options v-if="activeTool === 'inspect'" />
 
-                <cd-btn
-                    size="sq-md"
-                    :color="activeTool === 'brush' ? 'primary' : 'body-900'"
-                    @click="activeTool = 'brush'"
-                >
+                <cd-btn size="sq-md" :color="activeTool === 'brush' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'brush'">
                     <cd-icon name="heroicons:paint-brush-solid" />
                 </cd-btn>
 
-                <cd-btn
-                    size="sq-md"
-                    :color="activeTool === 'pan' ? 'primary' : 'body-900'"
-                    @click="activeTool = 'pan'"
-                >
+                <cd-btn size="sq-md" :color="activeTool === 'pan' ? 'primary' : 'body-900'" @click="activeTool = 'pan'">
                     <cd-icon name="mdi:hand-back-left" />
                 </cd-btn>
 
-                <cd-btn
-                    size="sq-md"
-                    :color="activeTool === 'rect' ? 'primary' : 'body-900'"
-                    @click="activeTool = 'rect'"
-                >
+                <cd-btn size="sq-md" :color="activeTool === 'rect' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'rect'">
                     <cd-icon name="mdi:square-outline" />
                 </cd-btn>
+                <cd-btn size="sq-md" :color="activeTool === 'ellipse' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'ellipse'">
+                    <cd-icon name="mdi:circle-outline" />
+                </cd-btn>
 
-                <cd-btn
-                    size="sq-md"
-                    :color="activeTool === 'inspect' ? 'primary' : 'body-900'"
-                    @click="activeTool = 'inspect'"
-                >
+                <cd-btn size="sq-md" :color="activeTool === 'inspect' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'inspect'">
                     <cd-icon name="iconamoon:cursor-fill" />
                 </cd-btn>
 
@@ -547,10 +509,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     </template>
                     <div class="py-2 px-4">
                         <cd-card class="border-2 border-body-600 min-w-64">
-                            <cd-board-layer-list
-                                v-model:layers="layers"
-                                v-model:active-layer-id="activeLayerId"
-                            />
+                            <cd-board-layer-list v-model:layers="layers" v-model:active-layer-id="activeLayerId" />
                         </cd-card>
                     </div>
                 </cd-menu>
@@ -558,50 +517,23 @@ async function exportTo(format: 'PNG' | 'JPEG') {
 
             <div class="fixed bottom-0 left-0 flex gap-2 z-20 p-4 h-dvh items-center">
                 <div class="bg-body-900 p-2 flex flex-col gap-y-4">
-                    <cd-range
-                        v-model="size"
-                        :min="minBrushSize"
-                        :max="maxBrushSize"
-                        step="1"
-                        size="1.2rem"
-                        orientation="vertical"
-                        class="h-[30dvh] w-6"
-                    />
-                    <cd-range
-                        v-model="opacity"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        size="1.2rem"
-                        orientation="vertical"
-                        class="h-[30dvh] w-6"
-                    />
+                    <cd-range v-model="size" :min="minBrushSize" :max="maxBrushSize" step="1" size="1.2rem"
+                        orientation="vertical" class="h-[30dvh] w-6" />
+                    <cd-range v-model="opacity" min="0" max="1" step="0.01" size="1.2rem" orientation="vertical"
+                        class="h-[30dvh] w-6" />
                 </div>
             </div>
 
             <div class="fixed bottom-0 right-0 flex flex-wrap gap-2 z-20 p-4">
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    @click="zoom.scale -= 0.1"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center"
+                    @click="zoom.scale -= 0.1">
                     <cd-icon name="mdi:magnify-minus" />
                 </cd-btn>
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    @click="fit"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center" @click="fit">
                     <cd-icon name="mdi:fit-to-screen" />
                 </cd-btn>
-                <cd-btn
-                    color="body-900"
-                    size="sq-md"
-                    class="flex items-center justify-center"
-                    @click="zoom.scale += 0.1"
-                >
+                <cd-btn color="body-900" size="sq-md" class="flex items-center justify-center"
+                    @click="zoom.scale += 0.1">
                     <cd-icon name="mdi:magnify-plus" />
                 </cd-btn>
             </div>
@@ -623,27 +555,15 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             <!--     <component :is="w.component" /> -->
             <!-- </cd-board-widget> -->
 
-            <cd-board
-                :width="board.width"
-                :height="board.height"
-                :plugins="[transform, zoom, pan, rect, rotate, brush, history]"
-                :style="{
+            <cd-board :width="board.width" :height="board.height"
+                :plugins="[transform, zoom, pan, rect, ellipse, rotate, brush, history]" :style="{
                     'will-change': 'transform',
-                }"
-            >
-                <cd-board-layer
-                    v-for="(layer, index) in layers"
-                    :key="layer.id"
-                    :width="canvasWidth"
-                    :height="canvasHeight"
-                    :x="canvasX"
-                    :y="canvasY"
-                    :layer="layer"
-                    :style="{
+                }">
+                <cd-board-layer v-for="(layer, index) in layers" :key="layer.id" :width="canvasWidth"
+                    :height="canvasHeight" :x="canvasX" :y="canvasY" :layer="layer" :style="{
                         'z-index': layers.length - index,
                         'pointer-events': activeLayerId === layer.id ? 'auto' : 'none',
-                    }"
-                />
+                    }" />
             </cd-board>
         </div>
     </div>

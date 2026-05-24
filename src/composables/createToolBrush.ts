@@ -19,9 +19,9 @@ export interface CreateBrushOptions {
 
 export function useBrushToolOptions(board: Board) {
     const definitionId = board.context.ref<string | null>('tools:brush:definition-id', 'cd01')
-    const size = board.context.ref('tools:brush:size', 10)
-    const opacity = board.context.ref('tools:brush:opacity', 1)
-    const color = board.context.ref('tools:brush:color', { r: 0, g: 0, b: 0 })
+    const size = board.context.ref('tools:shared:size', 10)
+    const opacity = board.context.ref('tools:shared:opacity', 1)
+    const color = board.context.ref('tools:shared:color', { r: 0, g: 0, b: 0 })
     const erase = board.context.ref('tools:brush:erase', false)
 
     return {
@@ -47,10 +47,6 @@ export function createToolBrush(options: CreateBrushOptions) {
     const availableBrushes = useBrushes()
 
     const { size, opacity, color, erase, definitionId } = useBrushToolOptions(board)
-
-    syncRef(useLocalStorage('tools:brush:size', 10), size)
-    syncRef(useLocalStorage('tools:brush:opacity', 1), opacity)
-    syncRef(useLocalStorage('tools:brush:color', { r: 0, g: 0, b: 0 }), color)
 
     const definition = computed(() => availableBrushes.find((b) => b.id === definitionId.value))
 

@@ -60,6 +60,11 @@ onMounted(load)
                 :object="selectedObject"
                 :layer="selectedLayer"
             />
+            <cd-object-inspect-form-ellipse
+                v-else-if="selectedObject.type === 'ellipse'"
+                :object="selectedObject"
+                :layer="selectedLayer"
+            />
         </template>
 
         <div v-else class="px-4 py-6 text-xs text-body-400 text-center">
