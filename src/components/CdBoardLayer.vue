@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { LayerObject } from '@/composables/createLayer'
-import type { ObjectRender } from '@/composables/defineObjectRender'
 
 // general
 const root = ref<HTMLCanvasElement | null>(null)
@@ -8,11 +7,6 @@ const root = ref<HTMLCanvasElement | null>(null)
 const layer = defineModel('layer', {
     type: Object as () => Layer,
     required: true,
-})
-
-const objectRenders = defineModel<Map<string, ObjectRender>>('objectRenders', {
-    type: Map as PropType<Map<string, ObjectRender>>,
-    default: () => new Map(),
 })
 
 function getCanvas() {
@@ -192,14 +186,14 @@ function draw() {
     const ctx = getContext()
 
     for (const item of items) {
-        const objectRender = objectRenders.value.get(item.type)
+        const renderer = board.renders.get(item.type)
 
-        if (!objectRender) {
+        if (!renderer) {
             console.warn(`No render found for type ${item.type}`)
             continue
         }
 
-        objectRender.render({
+        renderer.render({
             layer: layer.value,
             ctx: ctx,
             item,

@@ -5,6 +5,7 @@ import type { ColorRGB } from '@/utils/colors'
 import type { BrushDefinition } from './defineBrush'
 import { defineObjectRender } from './defineObjectRender'
 import { drawBrushPath } from '@/utils/drawBrushPaths'
+import { syncRef, useLocalStorage } from '@vueuse/core'
 
 export interface CreateBrushOptions {
     board: Board
@@ -46,6 +47,10 @@ export function createBrush(options: CreateBrushOptions) {
     const availableBrushes = useBrushes()
 
     const { size, opacity, color, erase, definitionId } = useBrushOptions(board)
+
+    syncRef(useLocalStorage('tools:brush:size', 10), size)
+    syncRef(useLocalStorage('tools:brush:opacity', 1), opacity)
+    syncRef(useLocalStorage('tools:brush:color', { r: 0, g: 0, b: 0 }), color)
 
     const definition = computed(() => availableBrushes.find((b) => b.id === definitionId.value))
 
@@ -162,6 +167,8 @@ export function createBrush(options: CreateBrushOptions) {
             active,
             render,
             install(board: Board) {
+                board.renders.set(render.name, render)
+
                 board.emitter.on('layer:added', (layer: Layer) => {
                     layerExcludeMap.set(layer.id, new Set<string>())
 

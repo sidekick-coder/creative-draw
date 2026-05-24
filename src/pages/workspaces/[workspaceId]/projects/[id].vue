@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { createTransform } from '@/composables/createTransform'
 import type Project from '@/entities/Project'
-import type { ColorRGB } from '@/utils/colors'
-import { syncRef, useLocalStorage } from '@vueuse/core'
+import { useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
-import type { ObjectRender } from '@/composables/defineObjectRender'
 import type { WidgetDefinition, WidgetData } from '@/utils/defineWidget'
 import { createAndProvideBoard } from '@/composables/useBoard'
 
@@ -19,20 +17,13 @@ const board = createAndProvideBoard({
     height: 500,
 })
 
+// tools
 const history = createHistory()
-
 const activeTool = useLocalStorage<string>('brush', 'brush')
 
-// brush
-const color = board.context.ref('tools:brush:color', { r: 0, g: 0, b: 0 } as ColorRGB)
 const size = board.context.ref('tools:brush:size', 10)
 const opacity = board.context.ref('tools:brush:opacity', 1)
 
-syncRef(useLocalStorage('tools:brush:size', 10), size)
-syncRef(useLocalStorage('tools:brush:opacity', 1), opacity)
-syncRef(useLocalStorage('tools:brush:color', { r: 0, g: 0, b: 0 }), color)
-
-// react
 const rect = createToolRect({
     board,
     active: computed(() => activeTool.value === 'rect'),
@@ -42,11 +33,9 @@ const brush = createBrush({
     board,
     active: computed(() => activeTool.value === 'brush'),
 })
-
 const minBrushSize = computed(() => project.value?.width * 0.001)
 const maxBrushSize = computed(() => project.value?.width * 0.05)
 
-// pan
 const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
 const transform = createTransform()
 const zoom = createZoom(transform)
@@ -62,12 +51,6 @@ onMounted(() => {
 
     window.addEventListener('resize', setSizes)
 })
-
-// renders
-const renders = new Map<string, ObjectRender>()
-
-renders.set(brush.render.name, brush.render)
-renders.set(rect.render.name, rect.render)
 
 // project
 const projectId = computed(() => route.params.id)
@@ -390,10 +373,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
             class="relative w-dvw h-dvh overflow-hidden"
             :style="{
                 'background-size': `${board.width * 0.02}px ${board.width * 0.02}px`,
-                'background-image': `
-                linear-gradient(to right, var(--color-body-700) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--color-body-700) 1px, transparent 1px)
-            `,
+                'background-image': `linear-gradient(to right, var(--color-body-700) 1px, transparent 1px), linear-gradient(to bottom, var(--color-body-700) 1px, transparent 1px)`,
             }"
         >
             <div
@@ -659,7 +639,6 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                     :x="canvasX"
                     :y="canvasY"
                     :layer="layer"
-                    :object-renders="renders"
                     :style="{
                         'z-index': layers.length - index,
                         'pointer-events': activeLayerId === layer.id ? 'auto' : 'none',

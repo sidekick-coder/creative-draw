@@ -87,70 +87,70 @@ export function createToolRect(options: CreateRectOptions) {
         drawing = false
     }
 
-    return defineBoardPlugin(
-        reactive({
-            active,
-            fill,
-            render,
-            install(board: Board) {
-                board.emitter.on('layer:added', (layer: Layer) => {
-                    layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
-                        if (!active.value) return
+    return defineBoardPlugin({
+        active,
+        fill,
+        render,
+        install(board: Board) {
+            board.renders.set('rect', render)
 
-                        drawing = true
-                        startX = e.x
-                        startY = e.y
-                        savedImageData = e.ctx.getImageData(
-                            0,
-                            0,
-                            e.ctx.canvas.width,
-                            e.ctx.canvas.height
-                        )
-                    })
+            board.emitter.on('layer:added', (layer: Layer) => {
+                layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
+                    if (!active.value) return
 
-                    layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
-                        if (!active.value || !drawing) return
-
-                        drawPreview(e.ctx, e.x, e.y)
-                    })
-
-                    layer.emitter.on('mouseup', (e: LayerMouseEvent) => {
-                        if (!active.value || !drawing) return
-
-                        cancel(e.ctx)
-
-                        const x = Math.min(startX, e.x)
-                        const y = Math.min(startY, e.y)
-                        const width = Math.abs(e.x - startX)
-                        const height = Math.abs(e.y - startY)
-
-                        if (width < 1 || height < 1) return
-
-                        const item = {
-                            id: createId(),
-                            type: 'rect',
-                            x,
-                            y,
-                            width,
-                            height,
-                            color: { ...color.value },
-                            strokeWidth: size.value,
-                            opacity: opacity.value,
-                            fill: fill.value,
-                        }
-
-                        drawRect(e.ctx, item.x, item.y, item.width, item.height, item.fill)
-
-                        layer.add(item)
-                    })
-
-                    layer.emitter.on('mouseout', (e: LayerMouseEvent) => {
-                        if (!drawing) return
-
-                        cancel(e.ctx)
-                    })
+                    drawing = true
+                    startX = e.x
+                    startY = e.y
+                    savedImageData = e.ctx.getImageData(
+                        0,
+                        0,
+                        e.ctx.canvas.width,
+                        e.ctx.canvas.height
+                    )
                 })
-            },
-        })
-    )
+
+                layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
+                    if (!active.value || !drawing) return
+
+                    drawPreview(e.ctx, e.x, e.y)
+                })
+
+                layer.emitter.on('mouseup', (e: LayerMouseEvent) => {
+                    if (!active.value || !drawing) return
+
+                    cancel(e.ctx)
+
+                    const x = Math.min(startX, e.x)
+                    const y = Math.min(startY, e.y)
+                    const width = Math.abs(e.x - startX)
+                    const height = Math.abs(e.y - startY)
+
+                    if (width < 1 || height < 1) return
+
+                    const item = {
+                        id: createId(),
+                        type: 'rect',
+                        x,
+                        y,
+                        width,
+                        height,
+                        color: { ...color.value },
+                        strokeWidth: size.value,
+                        opacity: opacity.value,
+                        fill: fill.value,
+                    }
+
+                    drawRect(e.ctx, item.x, item.y, item.width, item.height, item.fill)
+
+                    layer.add(item)
+                })
+
+                layer.emitter.on('mouseout', (e: LayerMouseEvent) => {
+                    if (!drawing) return
+
+                    cancel(e.ctx)
+                })
+            })
+        },
+    })
 }

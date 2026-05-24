@@ -16,8 +16,11 @@ export interface CreateBoardOptions {
 export function createBoard(options: CreateBoardOptions = {}) {
     const emitter = createEmitter()
     const context = createContext()
+
     const width = toRef(options.width ?? 800)
     const height = toRef(options.height ?? 600)
+
+    const renders = new Map<string, ObjectRender>()
 
     // layers
     const layers = ref([] as Layer[])
@@ -47,6 +50,7 @@ export function createBoard(options: CreateBoardOptions = {}) {
 
         emitter,
         context,
+        renders,
 
         layers,
         activeLayerId,
