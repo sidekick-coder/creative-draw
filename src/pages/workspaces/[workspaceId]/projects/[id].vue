@@ -534,6 +534,7 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 >
                     <cd-icon name="heroicons:paint-brush-solid" />
                 </cd-btn>
+
                 <cd-btn
                     size="sq-md"
                     :color="activeTool === 'pan' ? 'primary' : 'body-900'"
@@ -541,12 +542,20 @@ async function exportTo(format: 'PNG' | 'JPEG') {
                 >
                     <cd-icon name="mdi:hand-back-left" />
                 </cd-btn>
+
                 <cd-btn
                     size="sq-md"
                     :color="activeTool === 'rect' ? 'primary' : 'body-900'"
                     @click="activeTool = 'rect'"
                 >
                     <cd-icon name="mdi:square-outline" />
+                </cd-btn>
+                <cd-btn
+                    size="sq-md"
+                    :color="activeTool === 'inspect' ? 'primary' : 'body-900'"
+                    @click="activeTool = 'inspect'"
+                >
+                    <cd-icon name="iconamoon:cursor-fill" />
                 </cd-btn>
 
                 <cd-menu :close-on-content-click="false">
