@@ -48,10 +48,37 @@ export function createToolRect(options: CreateRectOptions) {
     let drawing = false
     let startX = 0
     let startY = 0
-    let savedImageData: ImageData | null = null
+
+    let overlayCanvas: HTMLCanvasElement | null = null
+    let overlayCtx: CanvasRenderingContext2D | null = null
+
+    function ensureOverlay(board: Board) {
+        if (overlayCanvas) return
+
+        const container = board.context.get<HTMLElement>('container')
+
+        overlayCanvas = document.createElement('canvas')
+        overlayCanvas.style.position = 'absolute'
+        overlayCanvas.style.pointerEvents = 'none'
+        overlayCanvas.style.zIndex = '9999'
+        overlayCanvas.style.display = 'none'
+
+        container.appendChild(overlayCanvas)
+
+        overlayCtx = overlayCanvas.getContext('2d')!
+    }
+
+    function syncOverlay(layerCanvas: HTMLCanvasElement) {
+        if (!overlayCanvas) return
+
+        overlayCanvas.width = layerCanvas.width
+        overlayCanvas.height = layerCanvas.height
+        overlayCanvas.style.left = layerCanvas.style.left
+        overlayCanvas.style.top = layerCanvas.style.top
+    }
 
     function drawRect(
-        ctx: OffscreenCanvasRenderingContext2D,
+        ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
         x: number,
         y: number,
         w: number,
@@ -72,16 +99,17 @@ export function createToolRect(options: CreateRectOptions) {
         ctx.globalAlpha = 1
     }
 
-    function drawPreview(ctx: OffscreenCanvasRenderingContext2D, x: number, y: number) {
-        if (savedImageData) ctx.putImageData(savedImageData, 0, 0)
+    function drawPreview(x: number, y: number) {
+        if (!overlayCtx || !overlayCanvas) return
 
-        drawRect(ctx, startX, startY, x - startX, y - startY, fill.value)
+        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height)
+        drawRect(overlayCtx, startX, startY, x - startX, y - startY, fill.value)
     }
 
-    function cancel(ctx: OffscreenCanvasRenderingContext2D) {
-        if (savedImageData) {
-            ctx.putImageData(savedImageData, 0, 0)
-            savedImageData = null
+    function cancel() {
+        if (overlayCtx && overlayCanvas) {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height)
+            overlayCanvas.style.display = 'none'
         }
 
         drawing = false
@@ -98,27 +126,28 @@ export function createToolRect(options: CreateRectOptions) {
                 layer.emitter.on('mousedown', (e: LayerMouseEvent) => {
                     if (!active.value) return
 
+                    ensureOverlay(board)
+
+                    const layerCanvas = e.ctx.canvas as unknown as HTMLCanvasElement
+                    syncOverlay(layerCanvas)
+
                     drawing = true
                     startX = e.x
                     startY = e.y
-                    savedImageData = e.ctx.getImageData(
-                        0,
-                        0,
-                        e.ctx.canvas.width,
-                        e.ctx.canvas.height
-                    )
+
+                    if (overlayCanvas) overlayCanvas.style.display = 'block'
                 })
 
                 layer.emitter.on('mousemove', (e: LayerMouseEvent) => {
                     if (!active.value || !drawing) return
 
-                    drawPreview(e.ctx, e.x, e.y)
+                    drawPreview(e.x, e.y)
                 })
 
                 layer.emitter.on('mouseup', (e: LayerMouseEvent) => {
                     if (!active.value || !drawing) return
 
-                    cancel(e.ctx)
+                    cancel()
 
                     const x = Math.min(startX, e.x)
                     const y = Math.min(startY, e.y)
@@ -145,10 +174,10 @@ export function createToolRect(options: CreateRectOptions) {
                     layer.add(item)
                 })
 
-                layer.emitter.on('mouseout', (e: LayerMouseEvent) => {
+                layer.emitter.on('mouseout', () => {
                     if (!drawing) return
 
-                    cancel(e.ctx)
+                    cancel()
                 })
             })
         },
