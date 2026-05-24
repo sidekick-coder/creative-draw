@@ -3,7 +3,7 @@ import { createTransform } from '@/composables/createTransform'
 import { createRect } from '@/composables/createRect'
 import type Project from '@/entities/Project'
 import type { ColorRGB } from '@/utils/colors'
-import { useLocalStorage } from '@vueuse/core'
+import { syncRef, useLocalStorage } from '@vueuse/core'
 import { toggleEruda } from '@/plugins/eruda'
 import type { ObjectRender } from '@/composables/defineObjectRender'
 import type { WidgetDefinition, WidgetData } from '@/utils/defineWidget'
@@ -22,11 +22,14 @@ const boardHeight = ref(500)
 
 const history = createHistory()
 
-type ActiveTool = 'brush' | 'pan' | 'rect'
-const activeTool = useLocalStorage<ActiveTool>('brush', 'brush')
-const color = useLocalStorage<ColorRGB>('cd-color', { r: 0, g: 0, b: 0 })
-const size = useLocalStorage('cd-tool-size', 1)
-const opacity = useLocalStorage('cd-tool-opacity', 1)
+const activeTool = useLocalStorage<string>('brush', 'brush')
+const color = board.context.ref('tools:brush:color', { r: 0, g: 0, b: 0 } as ColorRGB)
+const size = board.context.ref('tools:brush:size', 10)
+const opacity = board.context.ref('tools:brush:opacity', 1)
+
+syncRef(useLocalStorage('tools:brush:size', 10), size)
+syncRef(useLocalStorage('tools:brush:opacity', 1), opacity)
+syncRef(useLocalStorage('tools:brush:color', { r: 0, g: 0, b: 0 }), color)
 
 const pan = createPan({ active: computed(() => activeTool.value === 'pan') })
 const rect = createRect({
