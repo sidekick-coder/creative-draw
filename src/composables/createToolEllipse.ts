@@ -34,10 +34,11 @@ interface DrawEllipseOptions {
     size: number
     opacity: number
     color: { r: number; g: number; b: number }
+    isFill?: boolean
 }
 
 function drawEllipse(options: DrawEllipseOptions) {
-    const { ctx, x, y, w, h, size, opacity, color } = options
+    const { ctx, x, y, w, h, size, opacity, color, isFill } = options
 
     ctx.globalAlpha = opacity
     ctx.strokeStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
@@ -46,7 +47,12 @@ function drawEllipse(options: DrawEllipseOptions) {
 
     ctx.beginPath()
     ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2)
-    ctx.fill()
+
+    if (isFill) {
+        ctx.fill()
+    } else {
+        ctx.stroke()
+    }
 
     ctx.globalAlpha = 1
 }
@@ -63,6 +69,7 @@ const render = defineObjectRender({
             size: item.strokeWidth ?? 10,
             opacity: item.opacity ?? 1,
             color: item.color,
+            isFill: item.fill ?? false,
         })
     },
 })
