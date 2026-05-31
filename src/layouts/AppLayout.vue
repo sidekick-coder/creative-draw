@@ -7,6 +7,7 @@ export interface Link {
 }
 </script>
 <script setup lang="ts">
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { groupBy } from 'lodash-es'
 import { ref, onMounted, computed } from 'vue'
 
@@ -37,31 +38,23 @@ defineProps({
 const groups = computed(() => groupBy(links.value, 'group'))
 
 // Sidebar visibility & mobile detection
+const breakpoint = useBreakpoint()
 const sidebarVisible = ref(true)
-const isMobile = ref(false)
+const isMobile = breakpoint.smaller('lg')
 
-onMounted(() => {
-    const m = window.matchMedia('(max-width: 768px)')
-    isMobile.value = m.matches
-    if (isMobile.value) sidebarVisible.value = false
-
-    const handle = (e: MediaQueryListEvent) => {
-        isMobile.value = e.matches
-        if (isMobile.value) sidebarVisible.value = false
-    }
-
-    if ('addEventListener' in m) {
-        m.addEventListener('change', handle)
-    } else {
-        // Safari fallback
-        // @ts-expect-error Safari fallback
-        m.addListener(handle)
-    }
-})
+watch(
+    isMobile,
+    (mobile) => {
+        if (mobile) {
+            sidebarVisible.value = false
+        }
+    },
+    { immediate: true }
+)
 </script>
 <template>
     <div class="flex min-h-dvh">
-        <aside v-show="sidebarVisible" class="w-72 bg-body-900">
+        <aside v-show="sidebarVisible" class="fixed w-full z-20 lg:relative lg:w-72 bg-body-900">
             <nav class="px-4 flex flex-col h-dvh overflow-auto">
                 <slot name="header">
                     <cd-list-item :to="homeUrl" class="py-6 flex items-center">
@@ -82,6 +75,17 @@ onMounted(() => {
                             </span>
                         </div>
                     </cd-list-item>
+
+                    <cd-btn
+                        v-if="isMobile"
+                        size="sq-md"
+                        variant="text"
+                        aria-label="Close sidebar"
+                        class="absolute top-4 right-4 z-30"
+                        @click="sidebarVisible = false"
+                    >
+                        <cd-icon name="mdi:close" class="size-5 text-white" />
+                    </cd-btn>
                 </slot>
                 <template v-for="(group, groupName) in groups" :key="groupName">
                     <cd-list-item class="py-1 text-body-200 font-bold text-sm">

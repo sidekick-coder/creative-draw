@@ -43,8 +43,6 @@ async function setProjects() {
 
     const response = await workspace.projects.list()
 
-    console.log('Projects response:', response)
-
     // set thumbnail for each project
     for (const project of response) {
         project.thumbnailSrc = await workspace.files.findDownloadUrlByFilename(
