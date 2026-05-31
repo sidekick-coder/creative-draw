@@ -1,0 +1,39 @@
+{
+    "short_name": "Creative-draw",
+    "name": "Creative-draw",
+    "description": "Creative-draw is a web-based drawing application that allows users to make drawings directly in the browser",
+    "start_url": "/workspaces",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#922de6",
+    "icons": [
+        {
+            "src": "logo-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "logo-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "logo-128.png",
+            "sizes": "128x128",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "screenshot-lg-1.png",
+            "sizes": "1920x1080",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "screenshot-md-1.png",
+            "sizes": "1539x1155",
+            "type": "image/png"
+        }
+    ]
+}
