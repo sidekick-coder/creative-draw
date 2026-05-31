@@ -1,3 +1,4 @@
+import type { ObjectStrokePath } from '@/composables/createToolBrush'
 import { defineBrush, type BrushPath } from '@/composables/defineBrush'
 
 interface PencilParams {
@@ -11,7 +12,7 @@ export function definePencilBrush(penParams: PencilParams) {
         id: penParams.id,
         name: penParams.name,
         draw(options) {
-            const paths: BrushPath[] = []
+            const paths: ObjectStrokePath[] = []
             const startX = options.lastX || options.x
             const startY = options.lastY || options.y
             const startPressure = options.lastPressure || options.pressure
@@ -65,13 +66,14 @@ export function definePencilBrush(penParams: PencilParams) {
                     const sizeJitter = 1 + (Math.random() - 0.5) * penParams.jitter
                     const jitteredDotSize = dotSize * sizeJitter
 
-                    paths.push({
-                        x: dotX,
-                        y: dotY,
-                        size: jitteredDotSize,
-                        pressure: point.pressure,
-                        color: color,
-                    })
+                    paths.push([
+                        dotX,
+                        dotY,
+                        jitteredDotSize,
+                        options.opacity * point.pressure,
+                        point.pressure,
+                        0,
+                    ])
                 }
             }
 

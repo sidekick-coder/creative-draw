@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { parsePath } from '@/utils/drawBrushPaths'
+
 const brush = defineProp<BrushDefinition>('brush', {
     type: Object,
     required: true,
@@ -30,10 +32,12 @@ function load() {
     })
 
     paths.forEach((p) => {
+        const { x, y, size } = parsePath(p)
+
         ctx.globalCompositeOperation = 'source-over'
-        ctx.fillStyle = `rgb(${p.color.r}, ${p.color.g}, ${p.color.b})`
+        ctx.fillStyle = `rgb(255, 255, 255)`
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2)
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath()
     })

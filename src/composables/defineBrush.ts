@@ -1,4 +1,5 @@
 import type { ColorRGB } from '@/utils/colors'
+import type { ObjectStroke } from './createToolBrush'
 
 export interface BrushStartOptions {
     x: number
@@ -36,7 +37,7 @@ export interface BrushPath {
 export interface BrushDefinition {
     id: string
     name?: string
-    draw: (options: BrushDrawOptions) => BrushPath[]
+    draw: (options: BrushDrawOptions) => ObjectStroke['paths']
 }
 
 export function defineBrush(brush: BrushDefinition) {

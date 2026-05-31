@@ -1,14 +1,14 @@
-export interface ObjectRenderOptions {
+export interface ObjectRenderOptions<T extends LayerObject = LayerObject> {
     ctx: CanvasRenderingContext2D
-    item: LayerObject
+    item: T
     layer: Layer
 }
 
-export interface ObjectRender {
+export interface ObjectRender<T extends LayerObject = LayerObject> {
     name: string
-    render: (options: ObjectRenderOptions) => void
+    render: (options: ObjectRenderOptions<T>) => void
 }
 
-export function defineObjectRender(render: ObjectRender) {
+export function defineObjectRender<T extends LayerObject = LayerObject>(render: ObjectRender<T>) {
     return render
 }

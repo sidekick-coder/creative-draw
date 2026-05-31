@@ -1,8 +1,10 @@
+import type { ObjectStrokePath } from '@/composables/createToolBrush'
+
 export default defineBrush({
     id: 'cd01',
     name: 'CD-01',
     draw(options) {
-        const paths: BrushPath[] = []
+        const paths: ObjectStrokePath[] = []
         const startX = options.lastX || options.x
         const startY = options.lastY || options.y
         const startPressure = options.lastPressure || options.pressure
@@ -13,7 +15,6 @@ export default defineBrush({
 
         const baseSize = options.size || 1
         const baseOpacity = options.opacity || 1
-        const color = options.color || { r: 0, g: 0, b: 0 }
 
         const spacing = Math.max(1, baseSize * 0.05) // Adjust spacing based on size
 
@@ -39,14 +40,7 @@ export default defineBrush({
             const size = minSize + (baseSize - minSize) * curvedPressure
             const opacity = minOpacity + (baseOpacity - minOpacity) * curvedPressure
 
-            paths.push({
-                x,
-                y,
-                size,
-                opacity,
-                pressure: rawPressure,
-                color,
-            })
+            paths.push([x, y, size, opacity, rawPressure, 0])
         }
 
         return paths

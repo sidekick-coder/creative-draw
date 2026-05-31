@@ -5,7 +5,6 @@ import type { ColorRGB } from '@/utils/colors'
 import type { BrushDefinition } from './defineBrush'
 import { defineObjectRender } from './defineObjectRender'
 import { drawBrushPath } from '@/utils/drawBrushPaths'
-import { syncRef, useLocalStorage } from '@vueuse/core'
 
 export interface CreateBrushOptions {
     board: Board
@@ -15,6 +14,15 @@ export interface CreateBrushOptions {
     erase?: MaybeRef<boolean>
     definition?: MaybeRef<BrushDefinition | undefined>
     active?: MaybeRef<boolean>
+}
+
+export type ObjectStrokeColor = [number, number, number] // [r, g, b]
+export type ObjectStrokePath = [number, number, number, number, number, number] // [x, y, size, opacity, pressure, erase?]
+
+export interface ObjectStroke extends LayerObject {
+    type: 'stroke'
+    color: ObjectStrokeColor
+    paths: ObjectStrokePath[]
 }
 
 export function useBrushToolOptions(board: Board) {
@@ -35,7 +43,7 @@ export function useBrushToolOptions(board: Board) {
 
 const layerExcludeMap = new Map<string, Set<string>>()
 
-const render = defineObjectRender({
+const render = defineObjectRender<ObjectStroke>({
     name: 'stroke',
     render({ ctx, item }) {
         drawBrushPath(ctx, item.paths, item.color)
@@ -57,7 +65,7 @@ export function createToolBrush(options: CreateBrushOptions) {
     let lastX = 0
     let lastY = 0
     let lastPressure = 0
-    let paths = [] as BrushPath[]
+    let paths = [] as ObjectStrokePath[]
 
     function start(layer: Layer, x: number, y: number, pressure = 0.5) {
         if (!active.value) return
@@ -82,7 +90,7 @@ export function createToolBrush(options: CreateBrushOptions) {
         })
 
         drawPath.forEach((path) => {
-            path.erase = erase.value
+            path[5] = erase.value ? 1 : 0 // Set erase flag in the path
             paths.push(path)
         })
 
@@ -91,7 +99,7 @@ export function createToolBrush(options: CreateBrushOptions) {
 
         exclude.clear()
 
-        drawBrushPath(ctx, paths, color.value, exclude)
+        drawBrushPath(ctx, paths, [color.value.r, color.value.g, color.value.b], exclude)
     }
 
     function move(layer: Layer, x: number, y: number, pressure = 0.5) {
@@ -112,10 +120,9 @@ export function createToolBrush(options: CreateBrushOptions) {
         const newPaths = definition.value?.draw(payload) ?? []
 
         newPaths.forEach((path) => {
-            paths.push({
-                ...path,
-                erase: erase.value,
-            })
+            path[5] = erase.value ? 1 : 0 // Set erase flag in the path
+
+            paths.push(path)
         })
 
         lastX = x
@@ -125,7 +132,7 @@ export function createToolBrush(options: CreateBrushOptions) {
         const ctx = layer.context.get('context')
         const exclude = layerExcludeMap.get(layer.id) || new Set<string>()
 
-        drawBrushPath(ctx, newPaths, color.value, exclude)
+        drawBrushPath(ctx, newPaths, [color.value.r, color.value.g, color.value.b], exclude)
     }
 
     function end(layer: Layer) {
