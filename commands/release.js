@@ -65,7 +65,9 @@ command
         console.log('\nBuilding to check errors...')
         run('npm', ['run', 'build'])
 
-        // checkout to main
+        console.log(`\nBumping ${bump} version...`)
+        run('npm', ['version', bump])
+
         console.log('Checking out to main branch...')
         run('git', ['checkout', 'main'])
 
@@ -73,11 +75,11 @@ command
         console.log('Merging develop into main...')
         run('git', ['merge', '--ff-only', 'develop'])
 
-        console.log(`\nBumping ${bump} version...`)
-        run('npm', ['version', bump])
-
         console.log('\nPushing commit and tag to origin...')
         run('git', ['push', 'origin', 'main', 'develop', '--tags'])
+
+        console.log('\nChanging back to develop branch...')
+        run('git', ['checkout', 'develop'])
 
         console.log('\nRelease complete.')
     })
