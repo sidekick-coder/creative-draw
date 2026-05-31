@@ -24,9 +24,11 @@ command
     .action(async (options) => {
         const staged = exec('git diff --cached --name-only')
         const unstaged = exec('git diff --name-only')
-        const head = exec('git rev-parse --abrev-ref HEAD')
+        const branch = exec('git branch --show-current')
 
-        if (head !== 'develop') {
+        console.log(`Current branch: ${branch}`)
+
+        if (branch !== 'develop') {
             console.error('Error: you must be on the develop branch to release.')
             process.exit(1)
         }
