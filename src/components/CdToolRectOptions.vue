@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useBrushOptions } from '@/composables/createBrush'
-
 const board = useBoard()
 
 const { color, fill, constrain } = useRectOptions(board)
@@ -10,7 +8,11 @@ const { color, fill, constrain } = useRectOptions(board)
     <cd-btn size="sq-md" :color="fill ? 'primary' : 'body-900'" @click="fill = !fill">
         <cd-icon name="mdi:square" />
     </cd-btn>
-    <cd-btn size="sq-md" :color="constrain ? 'primary' : 'body-900'" @click="constrain = !constrain">
+    <cd-btn
+        size="sq-md"
+        :color="constrain ? 'primary' : 'body-900'"
+        @click="constrain = !constrain"
+    >
         <cd-icon name="mdi:aspect-ratio" />
     </cd-btn>
 </template>
