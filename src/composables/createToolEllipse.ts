@@ -34,11 +34,11 @@ interface DrawEllipseOptions {
     size: number
     opacity: number
     color: { r: number; g: number; b: number }
-    isFill?: boolean
+    fill?: boolean
 }
 
 function drawEllipse(options: DrawEllipseOptions) {
-    const { ctx, x, y, w, h, size, opacity, color, isFill } = options
+    const { ctx, x, y, w, h, size, opacity, color, fill } = options
 
     ctx.globalAlpha = opacity
     ctx.strokeStyle = `rgb(${color.r}, ${color.g}, ${color.b})`
@@ -48,7 +48,9 @@ function drawEllipse(options: DrawEllipseOptions) {
     ctx.beginPath()
     ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2)
 
-    if (isFill) {
+    console.log('fill?', fill, 'color', ctx.fillStyle, 'stroke', ctx.strokeStyle)
+
+    if (fill) {
         ctx.fill()
     } else {
         ctx.stroke()
@@ -69,7 +71,7 @@ const render = defineObjectRender({
             size: item.strokeWidth ?? 10,
             opacity: item.opacity ?? 1,
             color: item.color,
-            isFill: item.fill ?? false,
+            fill: item.fill ?? false,
         })
     },
 })
@@ -77,7 +79,7 @@ const render = defineObjectRender({
 export function createToolEllipse(options: CreateToolEllipseOptions) {
     const active = toRef(options.active ?? false)
 
-    const { size, opacity, color, fill, constrain } = useRectOptions(options.board)
+    const { size, opacity, color, fill, constrain } = useEllipseToolOptions(options.board)
 
     let drawing = false
     let startX = 0
@@ -140,7 +142,7 @@ export function createToolEllipse(options: CreateToolEllipseOptions) {
             size: size.value,
             opacity: opacity.value,
             color: color.value,
-            isFill: fill.value,
+            fill: fill.value,
         })
     }
 
@@ -203,6 +205,8 @@ export function createToolEllipse(options: CreateToolEllipseOptions) {
                         fill: fill.value,
                     }
 
+                    console.log('committing ellipse', fill.value)
+
                     drawEllipse({
                         ctx,
                         x: rx,
@@ -212,7 +216,7 @@ export function createToolEllipse(options: CreateToolEllipseOptions) {
                         size: size.value,
                         opacity: opacity.value,
                         color: color.value,
-                        isFill: fill.value,
+                        fill: fill.value,
                     })
 
                     layer.add(item)
